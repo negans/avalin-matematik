@@ -103,10 +103,52 @@
             transition: border-color 0.2s, background 0.2s;
         }
 
+        input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
         .step input:focus { border-color: #4a90d9; }
 
         .step input.ok  { border-color: #2ecc71; background: #f0fff4; }
         .step input.fel { border-color: #e67e22; background: #fffaf2; }
+
+        .input-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .field-hint {
+            font-size: 0.78em;
+            color: #e67e22;
+            text-align: center;
+            max-width: 140px;
+            line-height: 1.3;
+            min-height: 0;
+        }
+
+        .step-hint {
+            display: block;
+            max-width: 480px;
+            margin: -6px auto 0;
+        }
+
+        .time-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .time-group input { width: 62px; }
+        #timeHrIn, #timeMinIn { width: 62px; }
+
+        .colon {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #34495e;
+            line-height: 1;
+        }
 
         /* ── Buttons ── */
         .btn-row {
@@ -145,6 +187,15 @@
         }
 
         #nextBtn:hover { background: #e8f2ff; }
+
+        /* ── Clock tip ── */
+        .clock-tip {
+            text-align: center;
+            font-size: 0.85em;
+            color: #8aaabf;
+            margin-top: -18px;
+            margin-bottom: 22px;
+        }
 
         /* ── Feedback ── */
         #feedback {
@@ -190,22 +241,35 @@
         </svg>
     </div>
 
+    <p class="clock-tip">Tips: Timvisaren är den korta och tjocka. Den pekar på det nummer den just passerat.</p>
+
     <div class="steps">
         <div class="step" id="step1">
             <div class="step-num">1</div>
             <span class="step-label">Timvisaren pekar på...</span>
-            <input id="hrIn" type="number" min="1" max="12" placeholder="?">
+            <div class="input-wrap">
+                <input id="hrIn" type="number" min="1" max="12" maxlength="2" placeholder="">
+                <span class="field-hint" id="hrHint"></span>
+            </div>
         </div>
         <div class="step" id="step2">
             <div class="step-num">2</div>
             <span class="step-label">Minutvisaren visar... minuter</span>
-            <input id="minIn" type="number" min="0" max="55" step="5" placeholder="?">
+            <div class="input-wrap">
+                <input id="minIn" type="number" min="0" max="55" step="5" maxlength="2" placeholder="">
+                <span class="field-hint" id="minHint"></span>
+            </div>
         </div>
         <div class="step" id="step3">
             <div class="step-num">3</div>
             <span class="step-label">Klockan är...</span>
-            <input id="timeIn" type="text" placeholder="3:20" style="width:90px">
+            <div class="time-group">
+                <input id="timeHrIn" type="number" min="1" max="12" maxlength="2" placeholder="">
+                <span class="colon">:</span>
+                <input id="timeMinIn" type="number" min="0" max="55" step="5" maxlength="2" placeholder="">
+            </div>
         </div>
+        <span class="field-hint step-hint" id="timeHrHint"></span>
     </div>
 
     <div class="btn-row">
@@ -267,10 +331,13 @@
 
         /* ── Återställ formuläret ── */
         function reset() {
-            ['hrIn', 'minIn', 'timeIn'].forEach(id => {
+            ['hrIn', 'minIn', 'timeHrIn', 'timeMinIn'].forEach(id => {
                 const el = document.getElementById(id);
                 el.value = '';
                 el.classList.remove('ok', 'fel');
+            });
+            ['hrHint', 'minHint', 'timeHrHint'].forEach(id => {
+                document.getElementById(id).textContent = '';
             });
             ['step1', 'step2', 'step3'].forEach(id =>
                 document.getElementById(id).classList.remove('done'));
@@ -279,45 +346,73 @@
 
         /* ── Kolla svaret ── */
         function check() {
-            const hrEl   = document.getElementById('hrIn');
-            const minEl  = document.getElementById('minIn');
-            const timeEl = document.getElementById('timeIn');
+            const hrEl      = document.getElementById('hrIn');
+            const minEl     = document.getElementById('minIn');
+            const timeHrEl  = document.getElementById('timeHrIn');
+            const timeMinEl = document.getElementById('timeMinIn');
 
-            [hrEl, minEl, timeEl].forEach(el => el.classList.remove('ok', 'fel'));
+            [hrEl, minEl, timeHrEl, timeMinEl].forEach(el => el.classList.remove('ok', 'fel'));
+            ['hrHint', 'minHint', 'timeHrHint'].forEach(id => { document.getElementById(id).textContent = ''; });
             ['step1', 'step2', 'step3'].forEach(id =>
                 document.getElementById(id).classList.remove('done'));
 
-            const hrVal   = hrEl.value.trim();
-            const minVal  = minEl.value.trim();
-            const timeVal = timeEl.value.trim();
+            const hrVal      = hrEl.value.trim();
+            const minVal     = minEl.value.trim();
+            const timeHrVal  = timeHrEl.value.trim();
+            const timeMinVal = timeMinEl.value.trim();
 
-            if (!hrVal && !minVal && !timeVal) {
+            if (!hrVal && !minVal && !timeHrVal && !timeMinVal) {
                 setFb('Titta på klockan och fyll i svaren! 🐱');
                 return;
             }
 
+            const invalidHrMsg = 'En analog klocka har siffrorna 1–12 – vilket nummer pekar visaren på?';
+
             let hrOk = null, minOk = null, timeOk = null;
 
             if (hrVal !== '') {
-                hrOk = parseInt(hrVal) === h;
-                hrEl.classList.add(hrOk ? 'ok' : 'fel');
-                if (hrOk) document.getElementById('step1').classList.add('done');
+                const v = parseInt(hrVal);
+                if (isNaN(v) || v < 1 || v > 12) {
+                    hrEl.classList.add('fel');
+                    document.getElementById('hrHint').textContent = invalidHrMsg;
+                } else {
+                    hrOk = v === h;
+                    hrEl.classList.add(hrOk ? 'ok' : 'fel');
+                    if (hrOk) document.getElementById('step1').classList.add('done');
+                }
             }
 
             if (minVal !== '') {
-                minOk = parseInt(minVal) === m;
-                minEl.classList.add(minOk ? 'ok' : 'fel');
-                if (minOk) document.getElementById('step2').classList.add('done');
+                const mv = parseInt(minVal);
+                if (isNaN(mv) || mv < 0 || mv > 59) {
+                    minEl.classList.add('fel');
+                    document.getElementById('minHint').textContent =
+                        'Minuter är mellan 0 och 59 – räkna den långa visaren från 12';
+                } else {
+                    minOk = mv === m;
+                    minEl.classList.add(minOk ? 'ok' : 'fel');
+                    if (minOk) document.getElementById('step2').classList.add('done');
+                }
             }
 
-            if (timeVal !== '') {
-                const parts = timeVal.replace(/[.,]/g, ':').split(':');
-                if (parts.length === 2) {
-                    timeOk = parseInt(parts[0]) === h && parseInt(parts[1]) === m;
-                } else {
-                    timeOk = false;
+            const timeHrFilled  = timeHrVal  !== '';
+            const timeMinFilled = timeMinVal !== '';
+
+            if (timeHrFilled || timeMinFilled) {
+                let timeHrOk = false;
+                if (timeHrFilled) {
+                    const v = parseInt(timeHrVal);
+                    if (isNaN(v) || v < 1 || v > 12) {
+                        timeHrEl.classList.add('fel');
+                        document.getElementById('timeHrHint').textContent = invalidHrMsg;
+                    } else {
+                        timeHrOk = v === h;
+                        timeHrEl.classList.add(timeHrOk ? 'ok' : 'fel');
+                    }
                 }
-                timeEl.classList.add(timeOk ? 'ok' : 'fel');
+                const timeMinOk = timeMinFilled && parseInt(timeMinVal) === m;
+                if (timeMinFilled) timeMinEl.classList.add(timeMinOk ? 'ok' : 'fel');
+                timeOk = timeHrOk && timeMinOk;
                 if (timeOk) document.getElementById('step3').classList.add('done');
             }
 
@@ -343,9 +438,9 @@
                 lines.push('✓ Minuterna stämmer!');
             }
 
-            if (timeVal !== '' && timeOk === false) {
+            if ((timeHrFilled || timeMinFilled) && timeOk === false) {
                 if (hrOk === true && minOk === true) {
-                    lines.push(`Skriv timmar:minuter – t.ex. <strong>${h}:${pad(m)}</strong>`);
+                    lines.push('Du vet ju svaret – fyll i timme och minuter var för sig!');
                 } else {
                     lines.push('Fyll i steg 1 och 2 rätt, så blir steg 3 lättare!');
                 }
@@ -364,11 +459,19 @@
         document.getElementById('checkBtn').addEventListener('click', check);
         document.getElementById('nextBtn').addEventListener('click', nextTime);
 
-        ['hrIn', 'minIn', 'timeIn'].forEach(id =>
-            document.getElementById(id).addEventListener('keydown', e => {
-                if (e.key === 'Enter') check();
-            })
-        );
+        const allowed = new Set(['Backspace','Delete','Tab','ArrowLeft','ArrowRight']);
+
+        ['hrIn', 'minIn', 'timeHrIn', 'timeMinIn'].forEach(id => {
+            const el = document.getElementById(id);
+            el.addEventListener('keydown', e => {
+                if (e.key === 'Enter') { check(); return; }
+                if (!allowed.has(e.key) && !/^[0-9]$/.test(e.key)) e.preventDefault();
+            });
+            el.addEventListener('input', function () {
+                if (this.value.length > 2) this.value = this.value.slice(0, 2);
+            });
+        });
+
 
         /* ── Starta med en slumpmässig tid ── */
         nextTime();
