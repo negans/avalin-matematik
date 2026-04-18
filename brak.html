@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bråk – Avalins Matematikverkstad</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f7ff;
+            min-height: 100vh;
+            padding: 16px 16px 48px;
+        }
+
+        .top-nav { text-align: center; margin-bottom: 10px; }
+        .top-nav a { color: #7a9cbf; text-decoration: none; font-size: 0.95em; }
+        .top-nav a:hover { text-decoration: underline; }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 1.9em;
+            margin-bottom: 6px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 1.05em;
+            font-weight: bold;
+            color: #4a90d9;
+            margin: 22px 0 10px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 22px 20px 20px;
+            max-width: 500px;
+            margin: 0 auto 12px;
+            box-shadow: 0 2px 12px rgba(44,62,80,0.09);
+        }
+
+        /* ── task label ── */
+        .task-label {
+            text-align: center;
+            font-size: 1.2em;
+            color: #2c3e50;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        /* ── Module 1: clickable rect ── */
+        .rect-outer {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 6px;
+        }
+
+        .frac-rect { display: flex; height: 68px; }
+
+        .frac-cell {
+            border: 2.5px solid #b8d4ef;
+            background: white;
+            cursor: pointer;
+            transition: background 0.12s;
+            flex-shrink: 0;
+        }
+        .frac-cell + .frac-cell { border-left-width: 1.5px; }
+        .frac-cell:first-child { border-radius: 10px 0 0 10px; }
+        .frac-cell:last-child  { border-radius: 0 10px 10px 0; }
+        .frac-cell.colored { background: #4a90d9; }
+        .frac-cell:hover:not(.colored) { background: #d6eafc; }
+        .frac-cell.colored:hover { background: #357abd; }
+
+        .counter-label {
+            text-align: center;
+            font-size: 0.9em;
+            color: #8aaabf;
+            min-height: 18px;
+            margin-bottom: 12px;
+        }
+
+        /* ── result pills ── */
+        .result-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .result-pill {
+            background: #f0f7ff;
+            border: 2px solid #cce0f5;
+            border-radius: 14px;
+            padding: 10px 18px;
+            text-align: center;
+            min-width: 80px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.35s, transform 0.35s;
+        }
+        .result-pill.show { opacity: 1; transform: translateY(0); }
+
+        .pill-label {
+            display: block;
+            font-size: 0.72em;
+            color: #8aaabf;
+            margin-bottom: 4px;
+        }
+
+        .pill-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        /* ── fraction stack (numerator/denominator) ── */
+        .fs {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.15;
+        }
+        .fs .fn { border-bottom: 2.5px solid #2c3e50; padding: 0 5px 2px; }
+        .fs .fd { padding: 2px 5px 0; }
+
+        /* ── buttons ── */
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        button {
+            font-family: Arial, sans-serif;
+            font-size: 1.05em;
+            padding: 11px 24px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        button:active { transform: scale(0.95); }
+
+        .btn-primary {
+            background: #4a90d9;
+            color: white;
+            box-shadow: 0 4px 12px rgba(74,144,217,0.3);
+        }
+        .btn-primary:hover { background: #3a7fc8; }
+
+        .btn-secondary {
+            background: white;
+            color: #4a90d9;
+            border: 2px solid #4a90d9;
+        }
+        .btn-secondary:hover { background: #e8f2ff; }
+
+        .feedback {
+            text-align: center;
+            font-size: 1.05em;
+            color: #2c3e50;
+            min-height: 28px;
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+
+        /* ── Module 2: equivalent fractions ── */
+        .equiv-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .equiv-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .equiv-frac {
+            font-size: 1.15em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .equiv-rect { display: flex; height: 56px; }
+
+        .equiv-cell {
+            border: 2.5px solid #b8d4ef;
+            background: white;
+            flex-shrink: 0;
+        }
+        .equiv-cell + .equiv-cell { border-left-width: 1.5px; }
+        .equiv-cell:first-child { border-radius: 8px 0 0 8px; }
+        .equiv-cell:last-child  { border-radius: 0 8px 8px 0; }
+        .equiv-cell.filled { background: #4a90d9; }
+
+        .eq-sign {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #4a90d9;
+            flex-shrink: 0;
+            margin-top: 20px;
+        }
+
+        .pct-badge {
+            font-size: 1.45em;
+            font-weight: bold;
+            color: #2ecc71;
+            flex-shrink: 0;
+            margin-top: 20px;
+        }
+
+        .equiv-desc {
+            text-align: center;
+            font-size: 0.95em;
+            color: #555;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .nav-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .nav-dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: #cce0f5;
+            cursor: pointer;
+            border: none;
+            padding: 0;
+            transition: background 0.2s;
+        }
+        .nav-dot.active { background: #4a90d9; }
+        .nav-dot:hover:not(.active) { background: #a0c4e8; }
+    </style>
+</head>
+<body>
+
+<nav class="top-nav">
+    <a href="index.html">← Avalins Matematikverkstad</a>
+</nav>
+
+<h1>🍕 Bråk och procent</h1>
+
+<!-- ══════ Modul 1 ══════ -->
+<p class="section-title">Modul 1 – Färga in delar</p>
+
+<div class="card">
+    <p class="task-label">
+        Färga in <strong id="m1Num">3</strong> av <strong id="m1Den">4</strong> delar
+    </p>
+
+    <div class="rect-outer">
+        <div class="frac-rect" id="m1Rect"></div>
+    </div>
+    <p class="counter-label" id="m1Counter"></p>
+
+    <div class="btn-row">
+        <button class="btn-primary" id="m1Check">Kolla svaret ✓</button>
+        <button class="btn-secondary" id="m1Next">Ny uppgift →</button>
+    </div>
+
+    <div id="m1ResultArea" style="display:none">
+        <div class="result-row">
+            <div class="result-pill" id="pillFrac">
+                <span class="pill-label">bråkform</span>
+                <span class="pill-value">
+                    <span class="fs">
+                        <span class="fn" id="rFN">3</span>
+                        <span class="fd" id="rFD">4</span>
+                    </span>
+                </span>
+            </div>
+            <div class="result-pill" id="pillDec">
+                <span class="pill-label">decimalform</span>
+                <span class="pill-value" id="rDec">0,75</span>
+            </div>
+            <div class="result-pill" id="pillPct">
+                <span class="pill-label">procent</span>
+                <span class="pill-value" id="rPct">75%</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="feedback" id="m1Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 2 ══════ -->
+<p class="section-title">Modul 2 – Likvärdiga bråk</p>
+
+<div class="card">
+    <p class="task-label">Olika antal delar – men lika stor bit av helheten</p>
+    <div class="equiv-container" id="m2Equiv"></div>
+    <p class="equiv-desc" id="m2Desc"></p>
+    <div class="nav-dots" id="m2Dots"></div>
+</div>
+
+<script>
+/* ════════════════════════════════
+   Modul 1
+════════════════════════════════ */
+
+const DENOMS = [2, 3, 4, 5, 8, 10];
+let m1Num = 3, m1Den = 4;
+let m1Colored = [];
+let m1Done = false;
+
+function isTerminating(den) {
+    let d = den;
+    while (d % 2 === 0) d /= 2;
+    while (d % 5 === 0) d /= 5;
+    return d === 1;
+}
+
+function decPlaces(den) {
+    let d = den, p2 = 0, p5 = 0;
+    while (d % 2 === 0) { d /= 2; p2++; }
+    d = den;
+    while (d % 5 === 0) { d /= 5; p5++; }
+    return Math.max(p2, p5);
+}
+
+function fmtDec(num, den) {
+    const v = num / den;
+    if (!isTerminating(den)) return '\u22480\u00a0' + v.toFixed(2).replace('.', ',');
+    let s = v.toFixed(decPlaces(den)).replace('.', ',');
+    s = s.replace(/,(\d+)$/, (_, d) => { const t = d.replace(/0+$/, ''); return t ? ',' + t : ''; });
+    return s || '0';
+}
+
+function fmtPct(num, den) {
+    const p = num / den * 100;
+    const approx = !isTerminating(den);
+    const r = Math.round(p * 10) / 10;
+    const s = Number.isInteger(r) ? String(r) : r.toFixed(1).replace('.', ',');
+    return (approx ? '\u2248\u00a0' : '') + s + '%';
+}
+
+function buildM1() {
+    const rect = document.getElementById('m1Rect');
+    rect.innerHTML = '';
+    m1Colored = new Array(m1Den).fill(false);
+    m1Done = false;
+
+    const maxW = Math.min(440, (window.innerWidth || 500) - 80);
+    const cellW = Math.max(24, Math.floor(maxW / m1Den));
+
+    for (let i = 0; i < m1Den; i++) {
+        const c = document.createElement('div');
+        c.className = 'frac-cell';
+        c.style.width = cellW + 'px';
+        c.addEventListener('click', () => {
+            if (m1Done) return;
+            m1Colored[i] = !m1Colored[i];
+            c.classList.toggle('colored', m1Colored[i]);
+            updateCounter();
+        });
+        rect.appendChild(c);
+    }
+
+    updateCounter();
+    document.getElementById('m1ResultArea').style.display = 'none';
+    document.querySelectorAll('.result-pill').forEach(p => p.classList.remove('show'));
+    document.getElementById('m1Feedback').textContent = '';
+}
+
+function updateCounter() {
+    const cnt = m1Colored.filter(Boolean).length;
+    document.getElementById('m1Counter').textContent = cnt + ' av ' + m1Den + ' delar ifärgade';
+}
+
+function m1Check() {
+    const cnt  = m1Colored.filter(Boolean).length;
+    const fb   = document.getElementById('m1Feedback');
+    const diff = m1Num - cnt;
+
+    if (cnt === 0) {
+        fb.textContent = 'Klicka på rutorna för att färga in dem! 🐱';
+        return;
+    }
+    if (diff > 0) {
+        fb.textContent = 'Du har färgat ' + cnt + ' delar – färga in ' + diff + ' till!';
+        return;
+    }
+    if (diff < 0) {
+        fb.textContent = 'Du har färgat ' + cnt + ' delar – det är ' + (-diff) + ' för många, klicka bort!';
+        return;
+    }
+
+    m1Done = true;
+    fb.textContent = '🐱 Fantastiskt bra, Avalin!';
+
+    document.getElementById('rFN').textContent = m1Num;
+    document.getElementById('rFD').textContent = m1Den;
+    document.getElementById('rDec').textContent = fmtDec(m1Num, m1Den);
+    document.getElementById('rPct').textContent = fmtPct(m1Num, m1Den);
+
+    document.getElementById('m1ResultArea').style.display = 'block';
+    setTimeout(() => {
+        document.querySelectorAll('.result-pill').forEach((p, i) =>
+            setTimeout(() => p.classList.add('show'), i * 160));
+    }, 30);
+}
+
+function m1Next() {
+    m1Den = DENOMS[Math.floor(Math.random() * DENOMS.length)];
+    m1Num = 1 + Math.floor(Math.random() * (m1Den - 1));
+    document.getElementById('m1Num').textContent = m1Num;
+    document.getElementById('m1Den').textContent = m1Den;
+    buildM1();
+}
+
+document.getElementById('m1Check').addEventListener('click', m1Check);
+document.getElementById('m1Next').addEventListener('click',  m1Next);
+
+
+/* ════════════════════════════════
+   Modul 2
+════════════════════════════════ */
+
+const EQUIV = [
+    { a:{n:1,d:2}, b:{n:2,d:4},  pct:50, desc:'1 av 2 delar = 2 av 4 delar. Lika stor bit – men delad på fler bitar!' },
+    { a:{n:1,d:2}, b:{n:5,d:10}, pct:50, desc:'Hälften är alltid 50% – oavsett hur många delar helheten är delad i!' },
+    { a:{n:1,d:4}, b:{n:2,d:8},  pct:25, desc:'En fjärdedel = två åttondelar. Man delar varje bit i hälften men tar dubbelt så många.' },
+    { a:{n:3,d:4}, b:{n:6,d:8},  pct:75, desc:'Tre fjärdedelar = sex åttondelar. Samma del – fler, men mindre bitar!' },
+    { a:{n:1,d:5}, b:{n:2,d:10}, pct:20, desc:'En femtedel = två tiondelar = 20%. Varje femtedel delas i två tiondelar.' },
+    { a:{n:2,d:5}, b:{n:4,d:10}, pct:40, desc:'Två femtedelar = fyra tiondelar = 40%.' },
+];
+
+let m2Idx = 0;
+const RECT_W = 160;
+
+function buildM2() {
+    const wrap = document.getElementById('m2Equiv');
+    wrap.innerHTML = '';
+
+    const e = EQUIV[m2Idx];
+
+    [e.a, e.b].forEach((frac, fi) => {
+        if (fi === 1) {
+            const eq = document.createElement('div');
+            eq.className = 'eq-sign';
+            eq.textContent = '=';
+            wrap.appendChild(eq);
+        }
+
+        const block = document.createElement('div');
+        block.className = 'equiv-block';
+
+        const lbl = document.createElement('div');
+        lbl.className = 'equiv-frac';
+        lbl.innerHTML = '<span class="fs"><span class="fn">' + frac.n + '</span><span class="fd">' + frac.d + '</span></span>';
+        block.appendChild(lbl);
+
+        const r = document.createElement('div');
+        r.className = 'equiv-rect';
+        const cw = Math.floor(RECT_W / frac.d);
+        for (let i = 0; i < frac.d; i++) {
+            const c = document.createElement('div');
+            c.className = 'equiv-cell' + (i < frac.n ? ' filled' : '');
+            c.style.width = cw + 'px';
+            r.appendChild(c);
+        }
+        block.appendChild(r);
+        wrap.appendChild(block);
+    });
+
+    const pct = document.createElement('div');
+    pct.className = 'pct-badge';
+    pct.textContent = '= ' + e.pct + '%';
+    wrap.appendChild(pct);
+
+    document.getElementById('m2Desc').textContent = e.desc;
+
+    const dotsEl = document.getElementById('m2Dots');
+    dotsEl.innerHTML = '';
+    EQUIV.forEach((_, i) => {
+        const d = document.createElement('button');
+        d.className = 'nav-dot' + (i === m2Idx ? ' active' : '');
+        d.setAttribute('aria-label', 'Exempel ' + (i + 1));
+        d.addEventListener('click', () => { m2Idx = i; buildM2(); });
+        dotsEl.appendChild(d);
+    });
+}
+
+m1Next();
+buildM2();
+</script>
+</body>
+</html>
