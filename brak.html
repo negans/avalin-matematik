@@ -248,6 +248,38 @@
         }
         .nav-dot.active { background: #4a90d9; }
         .nav-dot:hover:not(.active) { background: #a0c4e8; }
+
+        /* ── Module 3 ── */
+        .task-label .fs { vertical-align: middle; }
+
+        .frac-rect.static .frac-cell { cursor: default; pointer-events: none; }
+        .frac-cell.colored2 { background: #e8832a; }
+        .frac-cell.removed  { background: #e67e74; }
+
+        .answer-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 14px 0 0;
+            font-size: 1.15em;
+            color: #2c3e50;
+        }
+
+        .answer-input {
+            width: 58px;
+            font-size: 1.2em;
+            padding: 7px 8px;
+            border: 2.5px solid #cce0f5;
+            border-radius: 10px;
+            text-align: center;
+            outline: none;
+            font-family: Arial, sans-serif;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .answer-input:focus { border-color: #4a90d9; }
+        .answer-input.ok  { border-color: #2ecc71; background: #f0fff4; }
+        .answer-input.err { border-color: #e74c3c; background: #fff5f5; }
     </style>
 </head>
 <body>
@@ -309,6 +341,31 @@
     <div class="equiv-container" id="m2Equiv"></div>
     <p class="equiv-desc" id="m2Desc"></p>
     <div class="nav-dots" id="m2Dots"></div>
+</div>
+
+<!-- ══════ Modul 3 ══════ -->
+<p class="section-title">Modul 3 – Addera och subtrahera bråk</p>
+
+<div class="card">
+    <p class="task-label" id="m3Label"></p>
+
+    <div class="rect-outer">
+        <div class="frac-rect static" id="m3Rect"></div>
+    </div>
+    <p class="counter-label" id="m3Hint"></p>
+
+    <div class="answer-row">
+        Svaret är&nbsp;
+        <input class="answer-input" id="m3Input" type="text" inputmode="numeric" placeholder="">
+        <span id="m3DenLabel" style="font-weight:bold">/ 5</span>
+    </div>
+
+    <div class="btn-row">
+        <button class="btn-primary" id="m3Check">Kolla svaret ✓</button>
+        <button class="btn-secondary" id="m3Next">Ny uppgift →</button>
+    </div>
+
+    <div class="feedback" id="m3Feedback" aria-live="polite"></div>
 </div>
 
 <script>
@@ -501,6 +558,128 @@ function buildM2() {
 
 m1Next();
 buildM2();
+
+
+/* ════════════════════════════════
+   Modul 3
+════════════════════════════════ */
+
+const M3_DENOMS = [3, 4, 5, 6, 8, 10];
+let m3Task = null;
+
+function fracHTML(n, d) {
+    return '<span class="fs"><span class="fn">' + n + '</span><span class="fd">' + d + '</span></span>';
+}
+
+function genM3Task() {
+    const d = M3_DENOMS[Math.floor(Math.random() * M3_DENOMS.length)];
+    const isAdd = Math.random() > 0.35;
+    let a, b;
+    if (isAdd) {
+        a = 1 + Math.floor(Math.random() * (d - 2));
+        b = 1 + Math.floor(Math.random() * (d - 1 - a));
+    } else {
+        a = 2 + Math.floor(Math.random() * (d - 2));
+        b = 1 + Math.floor(Math.random() * (a - 1));
+    }
+    return { d, a, b, isAdd, ans: isAdd ? a + b : a - b };
+}
+
+function buildM3() {
+    const t = m3Task;
+    const op = t.isAdd ? '+' : '\u2212';
+
+    const fQ = '<span class="fs"><span class="fn" style="color:#8aaabf">?</span><span class="fd">' + t.d + '</span></span>';
+    document.getElementById('m3Label').innerHTML =
+        fracHTML(t.a, t.d) + '&nbsp;&nbsp;' + op + '&nbsp;&nbsp;' + fracHTML(t.b, t.d) + '&nbsp;&nbsp;=&nbsp;&nbsp;' + fQ;
+
+    document.getElementById('m3DenLabel').textContent = '/ ' + t.d;
+
+    const rect = document.getElementById('m3Rect');
+    rect.innerHTML = '';
+
+    const maxW = Math.min(440, (window.innerWidth || 500) - 80);
+    const cellW = Math.max(24, Math.floor(maxW / t.d));
+    const kept = t.a - t.b;
+
+    for (let i = 0; i < t.d; i++) {
+        const c = document.createElement('div');
+        c.className = 'frac-cell';
+        c.style.width = cellW + 'px';
+
+        if (t.isAdd) {
+            if (i < t.a)            c.classList.add('colored');
+            else if (i < t.a + t.b) c.classList.add('colored2');
+        } else {
+            if (i < kept)           c.classList.add('colored');
+            else if (i < t.a)       c.classList.add('removed');
+        }
+
+        rect.appendChild(c);
+    }
+
+    document.getElementById('m3Hint').textContent = t.isAdd
+        ? 'Blå = ' + t.a + '/' + t.d + '  \u2022  Orange = ' + t.b + '/' + t.d + '  \u2192  Räkna ihop de färgade rutorna!'
+        : 'Blå = kvar  \u2022  Rött = tas bort  \u2192  Räkna bara de blå rutorna!';
+
+    const inp = document.getElementById('m3Input');
+    inp.value = '';
+    inp.classList.remove('ok', 'err');
+    document.getElementById('m3Feedback').textContent = '';
+}
+
+function m3Next() {
+    m3Task = genM3Task();
+    buildM3();
+}
+
+function m3Check() {
+    const inp = document.getElementById('m3Input');
+    const fb  = document.getElementById('m3Feedback');
+    const val = inp.value.trim();
+
+    if (!val) {
+        fb.textContent = 'Skriv ditt svar i rutan! 🐱';
+        return;
+    }
+
+    const num = parseInt(val, 10);
+    inp.classList.remove('ok', 'err');
+
+    if (isNaN(num) || num < 0) {
+        inp.classList.add('err');
+        fb.textContent = 'Skriv ett positivt tal!';
+        return;
+    }
+
+    if (num === m3Task.ans) {
+        inp.classList.add('ok');
+        const opTxt = m3Task.isAdd ? '+' : '\u2212';
+        fb.textContent = '🐱 Rätt! ' + m3Task.a + ' ' + opTxt + ' ' + m3Task.b + ' = ' + m3Task.ans + '. Jättebra, Avalin!';
+    } else {
+        inp.classList.add('err');
+        fb.textContent = m3Task.isAdd
+            ? 'Räkna de blå och orange rutorna – hur många är det totalt?'
+            : 'Räkna bara de blå rutorna som är kvar – hur många är det?';
+    }
+}
+
+document.getElementById('m3Check').addEventListener('click', m3Check);
+document.getElementById('m3Next').addEventListener('click',  m3Next);
+
+document.getElementById('m3Input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { m3Check(); return; }
+    if (!/[0-9]/.test(e.key) && !['Backspace','Delete','Tab','ArrowLeft','ArrowRight'].includes(e.key)) {
+        e.preventDefault();
+    }
+});
+document.getElementById('m3Input').addEventListener('input', function() {
+    if (this.value.length > 2) this.value = this.value.slice(0, 2);
+    this.classList.remove('ok', 'err');
+    document.getElementById('m3Feedback').textContent = '';
+});
+
+m3Next();
 </script>
 </body>
 </html>
