@@ -326,6 +326,102 @@
         .step-line.show { opacity: 1; transform: translateY(0); }
         .step-line .hl    { color: #4a90d9; font-weight: bold; }
         .step-line .hl-ok { color: #2ecc71; font-weight: bold; }
+
+        /* ── Module 5 ── */
+        .cmp-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .cmp-card {
+            flex: 1;
+            max-width: 185px;
+            border: 2.5px solid #b8d4ef;
+            border-radius: 14px;
+            padding: 12px 10px 10px;
+            cursor: pointer;
+            user-select: none;
+            transition: border-color 0.15s, background 0.15s, transform 0.1s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: white;
+        }
+        .cmp-card:hover:not(.done) { border-color: #4a90d9; background: #f4f9ff; }
+        .cmp-card:active:not(.done) { transform: scale(0.97); }
+        .cmp-card.ok   { border-color: #2ecc71; background: #f0fff4; }
+        .cmp-card.fail { border-color: #e74c3c; background: #fff5f5; }
+        .cmp-card.done { cursor: default; }
+
+        .cmp-frac { font-size: 1.15em; font-weight: bold; color: #2c3e50; }
+
+        .cmp-rect  { display: flex; width: 100%; height: 44px; }
+        .cmp-cell  { flex: 1; border: 2px solid #b8d4ef; background: white; }
+        .cmp-cell + .cmp-cell { border-left-width: 1px; }
+        .cmp-cell:first-child { border-radius: 6px 0 0 6px; }
+        .cmp-cell:last-child  { border-radius: 0 6px 6px 0; }
+        .cmp-cell.active { background: #4a90d9; }
+
+        .vs-sign {
+            font-size: 0.95em;
+            font-weight: bold;
+            color: #b8d4ef;
+            flex-shrink: 0;
+        }
+
+        /* Del B – order cards */
+        .order-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .order-card {
+            position: relative;
+            flex: 1;
+            max-width: 130px;
+            min-width: 0;
+            border: 2.5px solid #b8d4ef;
+            border-radius: 14px;
+            padding: 10px 8px 8px;
+            cursor: pointer;
+            user-select: none;
+            transition: border-color 0.15s, background 0.15s, transform 0.1s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: white;
+        }
+        .order-card:hover:not(.done) { border-color: #4a90d9; background: #f4f9ff; }
+        .order-card:active:not(.done) { transform: scale(0.97); }
+        .order-card.picked { border-color: #4a90d9; background: #eef6ff; }
+        .order-card.ok     { border-color: #2ecc71; background: #f0fff4; }
+        .order-card.fail   { border-color: #e74c3c; background: #fff5f5; }
+        .order-card.done   { cursor: default; }
+
+        .order-badge {
+            position: absolute;
+            top: -9px; right: -9px;
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            background: #4a90d9;
+            color: white;
+            font-size: 0.82em;
+            font-weight: bold;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 5px rgba(74,144,217,0.4);
+        }
+        .order-badge.show           { display: flex; }
+        .order-card.ok   .order-badge { background: #2ecc71; }
+        .order-card.fail .order-badge { background: #e74c3c; }
     </style>
 </head>
 <body>
@@ -445,6 +541,28 @@
     </div>
 
     <div class="feedback" id="m4Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 5A ══════ -->
+<p class="section-title">Modul 5 – Jämföra och storleksordna bråk</p>
+
+<div class="card">
+    <p class="task-label">Vilket bråk är <strong>störst</strong>? Klicka på det!</p>
+    <div class="cmp-row" id="m5aRow"></div>
+    <div class="btn-row">
+        <button class="btn-secondary" id="m5aNext">Nästa uppgift →</button>
+    </div>
+    <div class="feedback" id="m5aFeedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 5B ══════ -->
+<div class="card">
+    <p class="task-label">Ordna från <strong>minst</strong> till <strong>störst</strong> – klicka i rätt ordning!</p>
+    <div class="order-row" id="m5bRow"></div>
+    <div class="btn-row">
+        <button class="btn-secondary" id="m5bNext">Nästa uppgift →</button>
+    </div>
+    <div class="feedback" id="m5bFeedback" aria-live="polite"></div>
 </div>
 
 <script>
@@ -888,6 +1006,200 @@ document.getElementById('m4Input').addEventListener('input', function() {
 });
 
 m4Next();
+
+
+/* ════════════════════════════════
+   Modul 5
+════════════════════════════════ */
+
+// Pairs — each pair stores [smaller, larger] (values may be swapped in display)
+const M5_PAIRS = [
+    [{n:1,d:4}, {n:3,d:4}],
+    [{n:1,d:3}, {n:2,d:3}],
+    [{n:1,d:5}, {n:4,d:5}],
+    [{n:1,d:4}, {n:1,d:2}],
+    [{n:1,d:3}, {n:1,d:2}],
+    [{n:2,d:5}, {n:1,d:2}],
+    [{n:2,d:3}, {n:3,d:4}],
+    [{n:1,d:4}, {n:1,d:3}],
+    [{n:3,d:8}, {n:2,d:5}],
+    [{n:3,d:5}, {n:2,d:3}],
+    [{n:3,d:5}, {n:5,d:8}],
+    [{n:5,d:8}, {n:2,d:3}],
+];
+
+// Triples sorted smallest → largest
+const M5_TRIPLES = [
+    [{n:1,d:4}, {n:1,d:2}, {n:3,d:4}],
+    [{n:1,d:3}, {n:1,d:2}, {n:2,d:3}],
+    [{n:1,d:5}, {n:2,d:5}, {n:3,d:5}],
+    [{n:1,d:4}, {n:1,d:3}, {n:1,d:2}],
+    [{n:1,d:3}, {n:2,d:5}, {n:1,d:2}],
+    [{n:2,d:5}, {n:1,d:2}, {n:3,d:5}],
+    [{n:1,d:4}, {n:3,d:8}, {n:2,d:5}],
+    [{n:1,d:3}, {n:3,d:8}, {n:1,d:2}],
+];
+
+function fval(f) { return f.n / f.d; }
+
+function makeCmpRect(frac) {
+    const rect = document.createElement('div');
+    rect.className = 'cmp-rect';
+    for (let i = 0; i < frac.d; i++) {
+        const c = document.createElement('div');
+        c.className = 'cmp-cell' + (i < frac.n ? ' active' : '');
+        rect.appendChild(c);
+    }
+    return rect;
+}
+
+function makeFracSpan(frac) {
+    const el = document.createElement('div');
+    el.className = 'cmp-frac';
+    el.innerHTML = '<span class="fs"><span class="fn">' + frac.n + '</span><span class="fd">' + frac.d + '</span></span>';
+    return el;
+}
+
+/* ── Del A: jämför två ── */
+let m5aDone  = false;
+let m5aItems = [];
+
+function m5aNext() {
+    const pair = M5_PAIRS[Math.floor(Math.random() * M5_PAIRS.length)];
+    // random left/right placement
+    m5aItems = Math.random() > 0.5
+        ? [{frac: pair[0]}, {frac: pair[1]}]
+        : [{frac: pair[1]}, {frac: pair[0]}];
+    m5aDone = false;
+
+    const row = document.getElementById('m5aRow');
+    row.innerHTML = '';
+
+    m5aItems.forEach((item, i) => {
+        if (i === 1) {
+            const vs = document.createElement('div');
+            vs.className = 'vs-sign';
+            vs.textContent = 'vs';
+            row.appendChild(vs);
+        }
+        const card = document.createElement('div');
+        card.className = 'cmp-card';
+        card.appendChild(makeFracSpan(item.frac));
+        card.appendChild(makeCmpRect(item.frac));
+        card.addEventListener('click', () => m5aPick(i));
+        item.card = card;
+        row.appendChild(card);
+    });
+
+    document.getElementById('m5aFeedback').textContent = '';
+}
+
+function m5aPick(idx) {
+    if (m5aDone) return;
+    m5aDone = true;
+
+    const chosen = m5aItems[idx].frac;
+    const other  = m5aItems[1 - idx].frac;
+    const ok     = fval(chosen) > fval(other);
+
+    m5aItems.forEach((item, i) => {
+        item.card.classList.add('done');
+        if (i === idx)     item.card.classList.add(ok ? 'ok' : 'fail');
+        else if (!ok)      item.card.classList.add('ok');
+    });
+
+    const fb = document.getElementById('m5aFeedback');
+    if (ok) {
+        fb.textContent = '🐱 Rätt! ' + chosen.n + '/' + chosen.d + ' är störst!';
+    } else {
+        const big = m5aItems[1 - idx].frac;
+        fb.textContent = 'Titta på rektanglarna – ' + big.n + '/' + big.d +
+            ' har mer ifärgat och är störst!';
+    }
+}
+
+document.getElementById('m5aNext').addEventListener('click', m5aNext);
+
+
+/* ── Del B: ordna tre ── */
+let m5bDone       = false;
+let m5bItems      = [];
+let m5bClickOrder = [];
+
+function m5bNext() {
+    const sorted = M5_TRIPLES[Math.floor(Math.random() * M5_TRIPLES.length)];
+
+    // Fisher-Yates shuffle of display order
+    const idxs = [0, 1, 2];
+    for (let i = 2; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [idxs[i], idxs[j]] = [idxs[j], idxs[i]];
+    }
+
+    m5bItems = idxs.map(si => ({ frac: sorted[si], rank: si, card: null, badge: null }));
+    m5bClickOrder = [];
+    m5bDone = false;
+
+    const row = document.getElementById('m5bRow');
+    row.innerHTML = '';
+
+    m5bItems.forEach((item, i) => {
+        const card = document.createElement('div');
+        card.className = 'order-card';
+
+        const badge = document.createElement('div');
+        badge.className = 'order-badge';
+        card.appendChild(badge);
+
+        card.appendChild(makeFracSpan(item.frac));
+        card.appendChild(makeCmpRect(item.frac));
+        card.addEventListener('click', () => m5bPick(i));
+
+        item.card  = card;
+        item.badge = badge;
+        row.appendChild(card);
+    });
+
+    document.getElementById('m5bFeedback').textContent = '';
+}
+
+function m5bPick(idx) {
+    if (m5bDone || m5bItems[idx].card.classList.contains('picked')) return;
+    const item = m5bItems[idx];
+    item.card.classList.add('picked');
+    item.badge.textContent = m5bClickOrder.length + 1;
+    item.badge.classList.add('show');
+    m5bClickOrder.push(idx);
+    if (m5bClickOrder.length === 3) m5bEval();
+}
+
+function m5bEval() {
+    m5bDone = true;
+    const correct = m5bClickOrder.every((dispIdx, pos) => m5bItems[dispIdx].rank === pos);
+    const fb = document.getElementById('m5bFeedback');
+
+    if (correct) {
+        m5bItems.forEach(item => { item.card.classList.add('done', 'ok'); });
+        fb.textContent = '🐱 Perfekt ordning, Avalin!';
+    } else {
+        // Show correct order with green badges
+        m5bItems.forEach(item => {
+            item.card.classList.remove('picked');
+            item.card.classList.add('done', 'ok');
+            item.badge.textContent = item.rank + 1;
+            item.badge.classList.add('show');
+        });
+        const inOrder = [...m5bItems].sort((a, b) => a.rank - b.rank);
+        fb.textContent = 'Rätt ordning: ' +
+            inOrder.map(it => it.frac.n + '/' + it.frac.d).join(' < ') +
+            '. Mer ifärgat = större bråk!';
+    }
+}
+
+document.getElementById('m5bNext').addEventListener('click', m5bNext);
+
+m5aNext();
+m5bNext();
 </script>
 </body>
 </html>
