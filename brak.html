@@ -280,6 +280,52 @@
         .answer-input:focus { border-color: #4a90d9; }
         .answer-input.ok  { border-color: #2ecc71; background: #f0fff4; }
         .answer-input.err { border-color: #e74c3c; background: #fff5f5; }
+        .answer-input.w3  { width: 70px; }
+
+        /* ── Module 4 ── */
+        .bar-wrap { max-width: 440px; margin: 0 auto 6px; }
+
+        .bar-track {
+            display: flex;
+            height: 52px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2.5px solid #b8d4ef;
+        }
+
+        .bar-seg { flex: 1; background: #ddeaf8; }
+        .bar-seg + .bar-seg { border-left: 2.5px solid white; }
+        .bar-seg.active { background: #4a90d9; }
+
+        .bar-endlabels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.88em;
+            color: #8aaabf;
+            margin-top: 4px;
+            padding: 0 2px;
+        }
+
+        .steps-area {
+            margin-top: 14px;
+            background: #f8fbff;
+            border-radius: 12px;
+            padding: 14px 16px;
+            border: 1.5px solid #cce0f5;
+        }
+
+        .step-line {
+            font-size: 1.05em;
+            color: #2c3e50;
+            padding: 3px 0;
+            line-height: 1.65;
+            opacity: 0;
+            transform: translateY(6px);
+            transition: opacity 0.4s, transform 0.4s;
+        }
+        .step-line.show { opacity: 1; transform: translateY(0); }
+        .step-line .hl    { color: #4a90d9; font-weight: bold; }
+        .step-line .hl-ok { color: #2ecc71; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -366,6 +412,39 @@
     </div>
 
     <div class="feedback" id="m3Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 4 ══════ -->
+<p class="section-title">Modul 4 – Beräkna del av antal</p>
+
+<div class="card">
+    <p class="task-label" id="m4Label"></p>
+
+    <div class="bar-wrap">
+        <div class="bar-track" id="m4Bar"></div>
+        <div class="bar-endlabels">
+            <span>0</span>
+            <span id="m4TotLbl"></span>
+        </div>
+    </div>
+
+    <div class="answer-row">
+        Svaret är&nbsp;
+        <input class="answer-input w3" id="m4Input" type="text" inputmode="numeric" placeholder="">
+    </div>
+
+    <div class="btn-row">
+        <button class="btn-primary" id="m4Check">Kolla svaret ✓</button>
+        <button class="btn-secondary" id="m4Next">Ny uppgift →</button>
+    </div>
+
+    <div id="m4Steps" class="steps-area" style="display:none">
+        <div class="step-line" id="m4S1"></div>
+        <div class="step-line" id="m4S2"></div>
+        <div class="step-line" id="m4S3"></div>
+    </div>
+
+    <div class="feedback" id="m4Feedback" aria-live="polite"></div>
 </div>
 
 <script>
@@ -680,6 +759,135 @@ document.getElementById('m3Input').addEventListener('input', function() {
 });
 
 m3Next();
+
+
+/* ════════════════════════════════
+   Modul 4
+════════════════════════════════ */
+
+const M4_PCTS   = [10, 25, 50, 75];
+const M4_TOTALS = [20, 40, 100, 200, 300];
+let m4Task = null;
+
+function genM4Task() {
+    const pct   = M4_PCTS[Math.floor(Math.random() * M4_PCTS.length)];
+    const total = M4_TOTALS[Math.floor(Math.random() * M4_TOTALS.length)];
+    const segs   = pct === 10 ? 10 : 4;
+    const filled = pct === 10 ? 1 : pct / 25;
+    return { pct, total, ans: pct / 100 * total, segs, filled };
+}
+
+function buildM4() {
+    const t = m4Task;
+
+    document.getElementById('m4Label').textContent = 'Vad är ' + t.pct + '% av ' + t.total + '?';
+    document.getElementById('m4TotLbl').textContent = t.total;
+
+    const bar = document.getElementById('m4Bar');
+    bar.innerHTML = '';
+    for (let i = 0; i < t.segs; i++) {
+        const s = document.createElement('div');
+        s.className = 'bar-seg' + (i < t.filled ? ' active' : '');
+        bar.appendChild(s);
+    }
+
+    const inp = document.getElementById('m4Input');
+    inp.value = '';
+    inp.classList.remove('ok', 'err');
+    document.getElementById('m4Feedback').textContent = '';
+    document.getElementById('m4Steps').style.display = 'none';
+    ['m4S1', 'm4S2', 'm4S3'].forEach(id => {
+        const el = document.getElementById(id);
+        el.innerHTML = '';
+        el.classList.remove('show');
+    });
+}
+
+function hl(v)   { return '<span class="hl">'    + v + '</span>'; }
+function hlOk(v) { return '<span class="hl-ok">' + v + '</span>'; }
+
+function buildSteps(t) {
+    if (t.pct === 50) return [
+        '50% = <strong>hälften</strong> av helheten',
+        hl(t.total) + ' ÷ 2 = ' + hlOk(t.ans),
+        '50% av ' + hl(t.total) + ' = ' + hlOk(t.ans)
+    ];
+    if (t.pct === 25) return [
+        '25% = <strong>en fjärdedel</strong> → dela ' + hl(t.total) + ' i 4 lika delar',
+        hl(t.total) + ' ÷ 4 = ' + hlOk(t.ans),
+        '25% av ' + hl(t.total) + ' = ' + hlOk(t.ans)
+    ];
+    if (t.pct === 75) {
+        const q = t.total / 4;
+        return [
+            'Börja med 25%: ' + hl(t.total) + ' ÷ 4 = ' + hl(q),
+            '75% = <strong>tre fjärdedelar</strong> → ' + hl(q) + ' × 3 = ' + hlOk(t.ans),
+            '75% av ' + hl(t.total) + ' = ' + hlOk(t.ans)
+        ];
+    }
+    return [
+        '10% = <strong>en tiondel</strong> → dela ' + hl(t.total) + ' i 10 lika delar',
+        hl(t.total) + ' ÷ 10 = ' + hlOk(t.ans),
+        '10% av ' + hl(t.total) + ' = ' + hlOk(t.ans)
+    ];
+}
+
+function m4Next() { m4Task = genM4Task(); buildM4(); }
+
+function m4Check() {
+    const inp = document.getElementById('m4Input');
+    const fb  = document.getElementById('m4Feedback');
+    const val = inp.value.trim();
+
+    if (!val) { fb.textContent = 'Skriv ditt svar i rutan! 🐱'; return; }
+
+    const num = parseInt(val, 10);
+    inp.classList.remove('ok', 'err');
+
+    if (isNaN(num) || num < 0) {
+        inp.classList.add('err');
+        fb.textContent = 'Skriv ett positivt tal!';
+        return;
+    }
+
+    if (num === m4Task.ans) {
+        inp.classList.add('ok');
+        fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
+
+        const lines = buildSteps(m4Task);
+        document.getElementById('m4Steps').style.display = 'block';
+        ['m4S1', 'm4S2', 'm4S3'].forEach((id, i) => {
+            const el = document.getElementById(id);
+            el.innerHTML = lines[i];
+            setTimeout(() => el.classList.add('show'), 80 + i * 230);
+        });
+    } else {
+        inp.classList.add('err');
+        const tip =
+            m4Task.pct === 50 ? 'Tips: 50% är hälften – dela ' + m4Task.total + ' på 2!' :
+            m4Task.pct === 25 ? 'Tips: 25% är en fjärdedel – dela ' + m4Task.total + ' på 4!' :
+            m4Task.pct === 75 ? 'Tips: Börja med att dela ' + m4Task.total + ' på 4, sedan gångra med 3!' :
+                                'Tips: 10% är en tiondel – dela ' + m4Task.total + ' på 10!';
+        fb.textContent = tip;
+    }
+}
+
+document.getElementById('m4Check').addEventListener('click', m4Check);
+document.getElementById('m4Next').addEventListener('click',  m4Next);
+
+document.getElementById('m4Input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { m4Check(); return; }
+    if (!/[0-9]/.test(e.key) && !['Backspace','Delete','Tab','ArrowLeft','ArrowRight'].includes(e.key)) {
+        e.preventDefault();
+    }
+});
+document.getElementById('m4Input').addEventListener('input', function() {
+    if (this.value.length > 3) this.value = this.value.slice(0, 3);
+    this.classList.remove('ok', 'err');
+    document.getElementById('m4Feedback').textContent = '';
+});
+
+m4Next();
 </script>
 </body>
 </html>
