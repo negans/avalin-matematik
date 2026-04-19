@@ -422,6 +422,92 @@
         .order-badge.show           { display: flex; }
         .order-card.ok   .order-badge { background: #2ecc71; }
         .order-card.fail .order-badge { background: #e74c3c; }
+
+        /* ── Module 6 ── */
+        .ratio-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .ratio-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ratio-group-label {
+            font-size: 0.92em;
+            font-weight: bold;
+            color: #34495e;
+            text-align: center;
+        }
+
+        .ratio-dots {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 168px;
+        }
+
+        .ratio-dot {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            transition: transform 0.15s;
+        }
+        .ratio-dot.a { background: #4a90d9; box-shadow: 0 2px 6px rgba(74,144,217,0.35); }
+        .ratio-dot.b { background: #e74c3c; box-shadow: 0 2px 6px rgba(231,76,60,0.30); }
+
+        .ratio-colon-sep {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #cce0f5;
+            flex-shrink: 0;
+            line-height: 1;
+            padding-top: 20px;
+        }
+
+        .ratio-answer-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0 0;
+        }
+
+        .ratio-colon {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: #2c3e50;
+            line-height: 1;
+        }
+
+        .ratio-insight {
+            margin-top: 14px;
+            background: #f8fbff;
+            border-radius: 12px;
+            padding: 12px 16px;
+            border: 1.5px solid #cce0f5;
+        }
+
+        .ri-line {
+            font-size: 1.02em;
+            color: #2c3e50;
+            padding: 3px 0;
+            line-height: 1.65;
+            opacity: 0;
+            transform: translateY(5px);
+            transition: opacity 0.38s, transform 0.38s;
+        }
+        .ri-line.show { opacity: 1; transform: translateY(0); }
+        .ri-line .hl    { color: #4a90d9; font-weight: bold; }
+        .ri-line .hl-ok { color: #2ecc71; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -563,6 +649,36 @@
         <button class="btn-secondary" id="m5bNext">Nästa uppgift →</button>
     </div>
     <div class="feedback" id="m5bFeedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 6 ══════ -->
+<p class="section-title">Modul 6 – Förhållanden</p>
+
+<div class="card">
+    <p class="task-label" id="m6Context"></p>
+
+    <div class="ratio-visual" id="m6Visual"></div>
+
+    <p class="counter-label" id="m6Question"></p>
+
+    <div class="ratio-answer-row">
+        <input class="answer-input" id="m6InpA" type="text" inputmode="numeric" placeholder="">
+        <span class="ratio-colon">:</span>
+        <input class="answer-input" id="m6InpB" type="text" inputmode="numeric" placeholder="">
+    </div>
+
+    <div class="btn-row">
+        <button class="btn-primary" id="m6Check">Kolla svaret ✓</button>
+        <button class="btn-secondary" id="m6Next">Ny uppgift →</button>
+    </div>
+
+    <div id="m6Insight" class="ratio-insight" style="display:none">
+        <div class="ri-line" id="m6R1"></div>
+        <div class="ri-line" id="m6R2"></div>
+        <div class="ri-line" id="m6R3"></div>
+    </div>
+
+    <div class="feedback" id="m6Feedback" aria-live="polite"></div>
 </div>
 
 <script>
@@ -1200,6 +1316,178 @@ document.getElementById('m5bNext').addEventListener('click', m5bNext);
 
 m5aNext();
 m5bNext();
+
+
+/* ════════════════════════════════
+   Modul 6
+════════════════════════════════ */
+
+const M6_TASKS = [
+    {a:1,b:1}, {a:2,b:2}, {a:3,b:3},
+    {a:1,b:2}, {a:2,b:1},
+    {a:1,b:3}, {a:3,b:1},
+    {a:2,b:3}, {a:3,b:2},
+    {a:1,b:4}, {a:4,b:1},
+    {a:3,b:4}, {a:4,b:3},
+];
+
+const M6_SCENARIOS = [
+    {a:'flickor', as:'flicka',  b:'pojkar',    bs:'pojke'   },
+    {a:'katter',  as:'katt',    b:'hundar',    bs:'hund'    },
+    {a:'katter',  as:'katt',    b:'kaniner',   bs:'kanin'   },
+    {a:'äpplen',  as:'äpple',   b:'apelsiner', bs:'apelsin' },
+    {a:'blåa',    as:'blå',     b:'röda',      bs:'röd'     },
+    {a:'stora',   as:'stor',    b:'små',       bs:'liten'   },
+];
+
+let m6Task = null;
+let m6Sc   = null;
+let m6Done = false;
+
+function genM6() {
+    const t  = M6_TASKS[Math.floor(Math.random() * M6_TASKS.length)];
+    const sc = M6_SCENARIOS[Math.floor(Math.random() * M6_SCENARIOS.length)];
+    return { t, sc };
+}
+
+function form(n, pl, sg) { return n === 1 ? sg : pl; }
+
+function buildM6() {
+    const { t, sc } = { t: m6Task, sc: m6Sc };
+    m6Done = false;
+
+    document.getElementById('m6Context').textContent =
+        'Det finns ' + t.a + ' ' + form(t.a, sc.a, sc.as) + ' och ' + t.b + ' ' + form(t.b, sc.b, sc.bs) + '.';
+
+    document.getElementById('m6Question').textContent =
+        'Vad är förhållandet ' + sc.a + ' till ' + sc.b + '?';
+
+    // Build visual
+    const vis = document.getElementById('m6Visual');
+    vis.innerHTML = '';
+
+    function makeGroup(count, cls, label) {
+        const g = document.createElement('div');
+        g.className = 'ratio-group';
+        const lbl = document.createElement('div');
+        lbl.className = 'ratio-group-label';
+        lbl.textContent = label;
+        g.appendChild(lbl);
+        const dots = document.createElement('div');
+        dots.className = 'ratio-dots';
+        for (let i = 0; i < count; i++) {
+            const d = document.createElement('div');
+            d.className = 'ratio-dot ' + cls;
+            dots.appendChild(d);
+        }
+        g.appendChild(dots);
+        return g;
+    }
+
+    vis.appendChild(makeGroup(t.a, 'a', form(t.a, sc.a, sc.as)));
+    const sep = document.createElement('div');
+    sep.className = 'ratio-colon-sep';
+    sep.textContent = ':';
+    vis.appendChild(sep);
+    vis.appendChild(makeGroup(t.b, 'b', form(t.b, sc.b, sc.bs)));
+
+    // Reset inputs
+    ['m6InpA','m6InpB'].forEach(id => {
+        const el = document.getElementById(id);
+        el.value = '';
+        el.classList.remove('ok','err');
+    });
+    document.getElementById('m6Insight').style.display = 'none';
+    ['m6R1','m6R2','m6R3'].forEach(id => {
+        document.getElementById(id).innerHTML = '';
+        document.getElementById(id).classList.remove('show');
+    });
+    document.getElementById('m6Feedback').textContent = '';
+}
+
+function m6InsightLines(t, sc) {
+    const total = t.a + t.b;
+    const pct   = fmtPct(t.a, total);
+    const rel   = t.a === t.b
+        ? 'Lika många <span class="hl">' + sc.a + '</span> och <span class="hl">' + sc.b + '</span>!'
+        : 'För var\u00a0<span class="hl">' + t.a + '</span>\u00a0' + form(t.a, sc.a, sc.as) +
+          ' finns det\u00a0<span class="hl">' + t.b + '</span>\u00a0' + form(t.b, sc.b, sc.bs);
+    return [
+        sc.a + '\u00a0:\u00a0' + sc.b + '\u00a0=\u00a0<strong>' + t.a + '\u00a0:\u00a0' + t.b + '</strong>',
+        rel,
+        sc.a + ' = ' + fracHTML(t.a, total) + ' av hela gruppen = <span class="hl-ok">' + pct + '</span>',
+    ];
+}
+
+function m6Next() {
+    const g = genM6();
+    m6Task = g.t;
+    m6Sc   = g.sc;
+    buildM6();
+}
+
+function m6Check() {
+    const inpA = document.getElementById('m6InpA');
+    const inpB = document.getElementById('m6InpB');
+    const fb   = document.getElementById('m6Feedback');
+    const vA   = inpA.value.trim();
+    const vB   = inpB.value.trim();
+
+    [inpA, inpB].forEach(el => el.classList.remove('ok','err'));
+
+    if (!vA || !vB) { fb.textContent = 'Fyll i båda rutorna! 🐱'; return; }
+
+    const nA = parseInt(vA, 10);
+    const nB = parseInt(vB, 10);
+
+    if (isNaN(nA) || isNaN(nB) || nA < 1 || nB < 1) {
+        fb.textContent = 'Skriv positiva heltal i båda rutor!';
+        [inpA, inpB].forEach(el => el.classList.add('err'));
+        return;
+    }
+
+    const okA = nA === m6Task.a;
+    const okB = nB === m6Task.b;
+
+    inpA.classList.add(okA ? 'ok' : 'err');
+    inpB.classList.add(okB ? 'ok' : 'err');
+
+    if (okA && okB) {
+        m6Done = true;
+        fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
+        const lines = m6InsightLines(m6Task, m6Sc);
+        document.getElementById('m6Insight').style.display = 'block';
+        ['m6R1','m6R2','m6R3'].forEach((id, i) => {
+            const el = document.getElementById(id);
+            el.innerHTML = lines[i];
+            setTimeout(() => el.classList.add('show'), 80 + i * 230);
+        });
+    } else {
+        const hint = !okA
+            ? 'Räkna de blå prickarna (' + m6Sc.a + ') – hur många är det?'
+            : 'Räkna de orangea prickarna (' + m6Sc.b + ') – hur många är det?';
+        fb.textContent = hint;
+    }
+}
+
+document.getElementById('m6Check').addEventListener('click', m6Check);
+document.getElementById('m6Next').addEventListener('click',  m6Next);
+
+['m6InpA','m6InpB'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { m6Check(); return; }
+        if (!/[0-9]/.test(e.key) && !['Backspace','Delete','Tab','ArrowLeft','ArrowRight'].includes(e.key))
+            e.preventDefault();
+    });
+    el.addEventListener('input', function() {
+        if (this.value.length > 1) this.value = this.value.slice(0, 1);
+        this.classList.remove('ok','err');
+        document.getElementById('m6Feedback').textContent = '';
+    });
+});
+
+m6Next();
 </script>
 </body>
 </html>
