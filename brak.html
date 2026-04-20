@@ -170,12 +170,20 @@
             animation: btn-pulse 1.1s ease-out infinite;
         }
 
+        .streak {
+            text-align: center;
+            font-size: 0.85em;
+            color: #8aaabf;
+            min-height: 18px;
+            margin-top: 8px;
+        }
+
         .feedback {
             text-align: center;
             font-size: 1.05em;
             color: #2c3e50;
             min-height: 28px;
-            margin-top: 10px;
+            margin-top: 4px;
             line-height: 1.5;
         }
 
@@ -566,6 +574,7 @@
         </div>
     </div>
 
+    <p class="streak" id="m1Streak"></p>
     <div class="feedback" id="m1Feedback" aria-live="polite"></div>
 </div>
 
@@ -601,6 +610,7 @@
         <button class="btn-secondary" id="m3Next">Ny uppgift →</button>
     </div>
 
+    <p class="streak" id="m3Streak"></p>
     <div class="feedback" id="m3Feedback" aria-live="polite"></div>
 </div>
 
@@ -634,6 +644,7 @@
         <div class="step-line" id="m4S3"></div>
     </div>
 
+    <p class="streak" id="m4Streak"></p>
     <div class="feedback" id="m4Feedback" aria-live="polite"></div>
 </div>
 
@@ -646,6 +657,7 @@
     <div class="btn-row">
         <button class="btn-secondary" id="m5aNext">Nästa uppgift →</button>
     </div>
+    <p class="streak" id="m5aStreak"></p>
     <div class="feedback" id="m5aFeedback" aria-live="polite"></div>
 </div>
 
@@ -656,6 +668,7 @@
     <div class="btn-row">
         <button class="btn-secondary" id="m5bNext">Nästa uppgift →</button>
     </div>
+    <p class="streak" id="m5bStreak"></p>
     <div class="feedback" id="m5bFeedback" aria-live="polite"></div>
 </div>
 
@@ -686,10 +699,18 @@
         <div class="ri-line" id="m6R3"></div>
     </div>
 
+    <p class="streak" id="m6Streak"></p>
     <div class="feedback" id="m6Feedback" aria-live="polite"></div>
 </div>
 
 <script>
+/* ── Streak helper ── */
+function setStreak(id, n) {
+    document.getElementById(id).textContent = n >= 2 ? '🐱\u00a0' + n + '\u00a0i\u00a0rad' : '';
+}
+let m1Streak = 0, m3Streak = 0, m4Streak = 0;
+let m5aStreak = 0, m5bStreak = 0, m6Streak = 0;
+
 /* ════════════════════════════════
    Modul 1
 ════════════════════════════════ */
@@ -755,6 +776,7 @@ function buildM1() {
     updateCounter();
     document.getElementById('m1ResultArea').style.display = 'none';
     document.querySelectorAll('.result-pill').forEach(p => p.classList.remove('show'));
+    document.getElementById('m1Streak').textContent = '';
     document.getElementById('m1Feedback').textContent = '';
     document.getElementById('m1Next').classList.remove('btn-pulse');
 }
@@ -774,15 +796,18 @@ function m1Check() {
         return;
     }
     if (diff > 0) {
+        m1Streak = 0; setStreak('m1Streak', 0);
         fb.textContent = 'Du har färgat ' + cnt + ' delar – färga in ' + diff + ' till!';
         return;
     }
     if (diff < 0) {
+        m1Streak = 0; setStreak('m1Streak', 0);
         fb.textContent = 'Du har färgat ' + cnt + ' delar – det är ' + (-diff) + ' för många, klicka bort!';
         return;
     }
 
     m1Done = true;
+    m1Streak++; setStreak('m1Streak', m1Streak);
     fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
     document.getElementById('m1Next').classList.add('btn-pulse');
 
@@ -948,6 +973,7 @@ function buildM3() {
     const inp = document.getElementById('m3Input');
     inp.value = '';
     inp.classList.remove('ok', 'err');
+    document.getElementById('m3Streak').textContent = '';
     document.getElementById('m3Feedback').textContent = '';
     document.getElementById('m3Next').classList.remove('btn-pulse');
 }
@@ -979,10 +1005,12 @@ function m3Check() {
     if (num === m3Task.ans) {
         inp.classList.add('ok');
         const opTxt = m3Task.isAdd ? '+' : '\u2212';
+        m3Streak++; setStreak('m3Streak', m3Streak);
         fb.textContent = '🐱 Rätt! ' + m3Task.a + ' ' + opTxt + ' ' + m3Task.b + ' = ' + m3Task.ans + '. Jättebra, Avalin!';
         document.getElementById('m3Next').classList.add('btn-pulse');
     } else {
         inp.classList.add('err');
+        m3Streak = 0; setStreak('m3Streak', 0);
         fb.textContent = m3Task.isAdd
             ? 'Räkna de blå och orange rutorna – hur många är det totalt?'
             : 'Räkna bara de blå rutorna som är kvar – hur många är det?';
@@ -1041,6 +1069,7 @@ function buildM4() {
     const inp = document.getElementById('m4Input');
     inp.value = '';
     inp.classList.remove('ok', 'err');
+    document.getElementById('m4Streak').textContent = '';
     document.getElementById('m4Feedback').textContent = '';
     document.getElementById('m4Next').classList.remove('btn-pulse');
     document.getElementById('m4Steps').style.display = 'none';
@@ -1100,6 +1129,7 @@ function m4Check() {
 
     if (num === m4Task.ans) {
         inp.classList.add('ok');
+        m4Streak++; setStreak('m4Streak', m4Streak);
         fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
         document.getElementById('m4Next').classList.add('btn-pulse');
 
@@ -1117,6 +1147,7 @@ function m4Check() {
             m4Task.pct === 25 ? 'Tips: 25% är en fjärdedel – dela ' + m4Task.total + ' på 4!' :
             m4Task.pct === 75 ? 'Tips: Börja med att dela ' + m4Task.total + ' på 4, sedan gångra med 3!' :
                                 'Tips: 10% är en tiondel – dela ' + m4Task.total + ' på 10!';
+        m4Streak = 0; setStreak('m4Streak', 0);
         fb.textContent = tip;
         document.getElementById('m4Next').classList.remove('btn-pulse');
     }
@@ -1223,6 +1254,7 @@ function m5aNext() {
         row.appendChild(card);
     });
 
+    document.getElementById('m5aStreak').textContent = '';
     document.getElementById('m5aFeedback').textContent = '';
     document.getElementById('m5aNext').classList.remove('btn-pulse');
 }
@@ -1243,9 +1275,11 @@ function m5aPick(idx) {
 
     const fb = document.getElementById('m5aFeedback');
     if (ok) {
+        m5aStreak++; setStreak('m5aStreak', m5aStreak);
         fb.textContent = '🐱 Rätt! ' + chosen.n + '/' + chosen.d + ' är störst. Jättebra, Avalin!';
         document.getElementById('m5aNext').classList.add('btn-pulse');
     } else {
+        m5aStreak = 0; setStreak('m5aStreak', 0);
         const big = m5aItems[1 - idx].frac;
         fb.textContent = 'Titta på rektanglarna – ' + big.n + '/' + big.d +
             ' har mer ifärgat och är störst!';
@@ -1295,6 +1329,7 @@ function m5bNext() {
         row.appendChild(card);
     });
 
+    document.getElementById('m5bStreak').textContent = '';
     document.getElementById('m5bFeedback').textContent = '';
     document.getElementById('m5bNext').classList.remove('btn-pulse');
 }
@@ -1316,6 +1351,7 @@ function m5bEval() {
 
     if (correct) {
         m5bItems.forEach(item => { item.card.classList.add('done', 'ok'); });
+        m5bStreak++; setStreak('m5bStreak', m5bStreak);
         fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
         document.getElementById('m5bNext').classList.add('btn-pulse');
     } else {
@@ -1327,6 +1363,7 @@ function m5bEval() {
             item.badge.classList.add('show');
         });
         const inOrder = [...m5bItems].sort((a, b) => a.rank - b.rank);
+        m5bStreak = 0; setStreak('m5bStreak', 0);
         fb.textContent = 'Rätt ordning: ' +
             inOrder.map(it => it.frac.n + '/' + it.frac.d).join(' < ') +
             '. Mer ifärgat = större bråk!';
@@ -1426,6 +1463,7 @@ function buildM6() {
     });
     m6Timers.forEach(id => clearTimeout(id));
     m6Timers = [];
+    document.getElementById('m6Streak').textContent = '';
     document.getElementById('m6Next').classList.remove('btn-pulse');
     document.getElementById('m6Insight').style.display = 'none';
     ['m6R1','m6R2','m6R3'].forEach(id => {
@@ -1486,6 +1524,7 @@ function m6Check() {
 
     if (okA && okB) {
         m6Done = true;
+        m6Streak++; setStreak('m6Streak', m6Streak);
         fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
         document.getElementById('m6Next').classList.add('btn-pulse');
         const lines = m6InsightLines(m6Task, m6Sc);
@@ -1499,6 +1538,7 @@ function m6Check() {
         const hint = !okA
             ? 'Räkna ' + m6Sc.emojiA + '-emojisarna (' + m6Sc.labelA + ') – hur många är det?'
             : 'Räkna ' + m6Sc.emojiB + '-emojisarna (' + m6Sc.labelB + ') – hur många är det?';
+        m6Streak = 0; setStreak('m6Streak', 0);
         fb.textContent = hint;
         document.getElementById('m6Next').classList.remove('btn-pulse');
     }

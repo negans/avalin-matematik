@@ -184,6 +184,14 @@
 
         #nextBtn:hover { background: #e8f2ff; }
 
+        .streak {
+            text-align: center;
+            font-size: 0.85em;
+            color: #8aaabf;
+            min-height: 18px;
+            margin-top: 8px;
+        }
+
         @keyframes btn-pulse {
             0%   { box-shadow: 0 0 0 0 rgba(74,144,217,0.5); }
             60%  { box-shadow: 0 0 0 8px rgba(74,144,217,0); }
@@ -282,10 +290,15 @@
         <button id="nextBtn">Nästa tid →</button>
     </div>
 
+    <p class="streak" id="streak"></p>
     <div id="feedback" aria-live="polite"></div>
 
     <script>
         let h = 3, m = 20;
+        let streak = 0;
+        function setStreak(n) {
+            document.getElementById('streak').textContent = n >= 2 ? '🐱\u00a0' + n + '\u00a0i\u00a0rad' : '';
+        }
 
         /* ── Bygg urtavlan en gång ── */
         (function buildFace() {
@@ -346,6 +359,7 @@
             });
             ['step1', 'step2', 'step3'].forEach(id =>
                 document.getElementById(id).classList.remove('done'));
+            document.getElementById('streak').textContent = '';
             document.getElementById('feedback').innerHTML = '';
             document.getElementById('nextBtn').classList.remove('btn-pulse');
         }
@@ -369,7 +383,6 @@
 
             if (!hrVal && !minVal && !timeHrVal && !timeMinVal) {
                 setFb('Titta på klockan och fyll i svaren! 🐱');
-                document.getElementById('nextBtn').classList.remove('btn-pulse');
                 return;
             }
 
@@ -430,6 +443,7 @@
                 document.getElementById(id).classList.contains('done'));
 
             if (allDone) {
+                streak++; setStreak(streak);
                 setFb(`🐱 Jättebra, Avalin! Klockan är ${h}:${pad(m)} — du hade rätt på allt!`);
                 document.getElementById('nextBtn').classList.add('btn-pulse');
                 return;
@@ -459,6 +473,7 @@
                 lines.push('✓ Klockan stämmer!');
             }
 
+            streak = 0; setStreak(0);
             document.getElementById('nextBtn').classList.remove('btn-pulse');
             setFb(lines.join('<br>'));
         }
