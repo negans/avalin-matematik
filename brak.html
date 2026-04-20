@@ -430,7 +430,7 @@
         /* ── Module 6 ── */
         .ratio-visual {
             display: flex;
-            align-items: center;
+            align-items: flex-end;
             justify-content: center;
             gap: 14px;
             margin-bottom: 14px;
@@ -450,31 +450,26 @@
             text-align: center;
         }
 
-        .ratio-dots {
+        .emoji-row {
             display: flex;
-            gap: 7px;
+            gap: 5px;
             flex-wrap: wrap;
             justify-content: center;
-            max-width: 168px;
+            max-width: 210px;
+            font-size: 2em;
+            line-height: 1.2;
+            min-height: 48px;
+            align-items: center;
         }
-
-        .ratio-dot {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            flex-shrink: 0;
-            transition: transform 0.15s;
-        }
-        .ratio-dot.a { background: #4a90d9; box-shadow: 0 2px 6px rgba(74,144,217,0.35); }
-        .ratio-dot.b { background: #e74c3c; box-shadow: 0 2px 6px rgba(231,76,60,0.30); }
 
         .ratio-colon-sep {
             font-size: 2.2em;
             font-weight: bold;
             color: #cce0f5;
             flex-shrink: 0;
-            line-height: 1;
-            padding-top: 20px;
+            height: 48px;
+            display: flex;
+            align-items: center;
         }
 
         .ratio-answer-row {
@@ -1327,21 +1322,25 @@ m5bNext();
 ════════════════════════════════ */
 
 const M6_TASKS = [
-    {a:1,b:1}, {a:2,b:2}, {a:3,b:3},
     {a:1,b:2}, {a:2,b:1},
     {a:1,b:3}, {a:3,b:1},
     {a:2,b:3}, {a:3,b:2},
     {a:1,b:4}, {a:4,b:1},
-    {a:3,b:4}, {a:4,b:3},
+    {a:2,b:4}, {a:3,b:4}, {a:4,b:3},
+    {a:1,b:5}, {a:5,b:2},
 ];
 
 const M6_SCENARIOS = [
-    {a:'flickor', as:'flicka',  b:'pojkar',    bs:'pojke'   },
-    {a:'katter',  as:'katt',    b:'hundar',    bs:'hund'    },
-    {a:'katter',  as:'katt',    b:'kaniner',   bs:'kanin'   },
-    {a:'äpplen',  as:'äpple',   b:'apelsiner', bs:'apelsin' },
-    {a:'blåa',    as:'blå',     b:'röda',      bs:'röd'     },
-    {a:'stora',   as:'stor',    b:'små',       bs:'liten'   },
+    { emojiA:'🐱', emojiB:'🐟', labelA:'katter',    labelB:'fiskar',      singA:'katt',      singB:'fisk'       },
+    { emojiA:'🍎', emojiB:'🍊', labelA:'äpplen',    labelB:'apelsiner',   singA:'äpple',     singB:'apelsin'    },
+    { emojiA:'🐶', emojiB:'🐰', labelA:'hundar',    labelB:'kaniner',     singA:'hund',      singB:'kanin'      },
+    { emojiA:'⭐', emojiB:'🌙', labelA:'stjärnor',  labelB:'månar',       singA:'stjärna',   singB:'måne'       },
+    { emojiA:'🚗', emojiB:'🚌', labelA:'bilar',     labelB:'bussar',      singA:'bil',       singB:'buss'       },
+    { emojiA:'🦋', emojiB:'🐝', labelA:'fjärilar',  labelB:'bin',         singA:'fjäril',    singB:'bi'         },
+    { emojiA:'🎈', emojiB:'🎁', labelA:'ballonger', labelB:'paket',       singA:'ballong',   singB:'paket'      },
+    { emojiA:'🍕', emojiB:'🍔', labelA:'pizzor',    labelB:'hamburgare',  singA:'pizza',     singB:'hamburgare' },
+    { emojiA:'🐸', emojiB:'🦆', labelA:'grodor',    labelB:'ankor',       singA:'groda',     singB:'anka'       },
+    { emojiA:'🎨', emojiB:'✏️', labelA:'penslar',   labelB:'pennor',      singA:'pensel',    singB:'penna'      },
 ];
 
 let m6Task = null;
@@ -1357,45 +1356,45 @@ function genM6() {
 function form(n, pl, sg) { return n === 1 ? sg : pl; }
 
 function buildM6() {
-    const { t, sc } = { t: m6Task, sc: m6Sc };
+    const t  = m6Task;
+    const sc = m6Sc;
     m6Done = false;
 
     document.getElementById('m6Context').textContent =
-        'Det finns ' + t.a + ' ' + form(t.a, sc.a, sc.as) + ' och ' + t.b + ' ' + form(t.b, sc.b, sc.bs) + '.';
+        'Det finns ' + t.a + ' ' + form(t.a, sc.labelA, sc.singA) +
+        ' och ' + t.b + ' ' + form(t.b, sc.labelB, sc.singB) + '.';
 
     document.getElementById('m6Question').textContent =
-        'Vad är förhållandet ' + sc.a + ' till ' + sc.b + '?';
+        'Vad är förhållandet ' + sc.labelA + ' till ' + sc.labelB + '?';
 
-    // Build visual
     const vis = document.getElementById('m6Visual');
     vis.innerHTML = '';
 
-    function makeGroup(count, cls, label) {
+    function makeEmojiGroup(count, emoji, label) {
         const g = document.createElement('div');
         g.className = 'ratio-group';
         const lbl = document.createElement('div');
         lbl.className = 'ratio-group-label';
         lbl.textContent = label;
         g.appendChild(lbl);
-        const dots = document.createElement('div');
-        dots.className = 'ratio-dots';
+        const row = document.createElement('div');
+        row.className = 'emoji-row';
         for (let i = 0; i < count; i++) {
-            const d = document.createElement('div');
-            d.className = 'ratio-dot ' + cls;
-            dots.appendChild(d);
+            const s = document.createElement('span');
+            s.textContent = emoji;
+            row.appendChild(s);
         }
-        g.appendChild(dots);
+        g.appendChild(row);
         return g;
     }
 
-    vis.appendChild(makeGroup(t.a, 'a', form(t.a, sc.a, sc.as)));
+    vis.appendChild(makeEmojiGroup(t.a, sc.emojiA, form(t.a, sc.labelA, sc.singA)));
     const sep = document.createElement('div');
     sep.className = 'ratio-colon-sep';
     sep.textContent = ':';
     vis.appendChild(sep);
-    vis.appendChild(makeGroup(t.b, 'b', form(t.b, sc.b, sc.bs)));
+    vis.appendChild(makeEmojiGroup(t.b, sc.emojiB, form(t.b, sc.labelB, sc.singB)));
 
-    // Reset inputs
     ['m6InpA','m6InpB'].forEach(id => {
         const el = document.getElementById(id);
         el.value = '';
@@ -1412,14 +1411,16 @@ function buildM6() {
 function m6InsightLines(t, sc) {
     const total = t.a + t.b;
     const pct   = fmtPct(t.a, total);
+    const singA = form(t.a, sc.labelA, sc.singA);
+    const singB = form(t.b, sc.labelB, sc.singB);
     const rel   = t.a === t.b
-        ? 'Lika många <span class="hl">' + sc.a + '</span> och <span class="hl">' + sc.b + '</span>!'
-        : 'För var\u00a0<span class="hl">' + t.a + '</span>\u00a0' + form(t.a, sc.a, sc.as) +
-          ' finns det\u00a0<span class="hl">' + t.b + '</span>\u00a0' + form(t.b, sc.b, sc.bs);
+        ? 'Lika många <span class="hl">' + sc.labelA + '</span> och <span class="hl">' + sc.labelB + '</span>!'
+        : '<span class="hl">' + t.a + '\u00a0:\u00a0' + t.b + '</span> betyder att för varje '
+          + t.a + '\u00a0' + singA + ' finns det ' + t.b + '\u00a0' + singB;
     return [
-        sc.a + '\u00a0:\u00a0' + sc.b + '\u00a0=\u00a0<strong>' + t.a + '\u00a0:\u00a0' + t.b + '</strong>',
+        sc.labelA + '\u00a0:\u00a0' + sc.labelB + '\u00a0=\u00a0<strong>' + t.a + '\u00a0:\u00a0' + t.b + '</strong>',
         rel,
-        sc.a + ' = ' + fracHTML(t.a, total) + ' av hela gruppen = <span class="hl-ok">' + pct + '</span>',
+        sc.labelA + ' = ' + fracHTML(t.a, total) + ' av hela gruppen = <span class="hl-ok">' + pct + '</span>',
     ];
 }
 
@@ -1468,8 +1469,8 @@ function m6Check() {
         });
     } else {
         const hint = !okA
-            ? 'Räkna de blå prickarna (' + m6Sc.a + ') – hur många är det?'
-            : 'Räkna de röda prickarna (' + m6Sc.b + ') – hur många är det?';
+            ? 'Räkna ' + m6Sc.emojiA + '-emojisarna (' + m6Sc.labelA + ') – hur många är det?'
+            : 'Räkna ' + m6Sc.emojiB + '-emojisarna (' + m6Sc.labelB + ') – hur många är det?';
         fb.textContent = hint;
     }
 }
@@ -1485,7 +1486,7 @@ document.getElementById('m6Next').addEventListener('click',  m6Next);
             e.preventDefault();
     });
     el.addEventListener('input', function() {
-        if (this.value.length > 1) this.value = this.value.slice(0, 1);
+        if (this.value.length > 2) this.value = this.value.slice(0, 2);
         this.classList.remove('ok','err');
         document.getElementById('m6Feedback').textContent = '';
     });
