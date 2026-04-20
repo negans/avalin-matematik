@@ -592,7 +592,7 @@
 
     <div class="answer-row">
         Svaret är&nbsp;
-        <input class="answer-input" id="m3Input" type="text" inputmode="numeric" placeholder="">
+        <input class="answer-input" id="m3Input" type="text" inputmode="numeric" placeholder="" maxlength="1">
         <span id="m3DenLabel" style="font-weight:bold">/ 5</span>
     </div>
 
@@ -620,7 +620,7 @@
 
     <div class="answer-row">
         Svaret är&nbsp;
-        <input class="answer-input w3" id="m4Input" type="text" inputmode="numeric" placeholder="">
+        <input class="answer-input w3" id="m4Input" type="text" inputmode="numeric" placeholder="" maxlength="3">
     </div>
 
     <div class="btn-row">
@@ -670,9 +670,9 @@
     <p class="counter-label" id="m6Question"></p>
 
     <div class="ratio-answer-row">
-        <input class="answer-input" id="m6InpA" type="text" inputmode="numeric" placeholder="">
+        <input class="answer-input" id="m6InpA" type="text" inputmode="numeric" placeholder="" maxlength="1">
         <span class="ratio-colon">:</span>
-        <input class="answer-input" id="m6InpB" type="text" inputmode="numeric" placeholder="">
+        <input class="answer-input" id="m6InpB" type="text" inputmode="numeric" placeholder="" maxlength="1">
     </div>
 
     <div class="btn-row">
@@ -995,7 +995,7 @@ document.getElementById('m3Input').addEventListener('keydown', function(e) {
     }
 });
 document.getElementById('m3Input').addEventListener('input', function() {
-    if (this.value.length > 2) this.value = this.value.slice(0, 2);
+    if (this.value.length > 1) this.value = this.value.slice(0, 1);
     this.classList.remove('ok', 'err');
     document.getElementById('m3Feedback').textContent = '';
 });
@@ -1486,6 +1486,7 @@ function m6Check() {
             ? 'Räkna ' + m6Sc.emojiA + '-emojisarna (' + m6Sc.labelA + ') – hur många är det?'
             : 'Räkna ' + m6Sc.emojiB + '-emojisarna (' + m6Sc.labelB + ') – hur många är det?';
         fb.textContent = hint;
+        document.getElementById('m6Next').classList.remove('btn-pulse');
     }
 }
 
@@ -1500,7 +1501,7 @@ document.getElementById('m6Next').addEventListener('click',  m6Next);
             e.preventDefault();
     });
     el.addEventListener('input', function() {
-        if (this.value.length > 2) this.value = this.value.slice(0, 2);
+        if (this.value.length > 1) this.value = this.value.slice(0, 1);
         this.classList.remove('ok','err');
         document.getElementById('m6Feedback').textContent = '';
     });
