@@ -782,7 +782,7 @@ function m1Check() {
     }
 
     m1Done = true;
-    fb.textContent = '🐱 Fantastiskt bra, Avalin!';
+    fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
 
     document.getElementById('rFN').textContent = m1Num;
     document.getElementById('rFD').textContent = m1Den;
@@ -1234,7 +1234,7 @@ function m5aPick(idx) {
 
     const fb = document.getElementById('m5aFeedback');
     if (ok) {
-        fb.textContent = '🐱 Rätt! ' + chosen.n + '/' + chosen.d + ' är störst!';
+        fb.textContent = '🐱 Rätt! ' + chosen.n + '/' + chosen.d + ' är störst. Jättebra, Avalin!';
     } else {
         const big = m5aItems[1 - idx].frac;
         fb.textContent = 'Titta på rektanglarna – ' + big.n + '/' + big.d +
@@ -1304,7 +1304,7 @@ function m5bEval() {
 
     if (correct) {
         m5bItems.forEach(item => { item.card.classList.add('done', 'ok'); });
-        fb.textContent = '🐱 Perfekt ordning, Avalin!';
+        fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
     } else {
         // Show correct order with green badges
         m5bItems.forEach(item => {
