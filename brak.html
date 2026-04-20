@@ -173,7 +173,7 @@
         /* ── Module 2: equivalent fractions ── */
         .equiv-container {
             display: flex;
-            align-items: center;
+            align-items: flex-end;
             justify-content: center;
             gap: 10px;
             flex-wrap: wrap;
@@ -210,7 +210,9 @@
             font-weight: bold;
             color: #4a90d9;
             flex-shrink: 0;
-            margin-top: 20px;
+            height: 56px;
+            display: flex;
+            align-items: center;
         }
 
         .pct-badge {
@@ -218,7 +220,9 @@
             font-weight: bold;
             color: #2ecc71;
             flex-shrink: 0;
-            margin-top: 20px;
+            height: 56px;
+            display: flex;
+            align-items: center;
         }
 
         .equiv-desc {
@@ -708,7 +712,7 @@ function decPlaces(den) {
 
 function fmtDec(num, den) {
     const v = num / den;
-    if (!isTerminating(den)) return '\u22480\u00a0' + v.toFixed(2).replace('.', ',');
+    if (!isTerminating(den)) return '\u2248\u00a0' + v.toFixed(2).replace('.', ',');
     let s = v.toFixed(decPlaces(den)).replace('.', ',');
     s = s.replace(/,(\d+)$/, (_, d) => { const t = d.replace(/0+$/, ''); return t ? ',' + t : ''; });
     return s || '0';
