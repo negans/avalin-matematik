@@ -103,10 +103,6 @@
             transition: border-color 0.2s, background 0.2s;
         }
 
-        input[type=number] { -moz-appearance: textfield; appearance: textfield; }
-        input[type=number]::-webkit-outer-spin-button,
-        input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-
         .step input:focus { border-color: #4a90d9; }
 
         .step input.ok  { border-color: #2ecc71; background: #f0fff4; }
@@ -188,6 +184,15 @@
 
         #nextBtn:hover { background: #e8f2ff; }
 
+        @keyframes btn-pulse {
+            0%   { box-shadow: 0 0 0 0 rgba(74,144,217,0.5); }
+            60%  { box-shadow: 0 0 0 8px rgba(74,144,217,0); }
+            100% { box-shadow: 0 0 0 0 rgba(74,144,217,0); }
+        }
+        .btn-pulse {
+            animation: btn-pulse 1.1s ease-out infinite;
+        }
+
         /* ── Clock tip ── */
         .clock-tip {
             text-align: center;
@@ -248,7 +253,7 @@
             <div class="step-num">1</div>
             <span class="step-label">Timvisaren pekar på...</span>
             <div class="input-wrap">
-                <input id="hrIn" type="number" min="1" max="12" maxlength="2" placeholder="">
+                <input id="hrIn" type="text" inputmode="numeric" maxlength="2" placeholder="">
                 <span class="field-hint" id="hrHint"></span>
             </div>
         </div>
@@ -256,7 +261,7 @@
             <div class="step-num">2</div>
             <span class="step-label">Minutvisaren visar... minuter</span>
             <div class="input-wrap">
-                <input id="minIn" type="number" min="0" max="55" step="5" maxlength="2" placeholder="">
+                <input id="minIn" type="text" inputmode="numeric" maxlength="2" placeholder="">
                 <span class="field-hint" id="minHint"></span>
             </div>
         </div>
@@ -264,9 +269,9 @@
             <div class="step-num">3</div>
             <span class="step-label">Klockan är...</span>
             <div class="time-group">
-                <input id="timeHrIn" type="number" min="1" max="12" maxlength="2" placeholder="">
+                <input id="timeHrIn" type="text" inputmode="numeric" maxlength="2" placeholder="">
                 <span class="colon">:</span>
-                <input id="timeMinIn" type="number" min="0" max="55" step="5" maxlength="2" placeholder="">
+                <input id="timeMinIn" type="text" inputmode="numeric" maxlength="2" placeholder="">
             </div>
         </div>
         <span class="field-hint step-hint" id="timeHrHint"></span>
@@ -342,6 +347,7 @@
             ['step1', 'step2', 'step3'].forEach(id =>
                 document.getElementById(id).classList.remove('done'));
             document.getElementById('feedback').innerHTML = '';
+            document.getElementById('nextBtn').classList.remove('btn-pulse');
         }
 
         /* ── Kolla svaret ── */
@@ -363,6 +369,7 @@
 
             if (!hrVal && !minVal && !timeHrVal && !timeMinVal) {
                 setFb('Titta på klockan och fyll i svaren! 🐱');
+                document.getElementById('nextBtn').classList.remove('btn-pulse');
                 return;
             }
 
@@ -421,6 +428,7 @@
 
             if (hrOk === true && minOk === true && timeOk === true) {
                 setFb(`🐱 Jättebra, Avalin! Klockan är ${h}:${pad(m)} — du hade rätt på allt!`);
+                document.getElementById('nextBtn').classList.add('btn-pulse');
                 return;
             }
 
@@ -448,6 +456,7 @@
                 lines.push('✓ Klockan stämmer!');
             }
 
+            document.getElementById('nextBtn').classList.remove('btn-pulse');
             setFb(lines.join('<br>'));
         }
 

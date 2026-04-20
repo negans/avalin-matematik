@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html> -->
 <html lang="sv">
 <head>
     <meta charset="UTF-8">
@@ -756,6 +756,7 @@ function buildM1() {
     document.getElementById('m1ResultArea').style.display = 'none';
     document.querySelectorAll('.result-pill').forEach(p => p.classList.remove('show'));
     document.getElementById('m1Feedback').textContent = '';
+    document.getElementById('m1Next').classList.remove('btn-pulse');
 }
 
 function updateCounter() {
@@ -783,6 +784,7 @@ function m1Check() {
 
     m1Done = true;
     fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
+    document.getElementById('m1Next').classList.add('btn-pulse');
 
     document.getElementById('rFN').textContent = m1Num;
     document.getElementById('rFD').textContent = m1Den;
@@ -947,6 +949,7 @@ function buildM3() {
     inp.value = '';
     inp.classList.remove('ok', 'err');
     document.getElementById('m3Feedback').textContent = '';
+    document.getElementById('m3Next').classList.remove('btn-pulse');
 }
 
 function m3Next() {
@@ -977,11 +980,13 @@ function m3Check() {
         inp.classList.add('ok');
         const opTxt = m3Task.isAdd ? '+' : '\u2212';
         fb.textContent = '🐱 Rätt! ' + m3Task.a + ' ' + opTxt + ' ' + m3Task.b + ' = ' + m3Task.ans + '. Jättebra, Avalin!';
+        document.getElementById('m3Next').classList.add('btn-pulse');
     } else {
         inp.classList.add('err');
         fb.textContent = m3Task.isAdd
             ? 'Räkna de blå och orange rutorna – hur många är det totalt?'
             : 'Räkna bara de blå rutorna som är kvar – hur många är det?';
+        document.getElementById('m3Next').classList.remove('btn-pulse');
     }
 }
 
@@ -1037,6 +1042,7 @@ function buildM4() {
     inp.value = '';
     inp.classList.remove('ok', 'err');
     document.getElementById('m4Feedback').textContent = '';
+    document.getElementById('m4Next').classList.remove('btn-pulse');
     document.getElementById('m4Steps').style.display = 'none';
     ['m4S1', 'm4S2', 'm4S3'].forEach(id => {
         const el = document.getElementById(id);
@@ -1095,6 +1101,7 @@ function m4Check() {
     if (num === m4Task.ans) {
         inp.classList.add('ok');
         fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
+        document.getElementById('m4Next').classList.add('btn-pulse');
 
         const lines = buildSteps(m4Task);
         document.getElementById('m4Steps').style.display = 'block';
@@ -1111,6 +1118,7 @@ function m4Check() {
             m4Task.pct === 75 ? 'Tips: Börja med att dela ' + m4Task.total + ' på 4, sedan gångra med 3!' :
                                 'Tips: 10% är en tiondel – dela ' + m4Task.total + ' på 10!';
         fb.textContent = tip;
+        document.getElementById('m4Next').classList.remove('btn-pulse');
     }
 }
 
@@ -1216,6 +1224,7 @@ function m5aNext() {
     });
 
     document.getElementById('m5aFeedback').textContent = '';
+    document.getElementById('m5aNext').classList.remove('btn-pulse');
 }
 
 function m5aPick(idx) {
@@ -1235,10 +1244,12 @@ function m5aPick(idx) {
     const fb = document.getElementById('m5aFeedback');
     if (ok) {
         fb.textContent = '🐱 Rätt! ' + chosen.n + '/' + chosen.d + ' är störst. Jättebra, Avalin!';
+        document.getElementById('m5aNext').classList.add('btn-pulse');
     } else {
         const big = m5aItems[1 - idx].frac;
         fb.textContent = 'Titta på rektanglarna – ' + big.n + '/' + big.d +
             ' har mer ifärgat och är störst!';
+        document.getElementById('m5aNext').classList.remove('btn-pulse');
     }
 }
 
@@ -1285,6 +1296,7 @@ function m5bNext() {
     });
 
     document.getElementById('m5bFeedback').textContent = '';
+    document.getElementById('m5bNext').classList.remove('btn-pulse');
 }
 
 function m5bPick(idx) {
@@ -1305,6 +1317,7 @@ function m5bEval() {
     if (correct) {
         m5bItems.forEach(item => { item.card.classList.add('done', 'ok'); });
         fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
+        document.getElementById('m5bNext').classList.add('btn-pulse');
     } else {
         // Show correct order with green badges
         m5bItems.forEach(item => {
@@ -1317,6 +1330,7 @@ function m5bEval() {
         fb.textContent = 'Rätt ordning: ' +
             inOrder.map(it => it.frac.n + '/' + it.frac.d).join(' < ') +
             '. Mer ifärgat = större bråk!';
+        document.getElementById('m5bNext').classList.remove('btn-pulse');
     }
 }
 
