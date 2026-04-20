@@ -426,7 +426,10 @@
             /* ── Feedback ── */
             const pad = n => String(n).padStart(2, '0');
 
-            if (hrOk === true && minOk === true && timeOk === true) {
+            const allDone = ['step1','step2','step3'].every(id =>
+                document.getElementById(id).classList.contains('done'));
+
+            if (allDone) {
                 setFb(`🐱 Jättebra, Avalin! Klockan är ${h}:${pad(m)} — du hade rätt på allt!`);
                 document.getElementById('nextBtn').classList.add('btn-pulse');
                 return;
