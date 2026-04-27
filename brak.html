@@ -146,6 +146,7 @@
             transition: transform 0.1s;
         }
         button:active { transform: scale(0.95); }
+        button:disabled { opacity: 0.45; cursor: not-allowed; }
 
         .btn-primary {
             background: #4a90d9;
@@ -779,6 +780,7 @@ function buildM1() {
     document.getElementById('m1Streak').textContent = '';
     document.getElementById('m1Feedback').textContent = '';
     document.getElementById('m1Next').classList.remove('btn-pulse');
+    document.getElementById('m1Check').disabled = false;
 }
 
 function updateCounter() {
@@ -787,6 +789,7 @@ function updateCounter() {
 }
 
 function m1Check() {
+    if (m1Done) return;
     const cnt  = m1Colored.filter(Boolean).length;
     const fb   = document.getElementById('m1Feedback');
     const diff = m1Num - cnt;
@@ -807,6 +810,7 @@ function m1Check() {
     }
 
     m1Done = true;
+    document.getElementById('m1Check').disabled = true;
     m1Streak++; setStreak('m1Streak', m1Streak);
     fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
     document.getElementById('m1Next').classList.add('btn-pulse');
@@ -914,6 +918,7 @@ buildM2();
 
 const M3_DENOMS = [3, 4, 5, 6, 8, 10];
 let m3Task = null;
+let m3Answered = false;
 
 function fracHTML(n, d) {
     return '<span class="fs"><span class="fn">' + n + '</span><span class="fd">' + d + '</span></span>';
@@ -976,6 +981,8 @@ function buildM3() {
     document.getElementById('m3Streak').textContent = '';
     document.getElementById('m3Feedback').textContent = '';
     document.getElementById('m3Next').classList.remove('btn-pulse');
+    m3Answered = false;
+    document.getElementById('m3Check').disabled = false;
 }
 
 function m3Next() {
@@ -984,6 +991,7 @@ function m3Next() {
 }
 
 function m3Check() {
+    if (m3Answered) return;
     const inp = document.getElementById('m3Input');
     const fb  = document.getElementById('m3Feedback');
     const val = inp.value.trim();
@@ -1004,6 +1012,8 @@ function m3Check() {
 
     if (num === m3Task.ans) {
         inp.classList.add('ok');
+        m3Answered = true;
+        document.getElementById('m3Check').disabled = true;
         const opTxt = m3Task.isAdd ? '+' : '\u2212';
         m3Streak++; setStreak('m3Streak', m3Streak);
         fb.textContent = '🐱 Rätt! ' + m3Task.a + ' ' + opTxt + ' ' + m3Task.b + ' = ' + m3Task.ans + '. Jättebra, Avalin!';
@@ -1043,6 +1053,7 @@ m3Next();
 const M4_PCTS   = [10, 25, 50, 75];
 const M4_TOTALS = [20, 40, 100, 200, 300];
 let m4Task = null;
+let m4Answered = false;
 
 function genM4Task() {
     const pct   = M4_PCTS[Math.floor(Math.random() * M4_PCTS.length)];
@@ -1078,6 +1089,8 @@ function buildM4() {
         el.innerHTML = '';
         el.classList.remove('show');
     });
+    m4Answered = false;
+    document.getElementById('m4Check').disabled = false;
 }
 
 function hl(v)   { return '<span class="hl">'    + v + '</span>'; }
@@ -1112,6 +1125,7 @@ function buildSteps(t) {
 function m4Next() { m4Task = genM4Task(); buildM4(); }
 
 function m4Check() {
+    if (m4Answered) return;
     const inp = document.getElementById('m4Input');
     const fb  = document.getElementById('m4Feedback');
     const val = inp.value.trim();
@@ -1129,6 +1143,8 @@ function m4Check() {
 
     if (num === m4Task.ans) {
         inp.classList.add('ok');
+        m4Answered = true;
+        document.getElementById('m4Check').disabled = true;
         m4Streak++; setStreak('m4Streak', m4Streak);
         fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
         document.getElementById('m4Next').classList.add('btn-pulse');
@@ -1481,6 +1497,7 @@ function buildM6() {
         document.getElementById(id).classList.remove('show');
     });
     document.getElementById('m6Feedback').textContent = '';
+    document.getElementById('m6Check').disabled = false;
 }
 
 function m6InsightLines(t, sc) {
@@ -1499,6 +1516,7 @@ function m6Next() {
 }
 
 function m6Check() {
+    if (m6Done) return;
     const inpA = document.getElementById('m6InpA');
     const inpB = document.getElementById('m6InpB');
     const fb   = document.getElementById('m6Feedback');
@@ -1524,6 +1542,7 @@ function m6Check() {
         inpA.classList.add('ok');
         inpB.classList.add('ok');
         m6Done = true;
+        document.getElementById('m6Check').disabled = true;
         m6Streak++; setStreak('m6Streak', m6Streak);
         fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
         document.getElementById('m6Next').classList.add('btn-pulse');
