@@ -994,6 +994,9 @@ function buildM3() {
         ? 'Blå = ' + t.a + '/' + t.d + '  \u2022  Orange = ' + t.b + '/' + t.d + '  \u2192  Räkna ihop de färgade rutorna!'
         : 'Blå = kvar  \u2022  Rött = tas bort  \u2192  Räkna bara de blå rutorna!';
 
+    document.getElementById('m3Rect').parentElement.style.display = 'none';
+    document.getElementById('m3Hint').style.display = 'none';
+
     const inp = document.getElementById('m3Input');
     inp.value = '';
     inp.classList.remove('ok', 'err');
@@ -1028,6 +1031,9 @@ function m3Check() {
         fb.textContent = 'Skriv ett positivt tal!';
         return;
     }
+
+    document.getElementById('m3Rect').parentElement.style.display = '';
+    document.getElementById('m3Hint').style.display = '';
 
     if (num === m3Task.ans) {
         inp.classList.add('ok');
