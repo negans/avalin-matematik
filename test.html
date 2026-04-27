@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testsuite – brak.html</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f7ff;
+            padding: 20px 16px 48px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        h1    { color: #2c3e50; font-size: 1.5em; margin-bottom: 4px; }
+        .sub  { color: #7a9cbf; font-size: 0.88em; margin-bottom: 16px; }
+        #summary {
+            display: inline-block;
+            font-size: 1.05em;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 12px;
+            background: white;
+            color: #555;
+            margin-bottom: 18px;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+        }
+        .group {
+            background: white;
+            border-radius: 14px;
+            padding: 14px 18px 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.07);
+        }
+        .group-title { font-weight: bold; color: #4a90d9; font-size: 0.97em; margin-bottom: 7px; }
+        .result      { font-size: 0.9em; padding: 2px 0; line-height: 1.6; }
+        .pass        { color: #1a7a3c; }
+        .fail        { color: #b02020; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<h1>Testsuite – brak.html</h1>
+<p class="sub">Laddar brak.html i bakgrunden och kör automatiska kontroller</p>
+<div id="summary">⏳ Kör tester…</div>
+<div id="results"></div>
+
+<iframe id="frame" src="brak.html"
+        style="position:absolute;left:-9999px;width:1px;height:1px;"></iframe>
+
+<script>
+const frame     = document.getElementById('frame');
+const resultsEl = document.getElementById('results');
+const summaryEl = document.getElementById('summary');
+let passed = 0, failed = 0, groupEl = null;
+
+/* ── test-runner helpers ──────────────────────────────────────────────────── */
+
+function group(title) {
+    groupEl = document.createElement('div');
+    groupEl.className = 'group';
+    const h = document.createElement('div');
+    h.className = 'group-title';
+    h.textContent = title;
+    groupEl.appendChild(h);
+    resultsEl.appendChild(groupEl);
+}
+
+function check(cond, label, got) {
+    const r = document.createElement('div');
+    r.className = 'result ' + (cond ? 'pass' : 'fail');
+    r.textContent = (cond ? '✅ ' : '❌ ') + label +
+                    (!cond && got != null ? '  (fick: ' + String(got) + ')' : '');
+    groupEl.appendChild(r);
+    cond ? passed++ : failed++;
+}
+
+/* ── run on iframe load ───────────────────────────────────────────────────── */
+
+frame.addEventListener('load', () => {
+    try { runTests(); }
+    catch (e) {
+        group('Kritiskt fel vid testkörning');
+        check(false, e.message);
+    }
+    summaryEl.textContent  = passed + ' ✅  ·  ' + failed + ' ❌';
+    summaryEl.style.background = failed === 0 ? '#e8fff0' : '#fff0f0';
+    summaryEl.style.color      = failed === 0 ? '#1a7a3c' : '#b02020';
+});
+
+/* ── main test suite ──────────────────────────────────────────────────────── */
+
+function runTests() {
+    const w  = frame.contentWindow;
+    const d  = frame.contentDocument;
+    const el = id => d.getElementById(id);
+
+    /* ── helpers ── */
+
+    // Index of the larger fraction in m5aItems (correct pick)
+    function m5aBigIdx() {
+        return w.fval(w.m5aItems[0].frac) >= w.fval(w.m5aItems[1].frac) ? 0 : 1;
+    }
+
+    // Pick m5b cards smallest → largest (correct order)
+    function m5bPickCorrect() {
+        [0, 1, 2]
+            .map(r => w.m5bItems.findIndex(it => it.rank === r))
+            .forEach(i => w.m5bPick(i));
+    }
+
+    // Pick m5b cards largest → smallest (guaranteed wrong)
+    function m5bPickWrong() {
+        [2, 1, 0]
+            .map(r => w.m5bItems.findIndex(it => it.rank === r))
+            .forEach(i => w.m5bPick(i));
+    }
+
+    /* ════════════════════════════════════════════════════════════════════════
+       1 – ANSWERED-FLAGGA BLOCKERAR DUBBELINMATNING
+    ════════════════════════════════════════════════════════════════════════ */
+    group('1 – Answered-flagga blockerar dubbelinmatning');
+
+    // M1
+    w.m1Next(); w.m1Streak = 4;
+    w.m1Colored = new Array(w.m1Den).fill(false);
+    for (let i = 0; i < w.m1Num; i++) w.m1Colored[i] = true;
+    w.m1Check();                        // rätt → m1Done=true, streak→5
+    const m1s1 = w.m1Streak;
+    w.m1Check();                        // ska blockeras
+    check(w.m1Done === true,     'M1: m1Done sätts true');
+    check(m1s1 === 5,            'M1: streak 4→5 vid rätt', m1s1);
+    check(w.m1Streak === m1s1,   'M1: andra anropet ändrar inte streak', w.m1Streak);
+    check(el('m1Check').disabled,'M1: Kolla-knappen disabled');
+
+    // M3
+    w.m3Next(); w.m3Streak = 4;
+    el('m3Input').value = String(w.m3Task.ans);
+    w.m3Check();
+    const m3s1 = w.m3Streak;
+    w.m3Check();
+    check(w.m3Answered === true,  'M3: m3Answered sätts true');
+    check(m3s1 === 5,             'M3: streak 4→5 vid rätt', m3s1);
+    check(w.m3Streak === m3s1,    'M3: andra anropet ändrar inte streak', w.m3Streak);
+    check(el('m3Check').disabled, 'M3: Kolla-knappen disabled');
+
+    // M4
+    w.m4Next(); w.m4Streak = 4;
+    el('m4Input').value = String(w.m4Task.ans);
+    w.m4Check();
+    const m4s1 = w.m4Streak;
+    w.m4Check();
+    check(w.m4Answered === true,  'M4: m4Answered sätts true');
+    check(m4s1 === 5,             'M4: streak 4→5 vid rätt', m4s1);
+    check(w.m4Streak === m4s1,    'M4: andra anropet ändrar inte streak', w.m4Streak);
+    check(el('m4Check').disabled, 'M4: Kolla-knappen disabled');
+
+    // M5a (click-baserad – m5aDone blockerar extra klick)
+    w.m5aNext(); w.m5aStreak = 4;
+    const bigIdx = m5aBigIdx();
+    w.m5aPick(bigIdx);
+    const m5as1 = w.m5aStreak;
+    w.m5aPick(bigIdx);                  // ska blockeras av m5aDone
+    check(w.m5aDone === true,     'M5a: m5aDone sätts true');
+    check(m5as1 === 5,            'M5a: streak 4→5 vid rätt', m5as1);
+    check(w.m5aStreak === m5as1,  'M5a: extra klick ändrar inte streak', w.m5aStreak);
+
+    // M5b
+    w.m5bNext(); w.m5bStreak = 4;
+    m5bPickCorrect();
+    w.m5bCheck();                       // rätt → m5bDone=true, streak→5
+    const m5bs1 = w.m5bStreak;
+    w.m5bCheck();                       // ska blockeras
+    check(w.m5bDone === true,     'M5b: m5bDone sätts true');
+    check(m5bs1 === 5,            'M5b: streak 4→5 vid rätt', m5bs1);
+    check(w.m5bStreak === m5bs1,  'M5b: andra anropet ändrar inte streak', w.m5bStreak);
+    check(el('m5bCheck').disabled,'M5b: Kolla-knappen disabled');
+
+    // M6
+    w.m6Next(); w.m6Streak = 4;
+    el('m6InpA').value = String(w.m6Task.simpA);
+    el('m6InpB').value = String(w.m6Task.simpB);
+    w.m6Check();
+    const m6s1 = w.m6Streak;
+    w.m6Check();
+    check(w.m6Done === true,      'M6: m6Done sätts true');
+    check(m6s1 === 5,             'M6: streak 4→5 vid rätt', m6s1);
+    check(w.m6Streak === m6s1,    'M6: andra anropet ändrar inte streak', w.m6Streak);
+    check(el('m6Check').disabled, 'M6: Kolla-knappen disabled');
+
+    /* ════════════════════════════════════════════════════════════════════════
+       2 – STREAK NOLLSTÄLLS VID FEL SVAR
+    ════════════════════════════════════════════════════════════════════════ */
+    group('2 – Streak nollställs vid fel svar');
+
+    // M1: en cell för många (m1Num+1 ≤ m1Den alltid)
+    w.m1Next(); w.m1Streak = 3;
+    w.m1Colored = new Array(w.m1Den).fill(false);
+    for (let i = 0; i <= w.m1Num; i++) w.m1Colored[i] = true;
+    w.m1Check();
+    check(w.m1Streak === 0, 'M1: streak→0 vid fel', w.m1Streak);
+
+    // M3
+    w.m3Next(); w.m3Streak = 3;
+    el('m3Input').value = String(w.m3Task.ans + 99);
+    w.m3Check();
+    check(w.m3Streak === 0, 'M3: streak→0 vid fel', w.m3Streak);
+
+    // M4
+    w.m4Next(); w.m4Streak = 3;
+    el('m4Input').value = String(w.m4Task.ans + 99);
+    w.m4Check();
+    check(w.m4Streak === 0, 'M4: streak→0 vid fel', w.m4Streak);
+
+    // M5a: klicka på det minsta bråket
+    w.m5aNext(); w.m5aStreak = 3;
+    w.m5aPick(1 - m5aBigIdx());
+    check(w.m5aStreak === 0, 'M5a: streak→0 vid fel val', w.m5aStreak);
+
+    // M5b: välj i omvänd ordning
+    w.m5bNext(); w.m5bStreak = 3;
+    m5bPickWrong();
+    w.m5bCheck();
+    check(w.m5bStreak === 0, 'M5b: streak→0 vid fel ordning', w.m5bStreak);
+
+    // M6: 9:8 finns aldrig som förenklat svar i M6_TASKS
+    w.m6Next(); w.m6Streak = 3;
+    el('m6InpA').value = '9';
+    el('m6InpB').value = '8';
+    w.m6Check();
+    check(w.m6Streak === 0, 'M6: streak→0 vid fel', w.m6Streak);
+
+    /* ════════════════════════════════════════════════════════════════════════
+       3 – STREAK ÖKAR VID RÄTT SVAR
+    ════════════════════════════════════════════════════════════════════════ */
+    group('3 – Streak ökar vid rätt svar');
+
+    w.m1Next(); w.m1Streak = 0;
+    w.m1Colored = new Array(w.m1Den).fill(false);
+    for (let i = 0; i < w.m1Num; i++) w.m1Colored[i] = true;
+    w.m1Check();
+    check(w.m1Streak === 1, 'M1: streak 0→1', w.m1Streak);
+
+    w.m3Next(); w.m3Streak = 0;
+    el('m3Input').value = String(w.m3Task.ans);
+    w.m3Check();
+    check(w.m3Streak === 1, 'M3: streak 0→1', w.m3Streak);
+
+    w.m4Next(); w.m4Streak = 0;
+    el('m4Input').value = String(w.m4Task.ans);
+    w.m4Check();
+    check(w.m4Streak === 1, 'M4: streak 0→1', w.m4Streak);
+
+    w.m5aNext(); w.m5aStreak = 0;
+    w.m5aPick(m5aBigIdx());
+    check(w.m5aStreak === 1, 'M5a: streak 0→1', w.m5aStreak);
+
+    w.m5bNext(); w.m5bStreak = 0;
+    m5bPickCorrect();
+    w.m5bCheck();
+    check(w.m5bStreak === 1, 'M5b: streak 0→1', w.m5bStreak);
+
+    w.m6Next(); w.m6Streak = 0;
+    el('m6InpA').value = String(w.m6Task.simpA);
+    el('m6InpB').value = String(w.m6Task.simpB);
+    w.m6Check();
+    check(w.m6Streak === 1, 'M6: streak 0→1', w.m6Streak);
+
+    /* ════════════════════════════════════════════════════════════════════════
+       4 – CLEAN STATE VID NY UPPGIFT
+    ════════════════════════════════════════════════════════════════════════ */
+    group('4 – Clean state vid ny uppgift');
+
+    // M1
+    w.m1Next();
+    w.m1Colored = new Array(w.m1Den).fill(false);
+    for (let i = 0; i < w.m1Num; i++) w.m1Colored[i] = true;
+    w.m1Check();
+    w.m1Next();
+    check(w.m1Done === false,                           'M1: m1Done→false');
+    check(!el('m1Check').disabled,                      'M1: Kolla-knappen aktiveras');
+    check(el('m1ResultArea').style.display === 'none',  'M1: resultyta dold');
+    check(el('m1Feedback').textContent === '',           'M1: feedback tömd');
+
+    // M3 – efter rätt svar
+    w.m3Next();
+    const m3i = el('m3Input');
+    m3i.value = String(w.m3Task.ans);
+    w.m3Check();
+    w.m3Next();
+    check(m3i.value === '',                                              'M3: input tömd (efter rätt)', '"' + m3i.value + '"');
+    check(!m3i.classList.contains('ok') && !m3i.classList.contains('err'), 'M3: ok/err-klass rensad');
+    check(el('m3Feedback').textContent === '',                           'M3: feedback tömd');
+    check(w.m3Answered === false,                                        'M3: m3Answered→false');
+    check(!el('m3Check').disabled,                                       'M3: Kolla-knappen aktiveras');
+    check(!el('m3Next').classList.contains('btn-pulse'),                 'M3: btn-pulse rensad');
+
+    // M3 – efter fel svar
+    m3i.value = String(w.m3Task.ans + 99);
+    w.m3Check();
+    w.m3Next();
+    check(m3i.value === '',                  'M3: input tömd (efter fel)', '"' + m3i.value + '"');
+    check(!m3i.classList.contains('err'),    'M3: err-klass rensad (efter fel)');
+
+    // M4
+    w.m4Next();
+    const m4i = el('m4Input');
+    m4i.value = String(w.m4Task.ans);
+    w.m4Check();
+    w.m4Next();
+    check(m4i.value === '',                                              'M4: input tömd', '"' + m4i.value + '"');
+    check(!m4i.classList.contains('ok') && !m4i.classList.contains('err'), 'M4: ok/err-klass rensad');
+    check(el('m4Feedback').textContent === '',                           'M4: feedback tömd');
+    check(w.m4Answered === false,                                        'M4: m4Answered→false');
+    check(!el('m4Check').disabled,                                       'M4: Kolla-knappen aktiveras');
+    check(el('m4Steps').style.display === 'none',                        'M4: stegvis visning dold');
+
+    // M5b – clean state
+    w.m5bNext();
+    m5bPickCorrect();
+    w.m5bCheck();
+    w.m5bNext();
+    check(w.m5bDone === false,                              'M5b: m5bDone→false');
+    check(w.m5bClickOrder.length === 0,                    'M5b: clickOrder tömd', w.m5bClickOrder.length);
+    check(el('m5bFeedback').textContent === '',             'M5b: feedback tömd');
+    check(!el('m5bCheck').disabled,                        'M5b: Kolla-knappen aktiveras');
+    check(!el('m5bNext').classList.contains('btn-pulse'),  'M5b: btn-pulse rensad');
+
+    // M5b – ångra val: klick på valt kort tar bort det och alla senare val
+    w.m5bNext();
+    const byRank = [0, 1, 2].map(r => w.m5bItems.findIndex(it => it.rank === r));
+    w.m5bPick(byRank[0]);               // välj minst (pos 1 i ordningen)
+    w.m5bPick(byRank[1]);               // välj mitten (pos 2)
+    w.m5bPick(byRank[0]);               // ångra minst → ska även ångra mitten
+    check(w.m5bClickOrder.length === 0,
+          'M5b ångra: ångra pos-1 rensar hela clickOrder', w.m5bClickOrder.length);
+    check(!w.m5bItems[byRank[0]].card.classList.contains('picked'),
+          'M5b ångra: ångrat kort saknar picked-klass');
+    check(!w.m5bItems[byRank[1]].card.classList.contains('picked'),
+          'M5b ångra: efterföljande kort också avmarkerat');
+
+    // M6
+    w.m6Next();
+    const m6a = el('m6InpA'), m6b = el('m6InpB');
+    m6a.value = String(w.m6Task.simpA);
+    m6b.value = String(w.m6Task.simpB);
+    w.m6Check();
+    w.m6Next();
+    check(m6a.value === '' && m6b.value === '',
+          'M6: inputs tömda', '"' + m6a.value + ':' + m6b.value + '"');
+    check(!m6a.classList.contains('ok') && !m6a.classList.contains('err') &&
+          !m6b.classList.contains('ok') && !m6b.classList.contains('err'),
+          'M6: ok/err-klass rensad');
+    check(el('m6Feedback').textContent === '',  'M6: feedback tömd');
+    check(w.m6Done === false,                   'M6: m6Done→false');
+    check(!el('m6Check').disabled,              'M6: Kolla-knappen aktiveras');
+    check(el('m6Insight').style.display === 'none', 'M6: insikt-box dold');
+
+    /* ════════════════════════════════════════════════════════════════════════
+       5 – KEYDOWN BLOCKERAR OTILLÅTNA TECKEN
+    ════════════════════════════════════════════════════════════════════════ */
+    group('5 – Keydown-handler blockerar otillåtna tecken');
+
+    w.m3Next(); w.m4Next(); w.m6Next();   // fresh state
+
+    const BLOCKED = ['a', 'e', 'E', '+', '-', ',', '.', ' ', '!'];
+    const ALLOWED = ['0', '5', '9', 'Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight'];
+
+    ['m3Input', 'm4Input', 'm6InpA', 'm6InpB'].forEach(inputId => {
+        const inp = el(inputId);
+        BLOCKED.forEach(key => {
+            const ev = new w.KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+            check(!inp.dispatchEvent(ev), inputId + ': "' + key + '" blockeras');
+        });
+        ALLOWED.forEach(key => {
+            const ev = new w.KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+            check(inp.dispatchEvent(ev), inputId + ': "' + key + '" tillåts');
+        });
+    });
+}
+</script>
+</body>
+</html>

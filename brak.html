@@ -536,17 +536,20 @@
 <h1>🍕 Bråk och procent</h1>
 
 <!-- ══════ Modul 1 ══════ -->
-<p class="section-title">Modul 1 – Färga in delar</p>
+<p class="section-title">Modul 1 – Vilket bråk?</p>
 
 <div class="card">
-    <p class="task-label">
-        Färga in <strong id="m1Num">3</strong> av <strong id="m1Den">4</strong> delar
-    </p>
+    <p class="task-label">Vilket bråk visar bilden?</p>
 
     <div class="rect-outer">
-        <div class="frac-rect" id="m1Rect"></div>
+        <div class="frac-rect static" id="m1Rect"></div>
     </div>
-    <p class="counter-label" id="m1Counter"></p>
+
+    <div class="answer-row" style="margin-top:14px">
+        <input class="answer-input" id="m1InpNum" type="text" inputmode="numeric" placeholder="" maxlength="1">
+        <span style="font-size:1.5em; font-weight:bold; color:#2c3e50; line-height:1">/</span>
+        <input class="answer-input" id="m1InpDen" type="text" inputmode="numeric" placeholder="" maxlength="2">
+    </div>
 
     <div class="btn-row">
         <button class="btn-primary" id="m1Check">Kolla svaret ✓</button>
@@ -719,7 +722,6 @@ let m5aStreak = 0, m5bStreak = 0, m6Streak = 0;
 
 const DENOMS = [2, 3, 4, 5, 8, 10];
 let m1Num = 3, m1Den = 4;
-let m1Colored = [];
 let m1Done = false;
 
 function isTerminating(den) {
@@ -756,7 +758,6 @@ function fmtPct(num, den) {
 function buildM1() {
     const rect = document.getElementById('m1Rect');
     rect.innerHTML = '';
-    m1Colored = new Array(m1Den).fill(false);
     m1Done = false;
 
     const maxW = Math.min(440, (window.innerWidth || 500) - 80);
@@ -764,18 +765,15 @@ function buildM1() {
 
     for (let i = 0; i < m1Den; i++) {
         const c = document.createElement('div');
-        c.className = 'frac-cell';
+        c.className = 'frac-cell' + (i < m1Num ? ' colored' : '');
         c.style.width = cellW + 'px';
-        c.addEventListener('click', () => {
-            if (m1Done) return;
-            m1Colored[i] = !m1Colored[i];
-            c.classList.toggle('colored', m1Colored[i]);
-            updateCounter();
-        });
         rect.appendChild(c);
     }
 
-    updateCounter();
+    document.getElementById('m1InpNum').value = '';
+    document.getElementById('m1InpDen').value = '';
+    document.getElementById('m1InpNum').classList.remove('ok', 'err');
+    document.getElementById('m1InpDen').classList.remove('ok', 'err');
     document.getElementById('m1ResultArea').style.display = 'none';
     document.querySelectorAll('.result-pill').forEach(p => p.classList.remove('show'));
     document.getElementById('m1Streak').textContent = '';
@@ -784,60 +782,80 @@ function buildM1() {
     document.getElementById('m1Check').disabled = false;
 }
 
-function updateCounter() {
-    const cnt = m1Colored.filter(Boolean).length;
-    document.getElementById('m1Counter').textContent = cnt + ' av ' + m1Den + ' delar ifärgade';
-}
-
 function m1Check() {
     if (m1Done) return;
-    const cnt  = m1Colored.filter(Boolean).length;
-    const fb   = document.getElementById('m1Feedback');
-    const diff = m1Num - cnt;
+    const inpNum = document.getElementById('m1InpNum');
+    const inpDen = document.getElementById('m1InpDen');
+    const fb = document.getElementById('m1Feedback');
+    const vN = inpNum.value.trim();
+    const vD = inpDen.value.trim();
 
-    if (cnt === 0) {
-        fb.textContent = 'Klicka på rutorna för att färga in dem! 🐱';
+    [inpNum, inpDen].forEach(el => el.classList.remove('ok', 'err'));
+
+    if (!vN || !vD) {
+        fb.textContent = 'Fyll i täljare och nämnare! 🐱';
         return;
     }
-    if (diff > 0) {
+
+    const num = parseInt(vN, 10);
+    const den = parseInt(vD, 10);
+
+    if (isNaN(num) || isNaN(den) || num < 1 || den < 1) {
+        fb.textContent = 'Skriv positiva heltal i båda rutorna!';
+        [inpNum, inpDen].forEach(el => el.classList.add('err'));
+        return;
+    }
+
+    if (num === m1Num && den === m1Den) {
+        inpNum.classList.add('ok');
+        inpDen.classList.add('ok');
+        m1Done = true;
+        document.getElementById('m1Check').disabled = true;
+        m1Streak++; setStreak('m1Streak', m1Streak);
+        fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
+        document.getElementById('m1Next').classList.add('btn-pulse');
+
+        document.getElementById('rFN').textContent = m1Num;
+        document.getElementById('rFD').textContent = m1Den;
+        document.getElementById('rDec').textContent = fmtDec(m1Num, m1Den);
+        document.getElementById('rPct').textContent = fmtPct(m1Num, m1Den);
+
+        document.getElementById('m1ResultArea').style.display = 'block';
+        setTimeout(() => {
+            document.querySelectorAll('.result-pill').forEach((p, i) =>
+                setTimeout(() => p.classList.add('show'), i * 160));
+        }, 30);
+    } else {
+        [inpNum, inpDen].forEach(el => el.classList.add('err'));
         m1Streak = 0; setStreak('m1Streak', 0);
-        fb.textContent = 'Du har färgat ' + cnt + ' delar – färga in ' + diff + ' till!';
-        return;
+        fb.textContent = 'Räkna de färgade rutorna – hur många är det av totalt?';
+        document.getElementById('m1Next').classList.remove('btn-pulse');
     }
-    if (diff < 0) {
-        m1Streak = 0; setStreak('m1Streak', 0);
-        fb.textContent = 'Du har färgat ' + cnt + ' delar – det är ' + (-diff) + ' för många, klicka bort!';
-        return;
-    }
-
-    m1Done = true;
-    document.getElementById('m1Check').disabled = true;
-    m1Streak++; setStreak('m1Streak', m1Streak);
-    fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
-    document.getElementById('m1Next').classList.add('btn-pulse');
-
-    document.getElementById('rFN').textContent = m1Num;
-    document.getElementById('rFD').textContent = m1Den;
-    document.getElementById('rDec').textContent = fmtDec(m1Num, m1Den);
-    document.getElementById('rPct').textContent = fmtPct(m1Num, m1Den);
-
-    document.getElementById('m1ResultArea').style.display = 'block';
-    setTimeout(() => {
-        document.querySelectorAll('.result-pill').forEach((p, i) =>
-            setTimeout(() => p.classList.add('show'), i * 160));
-    }, 30);
 }
 
 function m1Next() {
     m1Den = DENOMS[Math.floor(Math.random() * DENOMS.length)];
     m1Num = 1 + Math.floor(Math.random() * (m1Den - 1));
-    document.getElementById('m1Num').textContent = m1Num;
-    document.getElementById('m1Den').textContent = m1Den;
     buildM1();
 }
 
 document.getElementById('m1Check').addEventListener('click', m1Check);
 document.getElementById('m1Next').addEventListener('click',  m1Next);
+
+['m1InpNum', 'm1InpDen'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { m1Check(); return; }
+        if (!/[0-9]/.test(e.key) && !['Backspace','Delete','Tab','ArrowLeft','ArrowRight'].includes(e.key))
+            e.preventDefault();
+    });
+    el.addEventListener('input', function() {
+        const max = id === 'm1InpNum' ? 1 : 2;
+        if (this.value.length > max) this.value = this.value.slice(0, max);
+        this.classList.remove('ok', 'err');
+        document.getElementById('m1Feedback').textContent = '';
+    });
+});
 
 
 /* ════════════════════════════════
