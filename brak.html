@@ -1,4 +1,4 @@
-<!-- <!DOCTYPE html> -->
+﻿<!-- <!DOCTYPE html> -->
 <html lang="sv">
 <head>
     <meta charset="UTF-8">
@@ -1382,12 +1382,22 @@ m5bNext();
 ════════════════════════════════ */
 
 const M6_TASKS = [
-    {a:1,b:2}, {a:2,b:1},
-    {a:1,b:3}, {a:3,b:1},
-    {a:2,b:3}, {a:3,b:2},
-    {a:1,b:4}, {a:4,b:1},
-    {a:2,b:4}, {a:3,b:4}, {a:4,b:3},
-    {a:1,b:5}, {a:5,b:2},
+    {rawA:2, rawB:4,  simpA:1, simpB:2, gcd:2},
+    {rawA:4, rawB:2,  simpA:2, simpB:1, gcd:2},
+    {rawA:3, rawB:6,  simpA:1, simpB:2, gcd:3},
+    {rawA:6, rawB:3,  simpA:2, simpB:1, gcd:3},
+    {rawA:4, rawB:6,  simpA:2, simpB:3, gcd:2},
+    {rawA:6, rawB:4,  simpA:3, simpB:2, gcd:2},
+    {rawA:2, rawB:8,  simpA:1, simpB:4, gcd:2},
+    {rawA:8, rawB:2,  simpA:4, simpB:1, gcd:2},
+    {rawA:6, rawB:8,  simpA:3, simpB:4, gcd:2},
+    {rawA:8, rawB:6,  simpA:4, simpB:3, gcd:2},
+    {rawA:2, rawB:6,  simpA:1, simpB:3, gcd:2},
+    {rawA:3, rawB:9,  simpA:1, simpB:3, gcd:3},
+    {rawA:6, rawB:9,  simpA:2, simpB:3, gcd:3},
+    {rawA:9, rawB:6,  simpA:3, simpB:2, gcd:3},
+    {rawA:4, rawB:10, simpA:2, simpB:5, gcd:2},
+    {rawA:6, rawB:10, simpA:3, simpB:5, gcd:2},
 ];
 
 const M6_SCENARIOS = [
@@ -1422,11 +1432,11 @@ function buildM6() {
     m6Done = false;
 
     document.getElementById('m6Context').textContent =
-        'Det finns ' + t.a + ' ' + form(t.a, sc.labelA, sc.singA) +
-        ' och ' + t.b + ' ' + form(t.b, sc.labelB, sc.singB) + '.';
+        'Det finns ' + t.rawA + ' ' + form(t.rawA, sc.labelA, sc.singA) +
+        ' och ' + t.rawB + ' ' + form(t.rawB, sc.labelB, sc.singB) + '.';
 
     document.getElementById('m6Question').textContent =
-        'Vad är förhållandet ' + sc.labelA + ' till ' + sc.labelB + '?';
+        'Skriv förhållandet ' + sc.labelA + ' : ' + sc.labelB + ' i enklaste form';
 
     const vis = document.getElementById('m6Visual');
     vis.innerHTML = '';
@@ -1449,12 +1459,12 @@ function buildM6() {
         return g;
     }
 
-    vis.appendChild(makeEmojiGroup(t.a, sc.emojiA, form(t.a, sc.labelA, sc.singA)));
+    vis.appendChild(makeEmojiGroup(t.rawA, sc.emojiA, form(t.rawA, sc.labelA, sc.singA)));
     const sep = document.createElement('div');
     sep.className = 'ratio-colon-sep';
     sep.textContent = ':';
     vis.appendChild(sep);
-    vis.appendChild(makeEmojiGroup(t.b, sc.emojiB, form(t.b, sc.labelB, sc.singB)));
+    vis.appendChild(makeEmojiGroup(t.rawB, sc.emojiB, form(t.rawB, sc.labelB, sc.singB)));
 
     ['m6InpA','m6InpB'].forEach(id => {
         const el = document.getElementById(id);
@@ -1474,18 +1484,10 @@ function buildM6() {
 }
 
 function m6InsightLines(t, sc) {
-    const total = t.a + t.b;
-    const pct   = fmtPct(t.a, total);
-    const singA = form(t.a, sc.labelA, sc.singA);
-    const singB = form(t.b, sc.labelB, sc.singB);
-    const rel   = t.a === t.b
-        ? 'Lika många <span class="hl">' + sc.labelA + '</span> och <span class="hl">' + sc.labelB + '</span>!'
-        : '<span class="hl">' + t.a + '\u00a0:\u00a0' + t.b + '</span> betyder att för varje '
-          + t.a + '\u00a0' + singA + ' finns det ' + t.b + '\u00a0' + singB;
     return [
-        sc.labelA + '\u00a0:\u00a0' + sc.labelB + '\u00a0=\u00a0<strong>' + t.a + '\u00a0:\u00a0' + t.b + '</strong>',
-        rel,
-        sc.labelA + ' = ' + fracHTML(t.a, total) + ' av hela gruppen = <span class="hl-ok">' + pct + '</span>',
+        hl(t.rawA + ' : ' + t.rawB) + ' → dela båda med ' + hl(t.gcd),
+        t.rawA + ' ÷ ' + t.gcd + ' : ' + t.rawB + ' ÷ ' + t.gcd,
+        sc.labelA + ' : ' + sc.labelB + ' = ' + hlOk(t.simpA + ' : ' + t.simpB),
     ];
 }
 
@@ -1516,13 +1518,11 @@ function m6Check() {
         return;
     }
 
-    const okA = nA === m6Task.a;
-    const okB = nB === m6Task.b;
+    const ok = nA === m6Task.simpA && nB === m6Task.simpB;
 
-    inpA.classList.add(okA ? 'ok' : 'err');
-    inpB.classList.add(okB ? 'ok' : 'err');
-
-    if (okA && okB) {
+    if (ok) {
+        inpA.classList.add('ok');
+        inpB.classList.add('ok');
         m6Done = true;
         m6Streak++; setStreak('m6Streak', m6Streak);
         fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
@@ -1535,11 +1535,16 @@ function m6Check() {
             m6Timers.push(setTimeout(() => el.classList.add('show'), 80 + i * 230));
         });
     } else {
-        const hint = !okA
-            ? 'Räkna ' + m6Sc.emojiA + '-emojisarna (' + m6Sc.labelA + ') – hur många är det?'
-            : 'Räkna ' + m6Sc.emojiB + '-emojisarna (' + m6Sc.labelB + ') – hur många är det?';
+        inpA.classList.add('err');
+        inpB.classList.add('err');
         m6Streak = 0; setStreak('m6Streak', 0);
-        fb.textContent = hint;
+        if (nA === m6Task.rawA && nB === m6Task.rawB) {
+            fb.textContent = 'Du räknade rätt! Men ' + m6Task.rawA + ':' + m6Task.rawB +
+                ' kan förenklas – dela båda med ' + m6Task.gcd + '!';
+        } else {
+            fb.textContent = m6Task.rawA + ':' + m6Task.rawB +
+                ' kan förenklas – dela båda talen med ' + m6Task.gcd + ' och försök igen!';
+        }
         document.getElementById('m6Next').classList.remove('btn-pulse');
     }
 }
