@@ -664,9 +664,10 @@
 
 <!-- ══════ Modul 5B ══════ -->
 <div class="card">
-    <p class="task-label">Ordna från <strong>minst</strong> till <strong>störst</strong> – klicka i rätt ordning!</p>
+    <p class="task-label">Ordna från <strong>minst</strong> till <strong>störst</strong> – klicka i rätt ordning. Klicka igen för att ångra.</p>
     <div class="order-row" id="m5bRow"></div>
     <div class="btn-row">
+        <button class="btn-primary" id="m5bCheck">Kolla svaret ✓</button>
         <button class="btn-secondary" id="m5bNext">Nästa uppgift →</button>
     </div>
     <p class="streak" id="m5bStreak"></p>
@@ -1348,20 +1349,45 @@ function m5bNext() {
     document.getElementById('m5bStreak').textContent = '';
     document.getElementById('m5bFeedback').textContent = '';
     document.getElementById('m5bNext').classList.remove('btn-pulse');
+    document.getElementById('m5bCheck').disabled = false;
 }
 
 function m5bPick(idx) {
-    if (m5bDone || m5bItems[idx].card.classList.contains('picked')) return;
+    if (m5bDone) return;
     const item = m5bItems[idx];
+
+    if (item.card.classList.contains('picked')) {
+        // Undo this pick and all picks made after it
+        const pos = m5bClickOrder.indexOf(idx);
+        for (let i = pos; i < m5bClickOrder.length; i++) {
+            const ri = m5bClickOrder[i];
+            m5bItems[ri].card.classList.remove('picked');
+            m5bItems[ri].badge.textContent = '';
+            m5bItems[ri].badge.classList.remove('show');
+        }
+        m5bClickOrder = m5bClickOrder.slice(0, pos);
+        document.getElementById('m5bFeedback').textContent = '';
+        return;
+    }
+
     item.card.classList.add('picked');
     item.badge.textContent = m5bClickOrder.length + 1;
     item.badge.classList.add('show');
     m5bClickOrder.push(idx);
-    if (m5bClickOrder.length === 3) m5bEval();
+}
+
+function m5bCheck() {
+    if (m5bDone) return;
+    if (m5bClickOrder.length < 3) {
+        document.getElementById('m5bFeedback').textContent = 'Klicka på alla tre bråk i rätt ordning och kolla sedan svaret!';
+        return;
+    }
+    m5bEval();
 }
 
 function m5bEval() {
     m5bDone = true;
+    document.getElementById('m5bCheck').disabled = true;
     const correct = m5bClickOrder.every((dispIdx, pos) => m5bItems[dispIdx].rank === pos);
     const fb = document.getElementById('m5bFeedback');
 
@@ -1387,7 +1413,8 @@ function m5bEval() {
     }
 }
 
-document.getElementById('m5bNext').addEventListener('click', m5bNext);
+document.getElementById('m5bCheck').addEventListener('click', m5bCheck);
+document.getElementById('m5bNext').addEventListener('click',  m5bNext);
 
 m5aNext();
 m5bNext();
