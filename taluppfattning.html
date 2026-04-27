@@ -177,6 +177,41 @@
         .choice-btn:disabled { cursor: not-allowed; }
         .choice-btn.ok  { background: #f0fff4; border-color: #2ecc71; color: #27ae60; opacity: 1; }
         .choice-btn.err { background: #fff5f5; border-color: #e74c3c; color: #c0392b; opacity: 0.45; }
+
+        /* ── Modul 2: kompakt positionstabell ── */
+        .number-display.compact .digit-col { min-width: 78px; }
+        .number-display.compact .digit { font-size: 2.3em; padding: 12px 6px 8px; }
+        .number-display.compact .pos-label {
+            font-size: 0.65em;
+            line-height: 1.35;
+            padding: 4px 3px 6px;
+        }
+
+        /* horisontell scroll om tal är brett */
+        .display-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 6px 0 22px;
+        }
+        .display-scroll .number-display { margin: 0; }
+
+        /* ── navigering mellan moduler ── */
+        .module-nav {
+            text-align: center;
+            margin: 14px 0;
+        }
+        .module-nav-link {
+            display: inline-block;
+            color: #4a90d9;
+            text-decoration: none;
+            font-size: 0.92em;
+            padding: 7px 18px;
+            border: 1.5px solid #cce0f5;
+            border-radius: 20px;
+            background: white;
+            transition: background 0.15s;
+        }
+        .module-nav-link:hover { background: #e8f2ff; }
     </style>
 </head>
 <body>
@@ -188,7 +223,7 @@
 <h1>🔢 Taluppfattning</h1>
 
 <!-- ══════ Modul 1 ══════ -->
-<p class="section-title">Modul 1 – Positionssystemet</p>
+<p class="section-title" id="modul1">Modul 1 – Positionssystemet</p>
 
 <div class="card">
     <p class="task-label">Vad är <strong>värdet</strong> av den markerade siffran?</p>
@@ -203,6 +238,26 @@
 
     <p class="streak" id="m1Streak"></p>
     <div class="feedback" id="m1Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 2 ══════ -->
+<p class="section-title" id="modul2">Modul 2 – Positionssystemet, stora tal</p>
+
+<div class="card">
+    <p class="task-label">Vad är <strong>värdet</strong> av den markerade siffran?</p>
+
+    <div class="display-scroll">
+        <div class="number-display compact" id="m2Display"></div>
+    </div>
+
+    <div class="choice-row" id="m2Choices"></div>
+
+    <div class="btn-row">
+        <button class="btn-secondary" id="m2Next">Ny uppgift →</button>
+    </div>
+
+    <p class="streak" id="m2Streak"></p>
+    <div class="feedback" id="m2Feedback" aria-live="polite"></div>
 </div>
 
 <script>
@@ -321,6 +376,138 @@ function m1Check(val, btn) {
 document.getElementById('m1Next').addEventListener('click', buildM1);
 
 buildM1();
+
+/* ════════════════════════════════
+   Modul 2 – Positionssystemet, stora tal
+════════════════════════════════ */
+
+const M2_LABELS = {
+    1:      'Ental',
+    10:     'Tiotal',
+    100:    'Hundratal',
+    1000:   'Tusental',
+    10000:  'Tio­tusental',
+    100000: 'Hundra­tusental'
+};
+
+const M2_PLACES = {
+    1:      'entalsplatsen',
+    10:     'tiotalsplatsen',
+    100:    'hundratalsplatsen',
+    1000:   'tusentalsplatsen',
+    10000:  'tiotusentalsplatsen',
+    100000: 'hundratusentalsplatsen'
+};
+
+function formatNum(n) {
+    return new Intl.NumberFormat('sv-SE').format(n);
+}
+
+let m2Streak   = 0;
+let m2Task     = null;
+let m2Answered = false;
+let m2HadError = false;
+
+function genM2Task() {
+    const digits = Math.floor(Math.random() * 3) + 4;
+    let num;
+    if (digits === 4)      num = Math.floor(Math.random() * 9000)   + 1000;
+    else if (digits === 5) num = Math.floor(Math.random() * 90000)  + 10000;
+    else                   num = Math.floor(Math.random() * 900000) + 100000;
+
+    const numStr = String(num);
+    const len    = numStr.length;
+
+    let pos;
+    do { pos = Math.floor(Math.random() * len); }
+    while (numStr[pos] === '0');
+
+    const digitVal = parseInt(numStr[pos], 10);
+    const posValue = Math.pow(10, len - 1 - pos);
+    const correct  = digitVal * posValue;
+
+    const allPVs   = Array.from({ length: len }, (_, i) => Math.pow(10, len - 1 - i));
+    const otherPVs = allPVs.filter(pv => pv !== posValue);
+    for (let i = otherPVs.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [otherPVs[i], otherPVs[j]] = [otherPVs[j], otherPVs[i]];
+    }
+    const distractors = otherPVs.slice(0, 2).map(pv => digitVal * pv);
+
+    return { numStr, len, pos, digitVal, posValue, correct, distractors };
+}
+
+function buildM2() {
+    m2Task     = genM2Task();
+    m2Answered = false;
+    m2HadError = false;
+
+    const display = document.getElementById('m2Display');
+    display.innerHTML = '';
+    for (let i = 0; i < m2Task.len; i++) {
+        const pv   = Math.pow(10, m2Task.len - 1 - i);
+        const isHl = i === m2Task.pos;
+
+        const col  = document.createElement('div');
+        col.className = 'digit-col';
+
+        const dEl  = document.createElement('div');
+        dEl.className   = 'digit' + (isHl ? ' highlighted' : '');
+        dEl.textContent = m2Task.numStr[i];
+
+        const lEl  = document.createElement('div');
+        lEl.className   = 'pos-label' + (isHl ? ' highlighted' : '');
+        lEl.textContent = M2_LABELS[pv];
+
+        col.appendChild(dEl);
+        col.appendChild(lEl);
+        display.appendChild(col);
+    }
+
+    const choices = [m2Task.correct, ...m2Task.distractors];
+    for (let i = choices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [choices[i], choices[j]] = [choices[j], choices[i]];
+    }
+
+    const row = document.getElementById('m2Choices');
+    row.innerHTML = '';
+    choices.forEach(val => {
+        const btn = document.createElement('button');
+        btn.className   = 'choice-btn';
+        btn.textContent = formatNum(val);
+        btn.addEventListener('click', () => m2Check(val, btn));
+        row.appendChild(btn);
+    });
+
+    document.getElementById('m2Feedback').textContent = '';
+    document.getElementById('m2Next').classList.remove('btn-pulse');
+}
+
+function m2Check(val, btn) {
+    if (m2Answered) return;
+    const fb = document.getElementById('m2Feedback');
+
+    if (val === m2Task.correct) {
+        m2Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m2Choices .choice-btn').forEach(b => { b.disabled = true; });
+        if (!m2HadError) { m2Streak++; } else { m2Streak = 0; }
+        setStreak('m2Streak', m2Streak);
+        fb.textContent = '🐱 Rätt! Siffran ' + m2Task.digitVal + ' på ' +
+            M2_PLACES[m2Task.posValue] + ' är värd ' + formatNum(m2Task.correct) + '. Jättebra, Avalin!';
+        document.getElementById('m2Next').classList.add('btn-pulse');
+    } else {
+        m2HadError = true;
+        btn.classList.add('err');
+        btn.disabled = true;
+        fb.textContent = 'Nästan! Titta på vilket ställe siffran står på.';
+    }
+}
+
+document.getElementById('m2Next').addEventListener('click', buildM2);
+
+buildM2();
 </script>
 </body>
 </html>
