@@ -258,6 +258,35 @@
             padding: 3px 12px;
             margin-bottom: 10px;
         }
+
+        /* ── Modul 5: läsa tal ── */
+        .choice-col {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 4px 0 12px;
+        }
+
+        .choice-btn-text {
+            font-family: Arial, sans-serif;
+            font-size: 1em;
+            padding: 12px 16px;
+            border: 2.5px solid #4a90d9;
+            border-radius: 14px;
+            background: white;
+            color: #2c3e50;
+            cursor: pointer;
+            text-align: left;
+            white-space: normal;
+            word-break: break-word;
+            line-height: 1.4;
+            transition: background 0.15s, border-color 0.15s, transform 0.1s;
+        }
+        .choice-btn-text:hover:not(:disabled) { background: #e8f2ff; border-color: #3a7fc8; }
+        .choice-btn-text:active:not(:disabled) { transform: scale(0.98); }
+        .choice-btn-text:disabled { cursor: not-allowed; }
+        .choice-btn-text.ok  { background: #f0fff4; border-color: #2ecc71; color: #27ae60; opacity: 1; }
+        .choice-btn-text.err { background: #fff5f5; border-color: #e74c3c; color: #c0392b; opacity: 0.45; }
     </style>
 </head>
 <body>
@@ -346,6 +375,48 @@
 
     <p class="streak" id="m4Streak"></p>
     <div class="feedback" id="m4Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 5 ══════ -->
+<p class="section-title">Modul 5 – Läsa tal</p>
+
+<div class="card">
+    <p class="task-label">Hur uttalas det här talet?</p>
+
+    <div style="text-align:center">
+        <span class="level-badge" id="m5LevelLabel">Nivå 1</span>
+    </div>
+
+    <p id="m5Number" style="text-align:center; font-size:2.6em; font-weight:bold; color:#2c3e50; margin:10px 0 18px; letter-spacing:0.03em"></p>
+
+    <div class="choice-col" id="m5Choices"></div>
+
+    <div class="btn-row">
+        <button class="btn-secondary" id="m5Next">Ny uppgift →</button>
+    </div>
+
+    <p class="streak" id="m5Streak"></p>
+    <div class="feedback" id="m5Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 6 ══════ -->
+<p class="section-title">Modul 6 – Avrundning</p>
+
+<div class="card">
+    <p class="task-label" id="m6Label"></p>
+
+    <div style="text-align:center">
+        <span class="level-badge" id="m6LevelLabel">Nivå 1</span>
+    </div>
+
+    <div class="choice-row" id="m6Choices"></div>
+
+    <div class="btn-row">
+        <button class="btn-secondary" id="m6Next">Ny uppgift →</button>
+    </div>
+
+    <p class="streak" id="m6Streak"></p>
+    <div class="feedback" id="m6Feedback" aria-live="polite"></div>
 </div>
 
 <script>
@@ -813,6 +884,260 @@ function m4Check(val, btn) {
 document.getElementById('m4Next').addEventListener('click', buildM4);
 
 buildM4();
+
+/* ════════════════════════════════
+   Modul 5 – Läsa tal
+════════════════════════════════ */
+
+const M5_LEVELS = [
+    { min: 10,     max: 999    },
+    { min: 1000,   max: 99999  },
+    { min: 100000, max: 999999 }
+];
+
+const SV_ONES = ['', 'ett', 'två', 'tre', 'fyra', 'fem', 'sex', 'sju', 'åtta', 'nio',
+                 'tio', 'elva', 'tolv', 'tretton', 'fjorton', 'femton', 'sexton',
+                 'sjutton', 'arton', 'nitton'];
+const SV_TENS = ['', '', 'tjugo', 'trettio', 'fyrtio', 'femtio', 'sextio', 'sjuttio', 'åttio', 'nittio'];
+
+function numToSv(n) {
+    if (n === 0) return '';
+    if (n < 20)  return SV_ONES[n];
+    if (n < 100) return SV_TENS[Math.floor(n / 10)] + (n % 10 !== 0 ? SV_ONES[n % 10] : '');
+    if (n < 1000) {
+        const h   = Math.floor(n / 100);
+        const rem = n % 100;
+        return (h === 1 ? 'en' : SV_ONES[h]) + 'hundra' + (rem ? numToSv(rem) : '');
+    }
+    const th  = Math.floor(n / 1000);
+    const rem = n % 1000;
+    const thW = th === 1 ? 'ett' : numToSv(th);
+    return thW + 'tusen' + (rem ? numToSv(rem) : '');
+}
+
+let m5Streak = 0, m5Task = null, m5Answered = false, m5HadError = false;
+let m5Level = 0, m5LevelStreak = 0;
+
+function genM5Task() {
+    const cfg = M5_LEVELS[m5Level];
+    const n   = Math.floor(Math.random() * (cfg.max - cfg.min + 1)) + cfg.min;
+
+    const distractors = [];
+    const seen   = new Set([n]);
+    const digits = String(n).split('').map(Number);
+    const len    = digits.length;
+
+    /* Strategi 1: byt plats på två intilliggande siffror */
+    for (let i = 0; i < len - 1 && distractors.length < 3; i++) {
+        if (digits[i] !== digits[i + 1]) {
+            const sw = [...digits];
+            [sw[i], sw[i + 1]] = [sw[i + 1], sw[i]];
+            if (sw[0] !== 0) {
+                const c = parseInt(sw.join(''));
+                if (!seen.has(c) && c >= cfg.min && c <= cfg.max) {
+                    distractors.push(c); seen.add(c);
+                }
+            }
+        }
+    }
+
+    /* Strategi 2: ändra en siffra med ±1..3 */
+    const positions = Array.from({ length: len }, (_, i) => i).sort(() => Math.random() - 0.5);
+    outer:
+    for (const pos of positions) {
+        for (const delta of [1, -1, 2, -2, 3, -3]) {
+            const nd = digits[pos] + delta;
+            if (nd < 0 || nd > 9 || (pos === 0 && nd === 0)) continue;
+            const nd2 = [...digits]; nd2[pos] = nd;
+            const c   = parseInt(nd2.join(''));
+            if (!seen.has(c) && c >= cfg.min && c <= cfg.max) {
+                distractors.push(c); seen.add(c);
+                if (distractors.length >= 3) break outer;
+            }
+        }
+    }
+
+    /* Reserv: slumptal */
+    let att = 0;
+    while (distractors.length < 3 && att++ < 300) {
+        const r = Math.floor(Math.random() * (cfg.max - cfg.min + 1)) + cfg.min;
+        if (!seen.has(r)) { distractors.push(r); seen.add(r); }
+    }
+
+    return { n, word: numToSv(n), distractors: distractors.slice(0, 3) };
+}
+
+function buildM5() {
+    m5Task = genM5Task(); m5Answered = false; m5HadError = false;
+
+    document.getElementById('m5Number').textContent =
+        new Intl.NumberFormat('sv-SE').format(m5Task.n);
+
+    /* Blanda rätt svar med distraktorer */
+    const allWords = [m5Task.word, ...m5Task.distractors.map(numToSv)];
+    for (let i = allWords.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allWords[i], allWords[j]] = [allWords[j], allWords[i]];
+    }
+
+    const col = document.getElementById('m5Choices');
+    col.innerHTML = '';
+    allWords.forEach(word => {
+        const btn = document.createElement('button');
+        btn.className   = 'choice-btn-text';
+        btn.textContent = word;
+        btn.addEventListener('click', () => m5Check(word, btn));
+        col.appendChild(btn);
+    });
+
+    document.getElementById('m5LevelLabel').textContent = 'Nivå ' + (m5Level + 1);
+    document.getElementById('m5Feedback').textContent   = '';
+    document.getElementById('m5Next').classList.remove('btn-pulse');
+}
+
+function m5Check(word, btn) {
+    if (m5Answered) return;
+    const fb = document.getElementById('m5Feedback');
+
+    if (word === m5Task.word) {
+        m5Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m5Choices .choice-btn-text').forEach(b => { b.disabled = true; });
+
+        if (!m5HadError) { m5Streak++; m5LevelStreak++; }
+        else             { m5Streak = 0; m5LevelStreak = 0; }
+        setStreak('m5Streak', m5Streak);
+
+        if (m5LevelStreak >= 3 && m5Level < M5_LEVELS.length - 1) {
+            m5Level++;
+            m5LevelStreak = 0;
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi större tal!';
+        } else {
+            fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
+        }
+        document.getElementById('m5Next').classList.add('btn-pulse');
+    } else {
+        m5HadError    = true;
+        m5LevelStreak = 0;
+        m5Streak      = 0;
+        setStreak('m5Streak', 0);
+        btn.classList.add('err');
+        btn.disabled = true;
+        fb.textContent = 'Nästan – det var "' + m5Task.word + '".';
+    }
+}
+
+document.getElementById('m5Next').addEventListener('click', buildM5);
+
+buildM5();
+
+/* ════════════════════════════════
+   Modul 6 – Avrundning
+════════════════════════════════ */
+
+const M6_LEVELS = [
+    { label: 'närmaste tiotal',    step: 10,   min: 11,   max: 999   },
+    { label: 'närmaste hundratal', step: 100,  min: 101,  max: 9999  },
+    { label: 'närmaste tusental',  step: 1000, min: 1001, max: 99999 }
+];
+
+let m6Streak = 0, m6Task = null, m6Answered = false, m6HadError = false;
+let m6Level = 0, m6LevelStreak = 0;
+
+function genM6Task() {
+    const cfg = M6_LEVELS[m6Level];
+
+    let n;
+    do {
+        n = Math.floor(Math.random() * (cfg.max - cfg.min + 1)) + cfg.min;
+    } while (n % cfg.step === 0);
+
+    const flr      = Math.floor(n / cfg.step) * cfg.step;
+    const cel      = Math.ceil(n / cfg.step) * cfg.step;
+    const correct  = (n % cfg.step >= cfg.step / 2) ? cel : flr;
+    const wrongDir = (correct === flr) ? cel : flr;
+
+    const wrongSteps = cfg.step === 10
+        ? [Math.round(n / 100) * 100,   Math.round(n / 1000) * 1000]
+        : cfg.step === 100
+        ? [Math.round(n / 10) * 10,     Math.round(n / 1000) * 1000]
+        : [Math.round(n / 100) * 100,   Math.round(n / 10000) * 10000];
+
+    const seen = new Set([correct, n]);
+    const distractors = [];
+    for (const v of [wrongDir, correct - cfg.step, correct + cfg.step, ...wrongSteps]) {
+        if (v > 0 && !seen.has(v)) { seen.add(v); distractors.push(v); }
+        if (distractors.length >= 3) break;
+    }
+    let extra = 2;
+    while (distractors.length < 3) {
+        const v = correct + cfg.step * extra++;
+        if (!seen.has(v)) { seen.add(v); distractors.push(v); }
+    }
+
+    return { n, correct, distractors: distractors.slice(0, 3), cfg };
+}
+
+function buildM6() {
+    m6Task = genM6Task(); m6Answered = false; m6HadError = false;
+
+    document.getElementById('m6Label').innerHTML =
+        'Avrunda <strong>' + formatNum(m6Task.n) + '</strong> till ' + m6Task.cfg.label + '.';
+
+    const choices = [m6Task.correct, ...m6Task.distractors];
+    for (let i = choices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [choices[i], choices[j]] = [choices[j], choices[i]];
+    }
+
+    const row = document.getElementById('m6Choices');
+    row.innerHTML = '';
+    choices.forEach(val => {
+        const btn = document.createElement('button');
+        btn.className   = 'choice-btn';
+        btn.textContent = formatNum(val);
+        btn.addEventListener('click', () => m6Check(val, btn));
+        row.appendChild(btn);
+    });
+
+    document.getElementById('m6LevelLabel').textContent = 'Nivå ' + (m6Level + 1);
+    document.getElementById('m6Feedback').textContent   = '';
+    document.getElementById('m6Next').classList.remove('btn-pulse');
+}
+
+function m6Check(val, btn) {
+    if (m6Answered) return;
+    const fb = document.getElementById('m6Feedback');
+
+    if (val === m6Task.correct) {
+        m6Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m6Choices .choice-btn').forEach(b => { b.disabled = true; });
+
+        if (!m6HadError) { m6Streak++; m6LevelStreak++; }
+        else             { m6Streak = 0; m6LevelStreak = 0; }
+        setStreak('m6Streak', m6Streak);
+
+        if (m6LevelStreak >= 3 && m6Level < M6_LEVELS.length - 1) {
+            m6Level++;
+            m6LevelStreak = 0;
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi större tal!';
+        } else {
+            fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
+        }
+        document.getElementById('m6Next').classList.add('btn-pulse');
+    } else {
+        m6HadError    = true;
+        m6LevelStreak = 0;
+        btn.classList.add('err');
+        btn.disabled = true;
+        fb.textContent = 'Nästan – rätt svar är ' + formatNum(m6Task.correct) + '. Vilket håll ska du avrunda?';
+    }
+}
+
+document.getElementById('m6Next').addEventListener('click', buildM6);
+
+buildM6();
 </script>
 </body>
 </html>
