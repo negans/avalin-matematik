@@ -525,6 +525,63 @@
         .ri-line.show { opacity: 1; transform: translateY(0); }
         .ri-line .hl    { color: #4a90d9; font-weight: bold; }
         .ri-line .hl-ok { color: #2ecc71; font-weight: bold; }
+
+        /* ── Del av antal: svarsalternativ ── */
+        .choice-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 4px 0 10px;
+        }
+
+        .choice-btn {
+            font-family: Arial, sans-serif;
+            font-size: 1.3em;
+            font-weight: bold;
+            padding: 12px 20px;
+            border: 2.5px solid #4a90d9;
+            border-radius: 16px;
+            background: white;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s, transform 0.1s;
+            min-width: 76px;
+            text-align: center;
+        }
+        .choice-btn:hover:not(:disabled) { background: #e8f2ff; border-color: #3a7fc8; }
+        .choice-btn:active:not(:disabled) { transform: scale(0.95); }
+        .choice-btn:disabled { cursor: not-allowed; }
+        .choice-btn.ok  { background: #f0fff4; border-color: #2ecc71; color: #27ae60; opacity: 1; }
+        .choice-btn.err { background: #fff5f5; border-color: #e74c3c; color: #c0392b; opacity: 0.45; }
+
+        /* ── Del av antal Fas 1: förklaringsbild ── */
+        .part-visual {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 14px 0 4px;
+            flex-wrap: wrap;
+        }
+
+        .part-cell {
+            width: 56px;
+            height: 56px;
+            border: 2.5px solid #b8d4ef;
+            border-radius: 12px;
+            background: #ddeaf8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.05em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .part-cell.active {
+            background: #4a90d9;
+            color: white;
+            border-color: #3a7fc8;
+        }
     </style>
 </head>
 <body>
@@ -706,6 +763,48 @@
 
     <p class="streak" id="m6Streak"></p>
     <div class="feedback" id="m6Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Del av antal – Fas 1 ══════ -->
+<p class="section-title">Del av antal – Fas 1: Hitta helheten</p>
+
+<div class="card">
+    <p class="task-label" id="da1Label"></p>
+
+    <div class="choice-row" id="da1Choices"></div>
+
+    <div id="da1Visual" style="display:none">
+        <div class="part-visual" id="da1VisBoxes"></div>
+        <p class="counter-label" id="da1VisLabel"></p>
+    </div>
+
+    <div class="btn-row">
+        <button class="btn-secondary" id="da1Next">Ny uppgift →</button>
+    </div>
+
+    <p class="streak" id="da1Streak"></p>
+    <div class="feedback" id="da1Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Del av antal – Fas 2 ══════ -->
+<p class="section-title">Del av antal – Fas 2: Bråk gånger heltal</p>
+
+<div class="card">
+    <p class="task-label" id="da2Label"></p>
+
+    <div class="choice-row" id="da2Choices"></div>
+
+    <div id="da2Visual" style="display:none">
+        <div class="part-visual" id="da2VisBoxes"></div>
+        <p class="counter-label" id="da2VisLabel"></p>
+    </div>
+
+    <div class="btn-row">
+        <button class="btn-secondary" id="da2Next">Ny uppgift →</button>
+    </div>
+
+    <p class="streak" id="da2Streak"></p>
+    <div class="feedback" id="da2Feedback" aria-live="polite"></div>
 </div>
 
 <script>
@@ -1637,6 +1736,203 @@ document.getElementById('m6Next').addEventListener('click',  m6Next);
 });
 
 m6Next();
+
+/* ════════════════════════════════
+   Del av antal – Fas 1: Hitta helheten
+   Uppgiftstyp: "n/d av ___ = part"
+════════════════════════════════ */
+
+const DA1_FRACS = [
+    {n:1,d:2},{n:1,d:3},{n:1,d:4},{n:1,d:5},
+    {n:2,d:3},{n:3,d:4},{n:2,d:5},{n:3,d:5}
+];
+
+let da1Streak = 0, da1Task = null, da1Answered = false, da1HadError = false;
+
+function genDa1Task() {
+    const frac = DA1_FRACS[Math.floor(Math.random() * DA1_FRACS.length)];
+    const k    = Math.floor(Math.random() * 6) + 2;   // k = 2..7
+    const whole = frac.d * k;
+    const part  = frac.n * k;
+
+    /* distractorer: typiska felsteg */
+    const cands = new Set();
+    cands.add(part);                          // glömmer att multiplicera
+    cands.add(part * frac.d);                 // multiplicerar men delar inte med n
+    if (Number.isInteger(part / frac.n) && part / frac.n !== whole)
+        cands.add(part / frac.n);             // delar istället för att multiplicera
+    cands.add(whole + frac.d);                // lägger till nämnaren
+    cands.delete(whole);
+
+    const dist = [...cands].filter(v => v > 0 && Number.isInteger(v));
+    let extra = 1;
+    while (dist.length < 3) {
+        if (extra !== whole && !dist.includes(extra)) dist.push(extra);
+        extra++;
+    }
+    return { frac, whole, part, k, distractors: dist.slice(0, 3) };
+}
+
+function buildDa1() {
+    da1Task = genDa1Task(); da1Answered = false; da1HadError = false;
+    const { frac, whole, part } = da1Task;
+
+    document.getElementById('da1Label').innerHTML =
+        fracHTML(frac.n, frac.d) + '&nbsp;&nbsp;av&nbsp;&nbsp;___&nbsp;&nbsp;=&nbsp;&nbsp;' + part;
+
+    const choices = [whole, ...da1Task.distractors];
+    for (let i = choices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [choices[i], choices[j]] = [choices[j], choices[i]];
+    }
+    const row = document.getElementById('da1Choices');
+    row.innerHTML = '';
+    choices.forEach(val => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = val;
+        btn.addEventListener('click', () => da1Check(val, btn));
+        row.appendChild(btn);
+    });
+
+    document.getElementById('da1Visual').style.display = 'none';
+    document.getElementById('da1Feedback').textContent = '';
+    document.getElementById('da1Next').classList.remove('btn-pulse');
+}
+
+function da1Check(val, btn) {
+    if (da1Answered) return;
+    const { frac, whole, part, k } = da1Task;
+    const fb = document.getElementById('da1Feedback');
+
+    if (val === whole) {
+        da1Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#da1Choices .choice-btn').forEach(b => { b.disabled = true; });
+        if (!da1HadError) { da1Streak++; } else { da1Streak = 0; }
+        setStreak('da1Streak', da1Streak);
+        fb.textContent = '🐱 Rätt! ' + frac.n + '/' + frac.d + ' av ' + whole + ' = ' + part + '. Jättebra, Avalin!';
+
+        /* förklaringsbild */
+        const boxWrap = document.getElementById('da1VisBoxes');
+        boxWrap.innerHTML = '';
+        for (let i = 0; i < frac.d; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'part-cell' + (i < frac.n ? ' active' : '');
+            cell.textContent = k;
+            boxWrap.appendChild(cell);
+        }
+        document.getElementById('da1VisLabel').textContent =
+            frac.d + ' delar av ' + k + '  →  totalt ' + whole;
+        document.getElementById('da1Visual').style.display = 'block';
+        document.getElementById('da1Next').classList.add('btn-pulse');
+    } else {
+        da1HadError = true;
+        btn.classList.add('err');
+        btn.disabled = true;
+        fb.textContent = 'Nästan! Tänk: om ' + frac.n + '/' + frac.d + ' av helheten är ' + part + ', hur stor är hela?';
+    }
+}
+
+document.getElementById('da1Next').addEventListener('click', buildDa1);
+buildDa1();
+
+/* ════════════════════════════════
+   Del av antal – Fas 2: Bråk gånger heltal
+   Uppgiftstyp: "n/d · integer = ?"
+════════════════════════════════ */
+
+const DA2_FRACS = [
+    {n:1,d:2},{n:1,d:3},{n:2,d:3},{n:1,d:4},{n:3,d:4},{n:2,d:5},{n:3,d:5}
+];
+
+let da2Streak = 0, da2Task = null, da2Answered = false, da2HadError = false;
+
+function genDa2Task() {
+    const frac    = DA2_FRACS[Math.floor(Math.random() * DA2_FRACS.length)];
+    const k       = Math.floor(Math.random() * 6) + 1;  // k = 1..6
+    const integer = frac.d * k;
+    const result  = frac.n * k;
+
+    const cands = new Set();
+    cands.add(integer);           // glömmer bråket
+    cands.add(frac.n * integer);  // multiplicerar med täljaren men delar inte
+    cands.add(k);                 // delar med nämnaren men multiplicerar inte med täljaren
+    cands.add(result + 1);
+    cands.delete(result);
+
+    const dist = [...cands].filter(v => v > 0 && Number.isInteger(v));
+    let extra = 1;
+    while (dist.length < 3) {
+        if (extra !== result && !dist.includes(extra)) dist.push(extra);
+        extra++;
+    }
+    return { frac, integer, result, distractors: dist.slice(0, 3) };
+}
+
+function buildDa2() {
+    da2Task = genDa2Task(); da2Answered = false; da2HadError = false;
+    const { frac, integer } = da2Task;
+
+    document.getElementById('da2Label').innerHTML =
+        fracHTML(frac.n, frac.d) + '&nbsp;&nbsp;·&nbsp;&nbsp;' + integer + '&nbsp;&nbsp;=&nbsp;&nbsp;?';
+
+    const choices = [da2Task.result, ...da2Task.distractors];
+    for (let i = choices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [choices[i], choices[j]] = [choices[j], choices[i]];
+    }
+    const row = document.getElementById('da2Choices');
+    row.innerHTML = '';
+    choices.forEach(val => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = val;
+        btn.addEventListener('click', () => da2Check(val, btn));
+        row.appendChild(btn);
+    });
+
+    document.getElementById('da2Visual').style.display = 'none';
+    document.getElementById('da2Feedback').textContent = '';
+    document.getElementById('da2Next').classList.remove('btn-pulse');
+}
+
+function da2Check(val, btn) {
+    if (da2Answered) return;
+    const { frac, integer, result } = da2Task;
+    const fb = document.getElementById('da2Feedback');
+
+    if (val === result) {
+        da2Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#da2Choices .choice-btn').forEach(b => { b.disabled = true; });
+        if (!da2HadError) { da2Streak++; } else { da2Streak = 0; }
+        setStreak('da2Streak', da2Streak);
+        fb.textContent = '🐱 Rätt! ' + frac.n + '/' + frac.d + ' · ' + integer + ' = ' + result + '. Jättebra, Avalin!';
+
+        const k2 = integer / frac.d;
+        const boxWrap2 = document.getElementById('da2VisBoxes');
+        boxWrap2.innerHTML = '';
+        for (let i = 0; i < frac.d; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'part-cell' + (i < frac.n ? ' active' : '');
+            cell.textContent = k2;
+            boxWrap2.appendChild(cell);
+        }
+        document.getElementById('da2VisLabel').textContent =
+            frac.n + ' av ' + frac.d + ' grupper  →  ' + result;
+        document.getElementById('da2Visual').style.display = 'block';
+        document.getElementById('da2Next').classList.add('btn-pulse');
+    } else {
+        da2HadError = true;
+        btn.classList.add('err');
+        btn.disabled = true;
+        fb.textContent = 'Nästan! Dela upp i lika delar och ta ' + frac.n + ' av dem.';
+    }
+}
+
+document.getElementById('da2Next').addEventListener('click', buildDa2);
+buildDa2();
 </script>
 </body>
 </html>
