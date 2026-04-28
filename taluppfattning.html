@@ -212,6 +212,52 @@
             transition: background 0.15s;
         }
         .module-nav-link:hover { background: #e8f2ff; }
+
+        /* ── Modul 3: talföljder ── */
+        .seq-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin: 10px 0 18px;
+        }
+
+        .seq-num {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
+            min-width: 52px;
+        }
+
+        .seq-blank {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #4a90d9;
+            text-align: center;
+            min-width: 52px;
+            border-bottom: 3px solid #4a90d9;
+            padding-bottom: 2px;
+        }
+
+        .seq-arrow {
+            font-size: 1.1em;
+            color: #b8d4ef;
+            flex-shrink: 0;
+            user-select: none;
+        }
+
+        .level-badge {
+            display: inline-block;
+            font-size: 0.8em;
+            color: #8aaabf;
+            background: #f0f7ff;
+            border: 1.5px solid #cce0f5;
+            border-radius: 20px;
+            padding: 3px 12px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -258,6 +304,28 @@
 
     <p class="streak" id="m2Streak"></p>
     <div class="feedback" id="m2Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 3 ══════ -->
+<p class="section-title">Modul 3 – Talföljder</p>
+
+<div class="card">
+    <p class="task-label">Vilket tal saknas i följden?</p>
+
+    <div style="text-align:center">
+        <span class="level-badge" id="m3LevelLabel">Nivå 1</span>
+    </div>
+
+    <div class="seq-row" id="m3Seq"></div>
+
+    <div class="choice-row" id="m3Choices"></div>
+
+    <div class="btn-row">
+        <button class="btn-secondary" id="m3Next">Ny uppgift →</button>
+    </div>
+
+    <p class="streak" id="m3Streak"></p>
+    <div class="feedback" id="m3Feedback" aria-live="polite"></div>
 </div>
 
 <script>
@@ -508,6 +576,143 @@ function m2Check(val, btn) {
 document.getElementById('m2Next').addEventListener('click', buildM2);
 
 buildM2();
+
+/* ════════════════════════════════
+   Modul 3 – Talföljder
+════════════════════════════════ */
+
+const M3_LEVELS = [
+    { steps: [10, 100] },
+    { steps: [1000, 10000] },
+    { steps: [100000] }
+];
+
+let m3Streak = 0, m3Task = null, m3Answered = false, m3HadError = false;
+let m3Level = 0;        /* 0=Nivå 1, 1=Nivå 2, 2=Nivå 3 */
+let m3LevelStreak = 0;  /* rätta i rad utan fel på aktuell nivå */
+
+function fmtSeq(n) {
+    return new Intl.NumberFormat('sv-SE').format(n);
+}
+
+function genM3Task() {
+    const cfg  = M3_LEVELS[m3Level];
+    const step = cfg.steps[Math.floor(Math.random() * cfg.steps.length)];
+    const len  = Math.random() < 0.5 ? 3 : 4;
+
+    /* Startvärde: rent multiplum av step, plus liten offset på nivå 3 */
+    const startK  = Math.floor(Math.random() * 8) + 1;
+    const offset  = m3Level === 2
+        ? (Math.floor(Math.random() * 9) + 1) * (step / 20)
+        : 0;
+    const start = step * startK + offset;
+
+    const series = Array.from({ length: len }, (_, i) => start + step * i);
+
+    /* Saknad position: slumpat bland alla index */
+    const missingIdx = Math.floor(Math.random() * len);
+    const correct    = series[missingIdx];
+
+    /* Distraktorer: ±steg och ±dubbelsteg, filtrerat på positiva */
+    const distCands = [
+        correct + step, correct - step,
+        correct + 2 * step, correct - 2 * step
+    ].filter(v => v > 0 && v !== correct);
+
+    for (let i = distCands.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [distCands[i], distCands[j]] = [distCands[j], distCands[i]];
+    }
+    /* Säkerhetsnät om < 2 kandidater */
+    let ex = 3;
+    while (distCands.length < 2) { distCands.push(correct + step * ex++); }
+
+    return { series, missingIdx, correct, step, distractors: distCands.slice(0, 2) };
+}
+
+function buildM3() {
+    m3Task = genM3Task(); m3Answered = false; m3HadError = false;
+
+    /* Talföljd */
+    const seqEl = document.getElementById('m3Seq');
+    seqEl.innerHTML = '';
+    m3Task.series.forEach((num, i) => {
+        if (i > 0) {
+            const arr = document.createElement('span');
+            arr.className = 'seq-arrow';
+            arr.textContent = '→';
+            seqEl.appendChild(arr);
+        }
+        const el = document.createElement('span');
+        if (i === m3Task.missingIdx) {
+            el.className = 'seq-blank';
+            el.textContent = '___';
+        } else {
+            el.className = 'seq-num';
+            el.textContent = fmtSeq(num);
+        }
+        seqEl.appendChild(el);
+    });
+
+    /* Svarsalternativ */
+    const choices = [m3Task.correct, ...m3Task.distractors];
+    for (let i = choices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [choices[i], choices[j]] = [choices[j], choices[i]];
+    }
+    const row = document.getElementById('m3Choices');
+    row.innerHTML = '';
+    choices.forEach(val => {
+        const btn = document.createElement('button');
+        btn.className   = 'choice-btn';
+        btn.textContent = fmtSeq(val);
+        btn.addEventListener('click', () => m3Check(val, btn));
+        row.appendChild(btn);
+    });
+
+    document.getElementById('m3LevelLabel').textContent = 'Nivå ' + (m3Level + 1);
+    document.getElementById('m3Feedback').textContent   = '';
+    document.getElementById('m3Next').classList.remove('btn-pulse');
+}
+
+function m3Check(val, btn) {
+    if (m3Answered) return;
+    const fb = document.getElementById('m3Feedback');
+
+    if (val === m3Task.correct) {
+        m3Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m3Choices .choice-btn').forEach(b => { b.disabled = true; });
+
+        if (!m3HadError) {
+            m3Streak++;
+            m3LevelStreak++;
+        } else {
+            m3Streak = 0;
+            m3LevelStreak = 0;
+        }
+        setStreak('m3Streak', m3Streak);
+
+        if (m3LevelStreak >= 3 && m3Level < M3_LEVELS.length - 1) {
+            m3Level++;
+            m3LevelStreak = 0;
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi ännu större tal!';
+        } else {
+            fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
+        }
+        document.getElementById('m3Next').classList.add('btn-pulse');
+    } else {
+        m3HadError = true;
+        m3LevelStreak = 0;
+        btn.classList.add('err');
+        btn.disabled = true;
+        fb.textContent = 'Nästan – det var ' + fmtSeq(m3Task.correct) + '. Titta på steget i följden!';
+    }
+}
+
+document.getElementById('m3Next').addEventListener('click', buildM3);
+
+buildM3();
 </script>
 </body>
 </html>
