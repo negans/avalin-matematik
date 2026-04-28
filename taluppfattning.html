@@ -328,6 +328,26 @@
     <div class="feedback" id="m3Feedback" aria-live="polite"></div>
 </div>
 
+<!-- ══════ Modul 4 ══════ -->
+<p class="section-title">Modul 4 – Jämföra tal</p>
+
+<div class="card">
+    <p class="task-label">Vilket tal är <strong>störst</strong>?</p>
+
+    <div style="text-align:center">
+        <span class="level-badge" id="m4LevelLabel">Nivå 1</span>
+    </div>
+
+    <div class="choice-row" id="m4Choices"></div>
+
+    <div class="btn-row">
+        <button class="btn-secondary" id="m4Next">Ny uppgift →</button>
+    </div>
+
+    <p class="streak" id="m4Streak"></p>
+    <div class="feedback" id="m4Feedback" aria-live="polite"></div>
+</div>
+
 <script>
 /* ── Streak helper ── */
 function setStreak(id, n) {
@@ -713,6 +733,86 @@ function m3Check(val, btn) {
 document.getElementById('m3Next').addEventListener('click', buildM3);
 
 buildM3();
+
+/* ════════════════════════════════
+   Modul 4 – Jämföra tal
+════════════════════════════════ */
+
+const M4_LEVELS = [
+    { min: 10,     max: 999,    deltaMin: 10,   deltaMax: 90    },
+    { min: 1000,   max: 99999,  deltaMin: 50,   deltaMax: 1000  },
+    { min: 100000, max: 999999, deltaMin: 1000, deltaMax: 50000 }
+];
+
+let m4Streak = 0, m4Task = null, m4Answered = false, m4HadError = false;
+let m4Level = 0, m4LevelStreak = 0;
+
+function genM4Task() {
+    const cfg = M4_LEVELS[m4Level];
+
+    /* A mitt i spannet så att B alltid ryms i range */
+    const safeMin = cfg.min + cfg.deltaMax;
+    const safeMax = cfg.max - cfg.deltaMax;
+    const A = Math.floor(Math.random() * (safeMax - safeMin + 1)) + safeMin;
+
+    const delta = Math.floor(Math.random() * (cfg.deltaMax - cfg.deltaMin + 1)) + cfg.deltaMin;
+    const B     = Math.random() < 0.5 ? A + delta : A - delta;
+
+    const correct = Math.max(A, B);
+    return { A, B, correct };
+}
+
+function buildM4() {
+    m4Task = genM4Task(); m4Answered = false; m4HadError = false;
+
+    const row = document.getElementById('m4Choices');
+    row.innerHTML = '';
+    [m4Task.A, m4Task.B].forEach(val => {
+        const btn = document.createElement('button');
+        btn.className   = 'choice-btn';
+        btn.textContent = new Intl.NumberFormat('sv-SE').format(val);
+        btn.addEventListener('click', () => m4Check(val, btn));
+        row.appendChild(btn);
+    });
+
+    document.getElementById('m4LevelLabel').textContent = 'Nivå ' + (m4Level + 1);
+    document.getElementById('m4Feedback').textContent   = '';
+    document.getElementById('m4Next').classList.remove('btn-pulse');
+}
+
+function m4Check(val, btn) {
+    if (m4Answered) return;
+    const fb = document.getElementById('m4Feedback');
+
+    if (val === m4Task.correct) {
+        m4Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m4Choices .choice-btn').forEach(b => { b.disabled = true; });
+
+        if (!m4HadError) { m4Streak++; m4LevelStreak++; }
+        else             { m4Streak = 0; m4LevelStreak = 0; }
+        setStreak('m4Streak', m4Streak);
+
+        if (m4LevelStreak >= 3 && m4Level < M4_LEVELS.length - 1) {
+            m4Level++;
+            m4LevelStreak = 0;
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi större tal!';
+        } else {
+            fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
+        }
+        document.getElementById('m4Next').classList.add('btn-pulse');
+    } else {
+        m4HadError = true;
+        m4LevelStreak = 0;
+        btn.classList.add('err');
+        btn.disabled = true;
+        fb.textContent = 'Nästan – ' + new Intl.NumberFormat('sv-SE').format(m4Task.correct) + ' är störst.';
+    }
+}
+
+document.getElementById('m4Next').addEventListener('click', buildM4);
+
+buildM4();
 </script>
 </body>
 </html>
