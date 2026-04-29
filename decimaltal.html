@@ -169,6 +169,13 @@
         .choice-btn-text:disabled { cursor: not-allowed; }
         .choice-btn-text.ok  { background: #f0fff4; border-color: #2ecc71; color: #27ae60; opacity: 1; }
         .choice-btn-text.err { background: #fff5f5; border-color: #e74c3c; color: #c0392b; opacity: 0.45; }
+
+        /* Modul 3: tallinje */
+        .number-line-wrap {
+            width: 100%;
+            max-width: 400px;
+            margin: 6px auto 20px;
+        }
     </style>
 </head>
 <body>
@@ -219,6 +226,52 @@
 
     <p class="streak" id="m2Streak"></p>
     <div class="feedback" id="m2Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 3 ══════ -->
+<p class="section-title">Modul 3 – Decimaltal på tallinjen</p>
+
+<div class="card">
+    <p class="task-label">Vilket decimaltal visar punkten?</p>
+
+    <div style="text-align:center">
+        <span class="level-badge" id="m3LevelLabel">Nivå 1</span>
+    </div>
+
+    <div class="number-line-wrap">
+        <svg id="m3SVG" width="100%" style="display:block; overflow:visible"></svg>
+    </div>
+
+    <div class="choice-row" id="m3Choices"></div>
+
+    <div class="btn-row">
+        <button class="btn-secondary" id="m3Next">Ny uppgift →</button>
+    </div>
+
+    <p class="streak" id="m3Streak"></p>
+    <div class="feedback" id="m3Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 4 ══════ -->
+<p class="section-title">Modul 4 – Addition och subtraktion</p>
+
+<div class="card">
+    <p class="task-label">Vad blir resultatet?</p>
+
+    <div style="text-align:center">
+        <span class="level-badge" id="m4LevelLabel">Nivå 1</span>
+    </div>
+
+    <p id="m4Expr" style="text-align:center; font-size:2em; font-weight:bold; color:#2c3e50; margin:8px 0 20px; letter-spacing:0.03em"></p>
+
+    <div class="choice-row" id="m4Choices"></div>
+
+    <div class="btn-row">
+        <button class="btn-secondary" id="m4Next">Ny uppgift →</button>
+    </div>
+
+    <p class="streak" id="m4Streak"></p>
+    <div class="feedback" id="m4Feedback" aria-live="polite"></div>
 </div>
 
 <script>
@@ -501,6 +554,315 @@ function m2Check(disp, btn) {
 
 document.getElementById('m2Next').addEventListener('click', buildM2);
 buildM2();
+
+/* ════════════════════════════════
+   Modul 3 – Decimaltal på tallinjen
+════════════════════════════════ */
+
+let m3Streak = 0, m3Task = null, m3Answered = false, m3HadError = false;
+let m3Level = 0, m3LevelStreak = 0;
+
+function svgEl(tag) {
+    return document.createElementNS('http://www.w3.org/2000/svg', tag);
+}
+
+function drawM3SVG(pos, leftLabel, rightLabel) {
+    const svg  = document.getElementById('m3SVG');
+    const W = 400, H = 72, lineY = 36;
+    const x0 = 50, x1 = 350, len = x1 - x0;
+    const steps = 10;
+
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.innerHTML = '';
+
+    /* Huvudlinje */
+    const ln = svgEl('line');
+    ln.setAttribute('x1', x0); ln.setAttribute('y1', lineY);
+    ln.setAttribute('x2', x1); ln.setAttribute('y2', lineY);
+    ln.setAttribute('stroke', '#b8d4ef'); ln.setAttribute('stroke-width', '3');
+    svg.appendChild(ln);
+
+    /* Streck och etiketter vid ändpunkterna */
+    for (let i = 0; i <= steps; i++) {
+        const x       = x0 + (len / steps) * i;
+        const isMajor = i === 0 || i === steps;
+        const tickH   = isMajor ? 16 : 8;
+
+        const t = svgEl('line');
+        t.setAttribute('x1', x); t.setAttribute('y1', lineY - tickH / 2);
+        t.setAttribute('x2', x); t.setAttribute('y2', lineY + tickH / 2);
+        t.setAttribute('stroke', isMajor ? '#2c3e50' : '#8aaabf');
+        t.setAttribute('stroke-width', isMajor ? '2' : '1.5');
+        svg.appendChild(t);
+
+        if (isMajor) {
+            const lbl = svgEl('text');
+            lbl.setAttribute('x', x);
+            lbl.setAttribute('y', lineY + tickH / 2 + 16);
+            lbl.setAttribute('text-anchor', 'middle');
+            lbl.setAttribute('font-size', '14');
+            lbl.setAttribute('font-family', 'Arial, sans-serif');
+            lbl.setAttribute('fill', '#2c3e50');
+            lbl.textContent = i === 0 ? leftLabel : rightLabel;
+            svg.appendChild(lbl);
+        }
+    }
+
+    /* Markerad punkt */
+    const mx = x0 + (len / steps) * pos;
+
+    const dot = svgEl('circle');
+    dot.setAttribute('cx', mx); dot.setAttribute('cy', lineY);
+    dot.setAttribute('r', '8');
+    dot.setAttribute('fill', '#4a90d9');
+    dot.setAttribute('stroke', 'white'); dot.setAttribute('stroke-width', '2.5');
+    svg.appendChild(dot);
+
+    const q = svgEl('text');
+    q.setAttribute('x', mx); q.setAttribute('y', lineY - 14);
+    q.setAttribute('text-anchor', 'middle');
+    q.setAttribute('font-size', '15'); q.setAttribute('font-weight', 'bold');
+    q.setAttribute('font-family', 'Arial, sans-serif'); q.setAttribute('fill', '#4a90d9');
+    q.textContent = '?';
+    svg.appendChild(q);
+}
+
+function genM3Task() {
+    const pos = rnd(1, 9);
+    let leftLabel, rightLabel, correct, pool = [];
+
+    if (m3Level === 0) {
+        /* Nivå 1: 0 – 1, tiondelar */
+        leftLabel  = '0';
+        rightLabel = '1';
+        correct    = '0,' + pos;
+        for (const d of [pos-1, pos+1, pos-2, pos+2, pos-3, pos+3]) {
+            if (d >= 1 && d <= 9) pool.push('0,' + d);
+        }
+    } else if (m3Level === 1) {
+        /* Nivå 2: 0,X0 – 0,(X+1)0, hundradelar */
+        const tenth = rnd(1, 8);
+        leftLabel   = '0,' + tenth + '0';
+        rightLabel  = '0,' + (tenth + 1) + '0';
+        correct     = '0,' + tenth + pos;
+        pool.push('0,' + pos);                                  /* vanlig fälla: förväxlar tiondel */
+        for (const d of [pos-1, pos+1, pos-2, pos+2, pos-3, pos+3]) {
+            if (d >= 1 && d <= 9) pool.push('0,' + tenth + d);
+        }
+    } else {
+        /* Nivå 3: N – N+1, tiondelar */
+        const N    = rnd(1, 9);
+        leftLabel  = '' + N;
+        rightLabel = '' + (N + 1);
+        correct    = N + ',' + pos;
+        pool.push((N + 1) + ',' + pos);
+        if (N > 1) pool.push((N - 1) + ',' + pos);
+        for (const d of [pos-1, pos+1, pos-2, pos+2, pos-3, pos+3]) {
+            if (d >= 1 && d <= 9) pool.push(N + ',' + d);
+        }
+    }
+
+    const seen = new Set([correct]);
+    const distractors = [];
+    for (const c of pool) {
+        if (!seen.has(c)) { seen.add(c); distractors.push(c); }
+        if (distractors.length >= 3) break;
+    }
+
+    return { pos, leftLabel, rightLabel, correct, distractors };
+}
+
+function buildM3() {
+    m3Task = genM3Task(); m3Answered = false; m3HadError = false;
+
+    drawM3SVG(m3Task.pos, m3Task.leftLabel, m3Task.rightLabel);
+
+    const choices = [m3Task.correct, ...m3Task.distractors];
+    for (let i = choices.length - 1; i > 0; i--) {
+        const j = rnd(0, i);
+        [choices[i], choices[j]] = [choices[j], choices[i]];
+    }
+
+    const row = document.getElementById('m3Choices');
+    row.innerHTML = '';
+    choices.forEach(val => {
+        const btn = document.createElement('button');
+        btn.className   = 'choice-btn';
+        btn.textContent = val;
+        btn.addEventListener('click', () => m3Check(val, btn));
+        row.appendChild(btn);
+    });
+
+    document.getElementById('m3LevelLabel').textContent = 'Nivå ' + (m3Level + 1);
+    document.getElementById('m3Feedback').textContent   = '';
+    document.getElementById('m3Next').classList.remove('btn-pulse');
+}
+
+function m3Check(val, btn) {
+    if (m3Answered) return;
+    const fb = document.getElementById('m3Feedback');
+
+    if (val === m3Task.correct) {
+        m3Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m3Choices .choice-btn').forEach(b => { b.disabled = true; });
+
+        if (!m3HadError) { m3Streak++; m3LevelStreak++; }
+        else             { m3Streak = 0; m3LevelStreak = 0; }
+        setStreak('m3Streak', m3Streak);
+
+        if (m3LevelStreak >= 3 && m3Level < 2) {
+            m3Level++;
+            m3LevelStreak = 0;
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi svårare tallinjer!';
+        } else {
+            fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
+        }
+        document.getElementById('m3Next').classList.add('btn-pulse');
+    } else {
+        m3HadError    = true;
+        m3LevelStreak = 0;
+        btn.classList.add('err');
+        btn.disabled = true;
+        fb.textContent = 'Nästan – punkten visar ' + m3Task.correct + '. Räkna stegen från vänster!';
+    }
+}
+
+document.getElementById('m3Next').addEventListener('click', buildM3);
+buildM3();
+
+/* ════════════════════════════════
+   Modul 4 – Addition och subtraktion
+════════════════════════════════ */
+
+let m4Streak = 0, m4Task = null, m4Answered = false, m4HadError = false;
+let m4Level = 0, m4LevelStreak = 0;
+
+function fmtOp(v) {
+    /* v i hundradelar (t.ex. 125 → "1,25", 130 → "1,3") */
+    const whole     = Math.floor(v / 100);
+    const frac      = v % 100;
+    const tenths    = Math.floor(frac / 10);
+    const hundredths = frac % 10;
+    if (hundredths === 0) return whole + ',' + tenths;
+    return whole + ',' + tenths + hundredths;
+}
+
+function genM4Task() {
+    let a, b, op, result;
+
+    if (m4Level === 0) {
+        /* Nivå 1: tiondelar, svar 0–5
+           Allt i hundradelar (multiplar av 10). Ingen retry behövs. */
+        op = Math.random() < 0.5 ? '+' : '-';
+        if (op === '+') {
+            a = rnd(1, 24) * 10;              /* 0,10 – 2,40 */
+            b = rnd(1, 24) * 10;
+            result = a + b;                    /* max 480 ✓ */
+        } else {
+            a = rnd(2, 39) * 10;              /* 0,20 – 3,90 */
+            b = rnd(1, Math.floor(a / 10) - 1) * 10;   /* b < a → result > 0 */
+            result = a - b;
+        }
+
+    } else if (m4Level === 1) {
+        /* Nivå 2: hundradelar, båda operanderna X,YZ (Z ≠ 0) */
+        do {
+            a  = rnd(0, 2) * 100 + rnd(0, 9) * 10 + rnd(1, 9);
+            b  = rnd(0, 1) * 100 + rnd(0, 9) * 10 + rnd(1, 9);
+            op = Math.random() < 0.5 ? '+' : '-';
+            if (op === '-' && a <= b) [a, b] = [b, a];
+            result = op === '+' ? a + b : a - b;
+        } while (result <= 0 || result > 999);
+
+    } else {
+        /* Nivå 3: blandade — en operand tiondelar, en hundradel */
+        do {
+            a  = rnd(1, 3) * 100 + rnd(1, 9) * 10 + rnd(1, 9);  /* alltid hundradel */
+            b  = Math.random() < 0.5
+                ? rnd(1, 29) * 10                                  /* tiondel */
+                : rnd(0, 1) * 100 + rnd(0, 9) * 10 + rnd(1, 9);  /* hundradel */
+            op = Math.random() < 0.5 ? '+' : '-';
+            if (op === '-' && a <= b) [a, b] = [b, a];
+            result = op === '+' ? a + b : a - b;
+        } while (result <= 0 || result > 999);
+    }
+
+    /* Distraktorer: ±steg, inga negativa */
+    const seen   = new Set([result]);
+    const deltas = m4Level === 0 ? [10, -10, 20, -20, 30, -30] : [1, -1, 10, -10, 11, -11, 2, -2];
+    const distractors = [];
+    for (const d of deltas) {
+        const v = result + d;
+        if (v > 0 && !seen.has(v)) { seen.add(v); distractors.push(v); }
+        if (distractors.length >= 3) break;
+    }
+
+    const opChar = op === '+' ? ' + ' : ' − ';
+    const label  = fmtOp(a) + opChar + fmtOp(b) + ' = ?';
+
+    return { result, distractors, label };
+}
+
+function buildM4() {
+    m4Task = genM4Task(); m4Answered = false; m4HadError = false;
+
+    document.getElementById('m4Expr').textContent = m4Task.label;
+
+    const choices = [m4Task.result, ...m4Task.distractors];
+    for (let i = choices.length - 1; i > 0; i--) {
+        const j = rnd(0, i);
+        [choices[i], choices[j]] = [choices[j], choices[i]];
+    }
+
+    const row = document.getElementById('m4Choices');
+    row.innerHTML = '';
+    choices.forEach(val => {
+        const btn = document.createElement('button');
+        btn.className   = 'choice-btn';
+        btn.textContent = fmtOp(val);
+        btn.addEventListener('click', () => m4Check(val, btn));
+        row.appendChild(btn);
+    });
+
+    document.getElementById('m4LevelLabel').textContent = 'Nivå ' + (m4Level + 1);
+    document.getElementById('m4Feedback').textContent   = '';
+    document.getElementById('m4Next').classList.remove('btn-pulse');
+}
+
+function m4Check(val, btn) {
+    if (m4Answered) return;
+    const fb = document.getElementById('m4Feedback');
+
+    if (val === m4Task.result) {
+        m4Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m4Choices .choice-btn').forEach(b => { b.disabled = true; });
+
+        if (!m4HadError) { m4Streak++; m4LevelStreak++; }
+        else             { m4Streak = 0; m4LevelStreak = 0; }
+        setStreak('m4Streak', m4Streak);
+
+        if (m4LevelStreak >= 3 && m4Level < 2) {
+            m4Level++;
+            m4LevelStreak = 0;
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi svårare tal!';
+        } else {
+            fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
+        }
+        document.getElementById('m4Next').classList.add('btn-pulse');
+    } else {
+        m4HadError    = true;
+        m4LevelStreak = 0;
+        btn.classList.add('err');
+        btn.disabled = true;
+        fb.textContent = 'Nästan – rätt svar är ' + fmtOp(m4Task.result) + '. Räkna tiondelar och hundradelar var för sig!';
+    }
+}
+
+document.getElementById('m4Next').addEventListener('click', buildM4);
+buildM4();
 </script>
 </body>
 </html>
