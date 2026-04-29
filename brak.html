@@ -582,6 +582,22 @@
             color: white;
             border-color: #3a7fc8;
         }
+
+        /* ── Level badge (M7, M8) ── */
+        .level-badge {
+            display: inline-block;
+            background: #e8f2ff;
+            color: #4a90d9;
+            border: 1.5px solid #cce0f5;
+            border-radius: 20px;
+            padding: 3px 14px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        /* fraction inside choice-btn */
+        .choice-btn .fs { font-size: 0.95em; line-height: 1.2; }
+        .choice-btn .fs .fn { border-bottom-color: currentColor; }
     </style>
 </head>
 <body>
@@ -771,6 +787,36 @@
 
     <p class="streak" id="m6Streak"></p>
     <div class="feedback" id="m6Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 7 ══════ -->
+<p class="section-title">Modul 7 – Addition med bråk</p>
+<div class="card">
+    <div style="text-align:center; margin-bottom:10px">
+        <span class="level-badge" id="m7LevelBadge">Nivå 1</span>
+    </div>
+    <p class="task-label" id="m7Label"></p>
+    <div class="choice-row" id="m7Choices"></div>
+    <div class="btn-row">
+        <button class="btn-secondary" id="m7Next">Ny uppgift →</button>
+    </div>
+    <p class="streak" id="m7Streak"></p>
+    <div class="feedback" id="m7Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 8 ══════ -->
+<p class="section-title">Modul 8 – Subtraktion med bråk</p>
+<div class="card">
+    <div style="text-align:center; margin-bottom:10px">
+        <span class="level-badge" id="m8LevelBadge">Nivå 1</span>
+    </div>
+    <p class="task-label" id="m8Label"></p>
+    <div class="choice-row" id="m8Choices"></div>
+    <div class="btn-row">
+        <button class="btn-secondary" id="m8Next">Ny uppgift →</button>
+    </div>
+    <p class="streak" id="m8Streak"></p>
+    <div class="feedback" id="m8Feedback" aria-live="polite"></div>
 </div>
 
 <script>
@@ -1751,6 +1797,286 @@ document.getElementById('m6Next').addEventListener('click',  m6Next);
 });
 
 m6Next();
+
+/* ════════════════════════════════
+   GCD / simplify helpers (M7 & M8)
+════════════════════════════════ */
+function gcd(a, b) { while (b) { let t = b; b = a % b; a = t; } return a; }
+function simplify(n, d) { const g = gcd(n, d); return { n: n / g, d: d / g }; }
+
+/* ════════════════════════════════
+   Modul 7 – Addition med bråk
+════════════════════════════════ */
+let m7Level = 1, m7CleanCount = 0, m7Streak = 0;
+let m7Task = null, m7Answered = false, m7HadError = false, m7Timer = null;
+
+function genM7Task() {
+    const D1 = [2, 3, 4, 5];
+    const D2 = [2, 3, 4, 5, 6, 8, 10];
+    const D3 = [4, 6, 8, 9, 10];
+    let d, a, b, attempts = 0;
+
+    if (m7Level === 1) {
+        d = D1[Math.floor(Math.random() * D1.length)];
+        a = 1 + Math.floor(Math.random() * (d - 1));
+        b = 1 + Math.floor(Math.random() * (d - a || 1));
+        if (a + b > d) b = d - a;
+        if (b < 1) b = 1;
+    } else if (m7Level === 2) {
+        d = D2[Math.floor(Math.random() * D2.length)];
+        a = 1 + Math.floor(Math.random() * (d - 1));
+        b = 1 + Math.floor(Math.random() * (d - 1));
+    } else {
+        do {
+            d = D3[Math.floor(Math.random() * D3.length)];
+            a = 1 + Math.floor(Math.random() * (d - 1));
+            b = 1 + Math.floor(Math.random() * (d - 1));
+            attempts++;
+        } while (gcd(a + b, d) <= 1 && attempts < 60);
+    }
+
+    const rawN = a + b;
+    const ans  = simplify(rawN, d);
+    return { d, a, b, rawN, ansN: ans.n, ansD: ans.d };
+}
+
+function m7Distractors(task) {
+    const { d, a, b, rawN, ansN, ansD } = task;
+    const cands = [
+        simplify(ansN + 1, ansD),
+        ansN > 1 ? simplify(ansN - 1, ansD) : null,
+        simplify(rawN, d * 2),
+        (rawN !== ansN || d !== ansD) ? { n: rawN, d } : null,
+        simplify(a, d),
+        simplify(b, d),
+    ].filter(Boolean);
+
+    const seen = new Set([ansN + '/' + ansD]);
+    const out  = [];
+    for (const fr of cands) {
+        if (fr.n <= 0 || fr.d <= 0) continue;
+        const s = simplify(fr.n, fr.d);
+        const k = s.n + '/' + s.d;
+        if (seen.has(k)) continue;
+        seen.add(k);
+        out.push(s);
+        if (out.length === 3) break;
+    }
+    for (let ex = 1; out.length < 3; ex++) {
+        const k = ex + '/' + ansD;
+        if (!seen.has(k)) { seen.add(k); out.push({ n: ex, d: ansD }); }
+    }
+    return out;
+}
+
+function buildM7() {
+    if (m7Timer) { clearTimeout(m7Timer); m7Timer = null; }
+    m7Task     = genM7Task();
+    m7Answered = false;
+    m7HadError = false;
+
+    document.getElementById('m7LevelBadge').textContent = 'Nivå ' + m7Level;
+    document.getElementById('m7Next').classList.remove('btn-pulse');
+    document.getElementById('m7Feedback').textContent = '';
+    document.getElementById('m7Streak').textContent = '';
+
+    const { d, a, b, ansN, ansD } = m7Task;
+    document.getElementById('m7Label').innerHTML =
+        fracHTML(a, d) + '&nbsp;&nbsp;+&nbsp;&nbsp;' + fracHTML(b, d) + '&nbsp;&nbsp;=&nbsp;&nbsp;?';
+
+    const choices = [{ n: ansN, d: ansD }, ...m7Distractors(m7Task)];
+    for (let i = choices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [choices[i], choices[j]] = [choices[j], choices[i]];
+    }
+
+    const row = document.getElementById('m7Choices');
+    row.innerHTML = '';
+    choices.forEach(fr => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.innerHTML = fracHTML(fr.n, fr.d);
+        btn.addEventListener('click', () => m7Check(fr, btn));
+        row.appendChild(btn);
+    });
+}
+
+function m7Check(fr, btn) {
+    if (m7Answered) return;
+    const { ansN, ansD, d, a, b, rawN } = m7Task;
+    const fb      = document.getElementById('m7Feedback');
+    const correct = fr.n === ansN && fr.d === ansD;
+
+    if (correct) {
+        m7Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m7Choices .choice-btn').forEach(b => { b.disabled = true; });
+
+        if (!m7HadError) { m7Streak++; m7CleanCount++; } else { m7Streak = 0; m7CleanCount = 0; }
+        setStreak('m7Streak', m7Streak);
+        document.getElementById('m7Next').classList.add('btn-pulse');
+
+        let msg = '🐱 Rätt! ' + a + '/' + d + ' + ' + b + '/' + d + ' = ' + rawN + '/' + d;
+        if (rawN !== ansN || d !== ansD) msg += ' = ' + ansN + '/' + ansD;
+        fb.textContent = msg + '. Jättebra, Avalin!';
+
+        if (m7CleanCount >= 3 && m7Level < 3) {
+            m7Level++;
+            m7CleanCount = 0;
+            m7Timer = setTimeout(() => {
+                document.getElementById('m7Feedback').textContent += ' 🌟 Nivå ' + m7Level + '!';
+                document.getElementById('m7LevelBadge').textContent = 'Nivå ' + m7Level;
+                m7Timer = null;
+            }, 700);
+        }
+    } else {
+        m7HadError = true;
+        btn.classList.add('err');
+        btn.disabled = true;
+        m7Streak = 0; setStreak('m7Streak', 0);
+        fb.textContent = 'Inte riktigt – addera täljarna och behåll nämnaren ' + d + '.';
+        document.getElementById('m7Next').classList.remove('btn-pulse');
+    }
+}
+
+document.getElementById('m7Next').addEventListener('click', buildM7);
+buildM7();
+
+/* ════════════════════════════════
+   Modul 8 – Subtraktion med bråk
+════════════════════════════════ */
+let m8Level = 1, m8CleanCount = 0, m8Streak = 0;
+let m8Task = null, m8Answered = false, m8HadError = false, m8Timer = null;
+
+function genM8Task() {
+    const D1 = [3, 4, 5];
+    const D2 = [3, 4, 5, 6, 8, 10];
+    const D3 = [4, 6, 8, 9, 10];
+    let d, a, b, attempts = 0;
+
+    if (m8Level === 1) {
+        d = D1[Math.floor(Math.random() * D1.length)];
+        a = 2 + Math.floor(Math.random() * (d - 2));
+        b = 1 + Math.floor(Math.random() * (a - 1));
+    } else if (m8Level === 2) {
+        d = D2[Math.floor(Math.random() * D2.length)];
+        a = 2 + Math.floor(Math.random() * (d - 2));
+        b = 1 + Math.floor(Math.random() * (a - 1));
+    } else {
+        do {
+            d = D3[Math.floor(Math.random() * D3.length)];
+            a = 2 + Math.floor(Math.random() * (d - 2));
+            b = 1 + Math.floor(Math.random() * (a - 1));
+            attempts++;
+        } while (gcd(a - b, d) <= 1 && attempts < 60);
+    }
+
+    const rawN = a - b;
+    const ans  = simplify(rawN, d);
+    return { d, a, b, rawN, ansN: ans.n, ansD: ans.d };
+}
+
+function m8Distractors(task) {
+    const { d, a, b, rawN, ansN, ansD } = task;
+    const cands = [
+        simplify(ansN + 1, ansD),
+        ansN > 1 ? simplify(ansN - 1, ansD) : null,
+        simplify(a + b, d),
+        (rawN !== ansN || d !== ansD) ? { n: rawN, d } : null,
+        simplify(a, d),
+        simplify(b, d),
+    ].filter(Boolean);
+
+    const seen = new Set([ansN + '/' + ansD]);
+    const out  = [];
+    for (const fr of cands) {
+        if (fr.n <= 0 || fr.d <= 0) continue;
+        const s = simplify(fr.n, fr.d);
+        const k = s.n + '/' + s.d;
+        if (seen.has(k)) continue;
+        seen.add(k);
+        out.push(s);
+        if (out.length === 3) break;
+    }
+    for (let ex = 1; out.length < 3; ex++) {
+        const k = ex + '/' + ansD;
+        if (!seen.has(k)) { seen.add(k); out.push({ n: ex, d: ansD }); }
+    }
+    return out;
+}
+
+function buildM8() {
+    if (m8Timer) { clearTimeout(m8Timer); m8Timer = null; }
+    m8Task     = genM8Task();
+    m8Answered = false;
+    m8HadError = false;
+
+    document.getElementById('m8LevelBadge').textContent = 'Nivå ' + m8Level;
+    document.getElementById('m8Next').classList.remove('btn-pulse');
+    document.getElementById('m8Feedback').textContent = '';
+    document.getElementById('m8Streak').textContent = '';
+
+    const { d, a, b, ansN, ansD } = m8Task;
+    document.getElementById('m8Label').innerHTML =
+        fracHTML(a, d) + '&nbsp;&nbsp;−&nbsp;&nbsp;' + fracHTML(b, d) + '&nbsp;&nbsp;=&nbsp;&nbsp;?';
+
+    const choices = [{ n: ansN, d: ansD }, ...m8Distractors(m8Task)];
+    for (let i = choices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [choices[i], choices[j]] = [choices[j], choices[i]];
+    }
+
+    const row = document.getElementById('m8Choices');
+    row.innerHTML = '';
+    choices.forEach(fr => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.innerHTML = fracHTML(fr.n, fr.d);
+        btn.addEventListener('click', () => m8Check(fr, btn));
+        row.appendChild(btn);
+    });
+}
+
+function m8Check(fr, btn) {
+    if (m8Answered) return;
+    const { ansN, ansD, d, a, b, rawN } = m8Task;
+    const fb      = document.getElementById('m8Feedback');
+    const correct = fr.n === ansN && fr.d === ansD;
+
+    if (correct) {
+        m8Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m8Choices .choice-btn').forEach(b => { b.disabled = true; });
+
+        if (!m8HadError) { m8Streak++; m8CleanCount++; } else { m8Streak = 0; m8CleanCount = 0; }
+        setStreak('m8Streak', m8Streak);
+        document.getElementById('m8Next').classList.add('btn-pulse');
+
+        let msg = '🐱 Rätt! ' + a + '/' + d + ' − ' + b + '/' + d + ' = ' + rawN + '/' + d;
+        if (rawN !== ansN || d !== ansD) msg += ' = ' + ansN + '/' + ansD;
+        fb.textContent = msg + '. Jättebra, Avalin!';
+
+        if (m8CleanCount >= 3 && m8Level < 3) {
+            m8Level++;
+            m8CleanCount = 0;
+            m8Timer = setTimeout(() => {
+                document.getElementById('m8Feedback').textContent += ' 🌟 Nivå ' + m8Level + '!';
+                document.getElementById('m8LevelBadge').textContent = 'Nivå ' + m8Level;
+                m8Timer = null;
+            }, 700);
+        }
+    } else {
+        m8HadError = true;
+        btn.classList.add('err');
+        btn.disabled = true;
+        m8Streak = 0; setStreak('m8Streak', 0);
+        fb.textContent = 'Inte riktigt – subtrahera täljarna och behåll nämnaren ' + d + '.';
+        document.getElementById('m8Next').classList.remove('btn-pulse');
+    }
+}
+
+document.getElementById('m8Next').addEventListener('click', buildM8);
+buildM8();
 </script>
 </body>
 </html>
