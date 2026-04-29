@@ -819,6 +819,21 @@
     <div class="feedback" id="m8Feedback" aria-live="polite"></div>
 </div>
 
+<!-- ══════ Modul 9 ══════ -->
+<p class="section-title">Modul 9 – Procent</p>
+<div class="card">
+    <div style="text-align:center; margin-bottom:10px">
+        <span class="level-badge" id="m9LevelBadge">Nivå 1</span>
+    </div>
+    <p class="task-label" id="m9Label" style="line-height:1.65"></p>
+    <div class="choice-row" id="m9Choices"></div>
+    <div class="btn-row">
+        <button class="btn-secondary" id="m9Next">Ny uppgift →</button>
+    </div>
+    <p class="streak" id="m9Streak"></p>
+    <div class="feedback" id="m9Feedback" aria-live="polite"></div>
+</div>
+
 <script>
 /* ── Streak helper ── */
 function setStreak(id, n) {
@@ -2077,6 +2092,158 @@ function m8Check(fr, btn) {
 
 document.getElementById('m8Next').addEventListener('click', buildM8);
 buildM8();
+
+/* ════════════════════════════════
+   Modul 9 – Procent
+════════════════════════════════ */
+let m9Level = 1, m9CleanCount = 0, m9Streak = 0;
+let m9Task = null, m9Answered = false, m9HadError = false, m9Timer = null;
+
+const M9_L3_TASKS = [
+    { q: 'En tröja kostar 200 kr. Du får 10% rabatt. Vad betalar du?',              ans: 180, unit: 'kr',          hint: '10% av 200 = 20 kr rabatt → 200 − 20 = 180',    distractors: [170, 190,  20] },
+    { q: 'En bok kostar 100 kr. Du får 20% rabatt. Vad betalar du?',                ans:  80, unit: 'kr',          hint: '20% av 100 = 20 kr rabatt → 100 − 20 = 80',     distractors: [ 60,  75,  20] },
+    { q: 'En jacka kostar 400 kr. Den är nedsatt med 25%. Vad kostar den nu?',      ans: 300, unit: 'kr',          hint: '25% av 400 = 100 kr rabatt → 400 − 100 = 300',  distractors: [350, 250, 100] },
+    { q: 'Skor kostar 300 kr. Du får 10% rabatt. Vad betalar du?',                  ans: 270, unit: 'kr',          hint: '10% av 300 = 30 kr rabatt → 300 − 30 = 270',    distractors: [280, 260,  30] },
+    { q: 'En cykel kostar 500 kr. Du får 20% rabatt. Vad betalar du?',              ans: 400, unit: 'kr',          hint: '20% av 500 = 100 kr rabatt → 500 − 100 = 400',  distractors: [450, 380, 100] },
+    { q: 'Det är 40 elever i klassen. 50% är flickor. Hur många flickor är det?',  ans:  20, unit: 'flickor',     hint: '50% = hälften → 40 ÷ 2 = 20',                   distractors: [ 10,  30,  25] },
+    { q: 'Det bor 200 djur i skogen. 25% är rävar. Hur många rävar är det?',        ans:  50, unit: 'rävar',       hint: '25% = en fjärdedel → 200 ÷ 4 = 50',             distractors: [ 25,  75, 100] },
+    { q: 'En klass har 30 elever. 10% är sjuka. Hur många är sjuka?',               ans:   3, unit: 'elever',      hint: '10% = tiondel → 30 ÷ 10 = 3',                   distractors: [  6,  10,   1] },
+    { q: 'Det finns 80 katter på djurhemmet. 50% är orange. Hur många är det?',     ans:  40, unit: 'katter',      hint: '50% = hälften → 80 ÷ 2 = 40',                   distractors: [ 20,  60,  50] },
+    { q: 'En påse har 20 godisbitar. 25% är röda. Hur många röda är det?',          ans:   5, unit: 'godisbitar',  hint: '25% = en fjärdedel → 20 ÷ 4 = 5',               distractors: [  4,  10,   2] },
+    { q: 'En pizza kostar 100 kr. Priset höjs med 10%. Vad kostar den nu?',         ans: 110, unit: 'kr',          hint: '10% av 100 = 10 kr mer → 100 + 10 = 110',       distractors: [ 90, 120,  10] },
+    { q: 'En resa kostar 200 kr. Priset stiger med 50%. Vad kostar den nu?',        ans: 300, unit: 'kr',          hint: '50% av 200 = 100 kr mer → 200 + 100 = 300',     distractors: [250, 350, 100] },
+    { q: 'Det är 60 bilar på parkeringen. 10% är röda. Hur många röda bilar?',      ans:   6, unit: 'bilar',       hint: '10% = tiondel → 60 ÷ 10 = 6',                   distractors: [ 10,  12,   3] },
+    { q: 'En tröja kostar 150 kr. Du får 20% rabatt. Vad betalar du?',              ans: 120, unit: 'kr',          hint: '20% av 150 = 30 kr rabatt → 150 − 30 = 120',    distractors: [130, 100,  30] },
+    { q: 'Det är 50 fåglar i trädet. 20% flyger iväg. Hur många är kvar?',          ans:  40, unit: 'fåglar',      hint: '20% av 50 = 10 flyger → 50 − 10 = 40',          distractors: [ 10,  45,  30] },
+    { q: 'En lampa kostar 200 kr. Priset sänks med 50%. Vad kostar den nu?',        ans: 100, unit: 'kr',          hint: '50% av 200 = 100 kr rabatt → 200 − 100 = 100',  distractors: [ 50, 150, 200] },
+];
+
+function genM9Task() {
+    if (m9Level === 1) {
+        const pcts = [5, 10, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90];
+        const pct  = pcts[Math.floor(Math.random() * pcts.length)];
+        return { level: 1, q: 'Vad är ' + pct + '% av 100?', ans: pct, pct, whole: 100, unit: '' };
+    }
+    if (m9Level === 2) {
+        const pcts   = [10, 20, 25, 50];
+        const wholes = [20, 40, 60, 80, 100, 120, 150, 200, 300];
+        let pct, whole, ans, tries = 0;
+        do {
+            pct   = pcts[Math.floor(Math.random() * pcts.length)];
+            whole = wholes[Math.floor(Math.random() * wholes.length)];
+            ans   = pct * whole / 100;
+            tries++;
+        } while (!Number.isInteger(ans) && tries < 60);
+        return { level: 2, q: 'Vad är ' + pct + '% av ' + whole + '?', ans, pct, whole, unit: '' };
+    }
+    const t = M9_L3_TASKS[Math.floor(Math.random() * M9_L3_TASKS.length)];
+    return { level: 3, pct: 0, whole: 0, ...t };
+}
+
+function m9NumDistractors(ans, pct, whole) {
+    const seen = new Set([ans]);
+    const cands = [
+        ans + 5, ans - 5, ans + 10, ans - 10,
+        pct, whole,
+        Math.round(ans * 2),
+        Math.round(ans / 2),
+    ].filter(v => v > 0 && Number.isInteger(v) && !seen.has(v));
+    const out = [];
+    const dedup = new Set([ans]);
+    for (const v of cands) {
+        if (dedup.has(v)) continue;
+        dedup.add(v);
+        out.push(v);
+        if (out.length === 3) break;
+    }
+    for (let ex = 1; out.length < 3; ex++) {
+        const v = ans + ex * 5;
+        if (!dedup.has(v)) { dedup.add(v); out.push(v); }
+    }
+    return out;
+}
+
+function buildM9() {
+    if (m9Timer) { clearTimeout(m9Timer); m9Timer = null; }
+    m9Task     = genM9Task();
+    m9Answered = false;
+    m9HadError = false;
+
+    document.getElementById('m9LevelBadge').textContent = 'Nivå ' + m9Level;
+    document.getElementById('m9Next').classList.remove('btn-pulse');
+    document.getElementById('m9Feedback').textContent = '';
+    document.getElementById('m9Streak').textContent = '';
+    document.getElementById('m9Label').textContent = m9Task.q;
+
+    const rawVals = m9Task.level === 3
+        ? [m9Task.ans, ...m9Task.distractors]
+        : [m9Task.ans, ...m9NumDistractors(m9Task.ans, m9Task.pct, m9Task.whole)];
+
+    for (let i = rawVals.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [rawVals[i], rawVals[j]] = [rawVals[j], rawVals[i]];
+    }
+
+    const row = document.getElementById('m9Choices');
+    row.innerHTML = '';
+    rawVals.forEach(val => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = m9Task.unit ? val + ' ' + m9Task.unit : String(val);
+        btn.addEventListener('click', () => m9Check(val, btn));
+        row.appendChild(btn);
+    });
+}
+
+function m9Check(val, btn) {
+    if (m9Answered) return;
+    const { ans, pct, whole, unit, hint, level } = m9Task;
+    const fb      = document.getElementById('m9Feedback');
+    const correct = val === ans;
+
+    if (correct) {
+        m9Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m9Choices .choice-btn').forEach(b => { b.disabled = true; });
+
+        if (!m9HadError) { m9Streak++; m9CleanCount++; } else { m9Streak = 0; m9CleanCount = 0; }
+        setStreak('m9Streak', m9Streak);
+        document.getElementById('m9Next').classList.add('btn-pulse');
+
+        if (level === 3) {
+            fb.textContent = '🐱 Rätt! ' + hint + '. Jättebra, Avalin!';
+        } else {
+            fb.textContent = '🐱 Rätt! ' + pct + '% av ' + whole + ' = ' + ans + '. Jättebra, Avalin!';
+        }
+
+        if (m9CleanCount >= 3 && m9Level < 3) {
+            m9Level++;
+            m9CleanCount = 0;
+            m9Timer = setTimeout(() => {
+                document.getElementById('m9Feedback').textContent += ' 🌟 Nivå ' + m9Level + '!';
+                document.getElementById('m9LevelBadge').textContent = 'Nivå ' + m9Level;
+                m9Timer = null;
+            }, 700);
+        }
+    } else {
+        m9HadError = true;
+        btn.classList.add('err');
+        btn.disabled = true;
+        m9Streak = 0; setStreak('m9Streak', 0);
+        if (level === 3) {
+            const step = hint ? hint.split('→')[0].trim() : 'räkna steg för steg';
+            fb.textContent = 'Inte riktigt – tänk: ' + step + '.';
+        } else if (level === 1) {
+            fb.textContent = 'Inte riktigt – ' + pct + '% av 100 är ' + pct + '. Procent betyder "av hundra"!';
+        } else {
+            fb.textContent = 'Inte riktigt – räkna ' + pct + '% av ' + whole + ': dela ' + whole + ' med 100 och ta ' + pct + ' delar.';
+        }
+        document.getElementById('m9Next').classList.remove('btn-pulse');
+    }
+}
+
+document.getElementById('m9Next').addEventListener('click', buildM9);
+buildM9();
 </script>
 </body>
 </html>
