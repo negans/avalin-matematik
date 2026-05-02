@@ -6,8 +6,80 @@
     <title>Decimaltal – Avalins Matematikverkstad</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        /* ── Misos varma skogstema (gäller bara decimaltal.html) ── */
+        :root {
+            --color-bg:             #FDF6EC;
+            --color-surface:        #FFF8F0;
+            --color-surface-alt:    #F5ECD7;
+            --color-border:         #EDE0C8;
+            --color-primary:        #D97B3A;
+            --color-primary-hover:  #E8955A;
+            --color-correct:        #6B9E6B;
+            --color-wrong:          #C0614A;
+            --color-text:           #4A3728;
+            --color-text-secondary: #7A5C42;
+            --color-heading:        #A0784A;
+            --color-badge:          #C8A882;
+
+            /* Remap delade --clr-*-variabler */
+            --clr-bg:         var(--color-bg);
+            --clr-card:       var(--color-surface);
+            --clr-hover:      var(--color-surface-alt);
+            --clr-primary:    var(--color-primary);
+            --clr-primary-dk: var(--color-primary-hover);
+            --clr-text:       var(--color-text);
+            --clr-text-sub:   var(--color-text);
+            --clr-text-dim:   var(--color-text-secondary);
+            --clr-nav:        var(--color-text-secondary);
+            --clr-border:     var(--color-border);
+            --clr-border-dk:  var(--color-border);
+            --clr-badge-bg:   var(--color-badge);
+            --clr-ok:         var(--color-correct);
+            --clr-ok-bg:      #EDF4ED;
+            --clr-ok-text:    var(--color-correct);
+            --clr-err:        var(--color-wrong);
+            --clr-err-bg:     #FAEDEA;
+            --clr-err-text:   var(--color-wrong);
+        }
+
+        /* section-title använder --clr-primary men ska ha heading-färg */
+        .section-title { color: var(--color-heading); }
+
+        /* Badge: ljus text mot #C8A882-bakgrund */
+        .level-badge { color: #FFF8F0; }
+
+        /* Svarsalternativ: explicit yta och tunn kantlinje */
+        .choice-btn, .choice-btn-text {
+            background: var(--color-surface);
+            border: 1.5px solid var(--color-border);
+        }
+
         /* Modul 3: tallinje */
         .number-line-wrap { width: 100%; max-width: 400px; margin: 6px auto 20px; }
+
+        #miso-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1000;
+        }
+        #miso-img { width: clamp(100px, 12vw, 140px); display: block; }
+        #miso-bubble {
+            display: none;
+            background: white;
+            border: 2px solid #e0c8a0;
+            border-radius: 16px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            font-size: 0.85em;
+            max-width: 160px;
+            text-align: center;
+            color: #3a3a3a;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
     </style>
 </head>
 <body>
@@ -106,7 +178,25 @@
     <div class="feedback" id="m4Feedback" aria-live="polite"></div>
 </div>
 
+<div id="miso-container">
+    <div id="miso-bubble"></div>
+    <img id="miso-img" src="images/miso/miso-neutral.webp" alt="Miso" width="100">
+</div>
+
 <script>
+const CAT_NAME = "Miso";
+
+let misoTimer = null;
+function showMiso(pose, text) {
+    const poses = { neutral: 'miso-neutral', glad: 'miso-glad', uppmuntrande: 'miso-uppmuntrande' };
+    document.getElementById('miso-img').src = 'images/miso/' + (poses[pose] || 'miso-neutral') + '.webp';
+    const bubble = document.getElementById('miso-bubble');
+    bubble.textContent = text;
+    bubble.style.display = 'block';
+    if (misoTimer) clearTimeout(misoTimer);
+    misoTimer = setTimeout(() => { bubble.style.display = 'none'; }, 3000);
+}
+
 /* ── Hjälpfunktioner ── */
 function setStreak(id, n) {
     document.getElementById(id).textContent = n >= 2 ? '🐱 ' + n + ' i rad' : '';
@@ -267,6 +357,7 @@ function m1Check(word, btn) {
         } else {
             fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
         }
+        showMiso('glad', 'Rätt svar! Jättebra!');
         document.getElementById('m1Next').classList.add('btn-pulse');
     } else {
         m1HadError    = true;
@@ -274,10 +365,11 @@ function m1Check(word, btn) {
         btn.classList.add('err');
         btn.disabled = true;
         fb.textContent = 'Nästan! ' + m1Task.display + ' heter "' + m1Task.correct + '".';
+        showMiso('uppmuntrande', 'Nästan – du klarar det!');
     }
 }
 
-document.getElementById('m1Next').addEventListener('click', buildM1);
+document.getElementById('m1Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildM1(); });
 buildM1();
 
 /* ════════════════════════════════
@@ -374,6 +466,7 @@ function m2Check(disp, btn) {
         } else {
             fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
         }
+        showMiso('glad', 'Precis rätt! Du är duktig!');
         document.getElementById('m2Next').classList.add('btn-pulse');
     } else {
         m2HadError    = true;
@@ -381,10 +474,11 @@ function m2Check(disp, btn) {
         btn.classList.add('err');
         btn.disabled = true;
         fb.textContent = m2Task.feedback;
+        showMiso('uppmuntrande', 'Nästan – titta noga!');
     }
 }
 
-document.getElementById('m2Next').addEventListener('click', buildM2);
+document.getElementById('m2Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – du fixar det!'); buildM2(); });
 buildM2();
 
 /* ════════════════════════════════
@@ -551,6 +645,7 @@ function m3Check(val, btn) {
         } else {
             fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
         }
+        showMiso('glad', 'Snyggt räknat på tallinjen!');
         document.getElementById('m3Next').classList.add('btn-pulse');
     } else {
         m3HadError    = true;
@@ -558,10 +653,11 @@ function m3Check(val, btn) {
         btn.classList.add('err');
         btn.disabled = true;
         fb.textContent = 'Nästan – punkten visar ' + m3Task.correct + '. Räkna stegen från vänster!';
+        showMiso('uppmuntrande', 'Räkna stegen – du kan!');
     }
 }
 
-document.getElementById('m3Next').addEventListener('click', buildM3);
+document.getElementById('m3Next').addEventListener('click', () => { showMiso('neutral', 'Ny tallinje – lycka till!'); buildM3(); });
 buildM3();
 
 /* ════════════════════════════════
@@ -683,6 +779,7 @@ function m4Check(val, btn) {
         } else {
             fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
         }
+        showMiso('glad', 'Rätt uträknat! Toppen!');
         document.getElementById('m4Next').classList.add('btn-pulse');
     } else {
         m4HadError    = true;
@@ -690,10 +787,11 @@ function m4Check(val, btn) {
         btn.classList.add('err');
         btn.disabled = true;
         fb.textContent = 'Nästan – rätt svar är ' + fmtOp(m4Task.result) + '. Räkna tiondelar och hundradelar var för sig!';
+        showMiso('uppmuntrande', 'Nästan! Räkna igen – du fixar det!');
     }
 }
 
-document.getElementById('m4Next').addEventListener('click', buildM4);
+document.getElementById('m4Next').addEventListener('click', () => { showMiso('neutral', 'Ny uträkning – kör på!'); buildM4(); });
 buildM4();
 </script>
 </body>
