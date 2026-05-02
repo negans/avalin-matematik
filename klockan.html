@@ -4,222 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Klockan – Avalins Matematikverkstad</title>
+    <link rel="stylesheet" href="style.css">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        h1 { margin-bottom: 22px; }
 
-        body {
-            font-family: Arial, sans-serif;
-            background: #f0f7ff;
-            min-height: 100vh;
-            padding: 16px 16px 48px;
-        }
-
-        .top-nav {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .top-nav a {
-            color: #7a9cbf;
-            text-decoration: none;
-            font-size: 0.95em;
-        }
-
-        .top-nav a:hover { text-decoration: underline; }
-
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-            font-size: 1.9em;
-            margin-bottom: 22px;
-        }
-
-        /* ── Clock ── */
-        .clock-wrap {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 28px;
-        }
-
-        svg#clock {
-            filter: drop-shadow(0 4px 16px rgba(44,62,80,0.18));
-        }
-
-        /* ── Steps ── */
-        .steps {
-            max-width: 480px;
-            margin: 0 auto 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .step {
-            background: white;
-            border-radius: 16px;
-            padding: 14px 18px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            box-shadow: 0 2px 8px rgba(44,62,80,0.08);
-            transition: background 0.3s;
-        }
-
-        .step.done { background: #f0fff4; }
-
-        .step-num {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background: #4a90d9;
-            color: white;
-            font-size: 1.15em;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            transition: background 0.3s;
-        }
-
-        .step.done .step-num { background: #2ecc71; }
-
-        .step-label {
-            flex: 1;
-            font-size: 1.1em;
-            color: #34495e;
-            line-height: 1.3;
-        }
-
-        .step input {
-            width: 78px;
-            font-size: 1.25em;
-            padding: 7px 8px;
-            border: 2.5px solid #cce0f5;
-            border-radius: 10px;
-            text-align: center;
-            outline: none;
-            font-family: Arial, sans-serif;
-            transition: border-color 0.2s, background 0.2s;
-        }
-
-        .step input:focus { border-color: #4a90d9; }
-
-        .step input.ok  { border-color: #2ecc71; background: #f0fff4; }
-        .step input.fel { border-color: #e67e22; background: #fffaf2; }
-
-        .input-wrap {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .field-hint {
-            font-size: 0.78em;
-            color: #e67e22;
-            text-align: center;
-            max-width: 140px;
-            line-height: 1.3;
-            min-height: 0;
-        }
-
-        .step-hint {
-            display: block;
-            max-width: 480px;
-            margin: -6px auto 0;
-        }
-
-        .time-group {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .time-group input { width: 62px; }
-        #timeHrIn, #timeMinIn { width: 62px; }
-
-        .colon {
-            font-size: 1.4em;
-            font-weight: bold;
-            color: #34495e;
-            line-height: 1;
-        }
-
-        /* ── Buttons ── */
+        /* ── Klock-specifik knapprad ── */
         .btn-row {
             max-width: 480px;
             margin: 0 auto 8px;
-            display: flex;
             gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
         }
 
-        button {
-            font-family: Arial, sans-serif;
-            font-size: 1.1em;
-            padding: 12px 28px;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-
+        button       { font-size: 1.1em; padding: 12px 28px; }
         button:active { transform: scale(0.96); }
 
-        #checkBtn {
-            background: #4a90d9;
-            color: white;
-            box-shadow: 0 4px 12px rgba(74,144,217,0.35);
-        }
+        #checkBtn       { background: var(--clr-primary); color: white; box-shadow: 0 4px 12px rgba(74,144,217,0.35); }
+        #checkBtn:hover { background: var(--clr-primary-dk); }
+        #nextBtn        { background: white; color: var(--clr-primary); border: 2px solid var(--clr-primary); }
+        #nextBtn:hover  { background: var(--clr-hover); }
 
-        #checkBtn:hover { background: #3a7fc8; }
+        /* ── Klocka ── */
+        .clock-wrap { display: flex; justify-content: center; margin-bottom: 28px; }
+        svg#clock   { filter: drop-shadow(0 4px 16px rgba(44,62,80,0.18)); }
 
-        #nextBtn {
-            background: white;
-            color: #4a90d9;
-            border: 2px solid #4a90d9;
-        }
+        /* ── Steg-lista ── */
+        .steps    { max-width: 480px; margin: 0 auto 20px; display: flex; flex-direction: column; gap: 12px; }
+        .step     { background: white; border-radius: 16px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(44,62,80,0.08); transition: background 0.3s; }
+        .step.done { background: var(--clr-ok-bg); }
 
-        #nextBtn:hover { background: #e8f2ff; }
+        .step-num { width: 38px; height: 38px; border-radius: 50%; background: var(--clr-primary); color: white; font-size: 1.15em; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.3s; }
+        .step.done .step-num { background: var(--clr-ok); }
 
-        .streak {
-            text-align: center;
-            font-size: 0.85em;
-            color: #8aaabf;
-            min-height: 18px;
-            margin-top: 8px;
-        }
+        .step-label { flex: 1; font-size: 1.1em; color: var(--clr-text-sub); line-height: 1.3; }
 
-        @keyframes btn-pulse {
-            0%   { box-shadow: 0 0 0 0 rgba(74,144,217,0.5); }
-            60%  { box-shadow: 0 0 0 8px rgba(74,144,217,0); }
-            100% { box-shadow: 0 0 0 0 rgba(74,144,217,0); }
-        }
-        .btn-pulse {
-            animation: btn-pulse 1.1s ease-out infinite;
-        }
+        .step input { width: 78px; font-size: 1.25em; padding: 7px 8px; border: 2.5px solid var(--clr-border); border-radius: var(--r-sm); text-align: center; outline: none; font-family: var(--font); transition: border-color var(--tr-slow), background var(--tr-slow); }
+        .step input:focus { border-color: var(--clr-primary); }
+        .step input.ok    { border-color: var(--clr-ok);  background: var(--clr-ok-bg); }
+        .step input.fel   { border-color: #e67e22; background: #fffaf2; }
 
-        /* ── Clock tip ── */
-        .clock-tip {
-            text-align: center;
-            font-size: 0.85em;
-            color: #8aaabf;
-            margin-top: -18px;
-            margin-bottom: 22px;
-        }
+        .input-wrap  { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .field-hint  { font-size: 0.78em; color: #e67e22; text-align: center; max-width: 140px; line-height: 1.3; min-height: 0; }
+        .step-hint   { display: block; max-width: 480px; margin: -6px auto 0; }
+        .time-group  { display: flex; align-items: center; gap: 4px; }
+        .time-group input, #timeHrIn, #timeMinIn { width: 62px; }
+        .colon { font-size: 1.4em; font-weight: bold; color: var(--clr-text-sub); line-height: 1; }
 
-        /* ── Feedback ── */
-        #feedback {
-            max-width: 480px;
-            margin: 18px auto 0;
-            font-size: 1.15em;
-            color: #2c3e50;
-            text-align: center;
-            line-height: 1.7;
-            min-height: 54px;
-        }
+        .clock-tip { text-align: center; font-size: 0.85em; color: var(--clr-text-dim); margin-top: -18px; margin-bottom: 22px; }
+
+        #feedback { max-width: 480px; margin: 18px auto 0; font-size: 1.15em; color: var(--clr-text); text-align: center; line-height: 1.7; min-height: 54px; }
     </style>
 </head>
 <body>

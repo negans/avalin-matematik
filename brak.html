@@ -4,54 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bråk – Avalins Matematikverkstad</title>
+    <link rel="stylesheet" href="style.css">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f0f7ff;
-            min-height: 100vh;
-            padding: 16px 16px 48px;
-        }
-
-        .top-nav { text-align: center; margin-bottom: 10px; }
-        .top-nav a { color: #7a9cbf; text-decoration: none; font-size: 0.95em; }
-        .top-nav a:hover { text-decoration: underline; }
-
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-            font-size: 1.9em;
-            margin-bottom: 6px;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 1.05em;
-            font-weight: bold;
-            color: #4a90d9;
-            margin: 22px 0 10px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 22px 20px 20px;
-            max-width: 500px;
-            margin: 0 auto 12px;
-            box-shadow: 0 2px 12px rgba(44,62,80,0.09);
-        }
-
-        /* ── task label ── */
-        .task-label {
-            text-align: center;
-            font-size: 1.2em;
-            color: #2c3e50;
-            margin-bottom: 16px;
-            line-height: 1.5;
-        }
-
-        /* ── Module 1: clickable rect ── */
+        /* ── Modul 1: klickbar rektangel ── */
         .rect-outer {
             display: flex;
             justify-content: center;
@@ -117,78 +72,7 @@
             color: #2c3e50;
         }
 
-        /* ── fraction stack (numerator/denominator) ── */
-        .fs {
-            display: inline-flex;
-            flex-direction: column;
-            align-items: center;
-            line-height: 1.15;
-        }
-        .fs .fn { border-bottom: 2.5px solid #2c3e50; padding: 0 5px 2px; }
-        .fs .fd { padding: 2px 5px 0; }
-
-        /* ── buttons ── */
-        .btn-row {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 12px;
-        }
-
-        button {
-            font-family: Arial, sans-serif;
-            font-size: 1.05em;
-            padding: 11px 24px;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-        button:active { transform: scale(0.95); }
-        button:disabled { opacity: 0.45; cursor: not-allowed; }
-
-        .btn-primary {
-            background: #4a90d9;
-            color: white;
-            box-shadow: 0 4px 12px rgba(74,144,217,0.3);
-        }
-        .btn-primary:hover { background: #3a7fc8; }
-
-        .btn-secondary {
-            background: white;
-            color: #4a90d9;
-            border: 2px solid #4a90d9;
-        }
-        .btn-secondary:hover { background: #e8f2ff; }
-
-        @keyframes btn-pulse {
-            0%   { box-shadow: 0 0 0 0 rgba(74,144,217,0.5); }
-            60%  { box-shadow: 0 0 0 8px rgba(74,144,217,0); }
-            100% { box-shadow: 0 0 0 0 rgba(74,144,217,0); }
-        }
-        .btn-pulse {
-            animation: btn-pulse 1.1s ease-out infinite;
-        }
-
-        .streak {
-            text-align: center;
-            font-size: 0.85em;
-            color: #8aaabf;
-            min-height: 18px;
-            margin-top: 8px;
-        }
-
-        .feedback {
-            text-align: center;
-            font-size: 1.05em;
-            color: #2c3e50;
-            min-height: 28px;
-            margin-top: 4px;
-            line-height: 1.5;
-        }
-
-        /* ── Module 2: equivalent fractions ── */
+        /* ── Modul 2: likvärda bråk ── */
         .equiv-container {
             display: flex;
             align-items: flex-end;
@@ -288,23 +172,7 @@
             color: #2c3e50;
         }
 
-        .answer-input {
-            width: 58px;
-            font-size: 1.2em;
-            padding: 7px 8px;
-            border: 2.5px solid #cce0f5;
-            border-radius: 10px;
-            text-align: center;
-            outline: none;
-            font-family: Arial, sans-serif;
-            transition: border-color 0.2s, background 0.2s;
-        }
-        .answer-input:focus { border-color: #4a90d9; }
-        .answer-input.ok  { border-color: #2ecc71; background: #f0fff4; }
-        .answer-input.err { border-color: #e74c3c; background: #fff5f5; }
-        .answer-input.w3  { width: 70px; }
-
-        /* ── Module 4 ── */
+        /* ── Modul 4 ── */
         .bar-wrap { max-width: 440px; margin: 0 auto 6px; }
 
         .bar-track {
@@ -526,35 +394,6 @@
         .ri-line .hl    { color: #4a90d9; font-weight: bold; }
         .ri-line .hl-ok { color: #2ecc71; font-weight: bold; }
 
-        /* ── Del av antal: svarsalternativ ── */
-        .choice-row {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin: 4px 0 10px;
-        }
-
-        .choice-btn {
-            font-family: Arial, sans-serif;
-            font-size: 1.3em;
-            font-weight: bold;
-            padding: 12px 20px;
-            border: 2.5px solid #4a90d9;
-            border-radius: 16px;
-            background: white;
-            color: #2c3e50;
-            cursor: pointer;
-            transition: background 0.15s, border-color 0.15s, transform 0.1s;
-            min-width: 76px;
-            text-align: center;
-        }
-        .choice-btn:hover:not(:disabled) { background: #e8f2ff; border-color: #3a7fc8; }
-        .choice-btn:active:not(:disabled) { transform: scale(0.95); }
-        .choice-btn:disabled { cursor: not-allowed; }
-        .choice-btn.ok  { background: #f0fff4; border-color: #2ecc71; color: #27ae60; opacity: 1; }
-        .choice-btn.err { background: #fff5f5; border-color: #e74c3c; color: #c0392b; opacity: 0.45; }
-
         /* ── Del av antal Fas 1: förklaringsbild ── */
         .part-visual {
             display: flex;
@@ -583,21 +422,6 @@
             border-color: #3a7fc8;
         }
 
-        /* ── Level badge (M7, M8) ── */
-        .level-badge {
-            display: inline-block;
-            background: #e8f2ff;
-            color: #4a90d9;
-            border: 1.5px solid #cce0f5;
-            border-radius: 20px;
-            padding: 3px 14px;
-            font-size: 0.85em;
-            font-weight: bold;
-        }
-
-        /* fraction inside choice-btn */
-        .choice-btn .fs { font-size: 0.95em; line-height: 1.2; }
-        .choice-btn .fs .fn { border-bottom-color: currentColor; }
     </style>
 </head>
 <body>
