@@ -25,7 +25,7 @@
         .frac-cell + .frac-cell { border-left-width: 1.5px; }
         .frac-cell:first-child { border-radius: 10px 0 0 10px; }
         .frac-cell:last-child  { border-radius: 0 10px 10px 0; }
-        .frac-cell.colored { background: #4a90d9; }
+        .frac-cell.colored { background: var(--color-primary); }
         .frac-cell:hover:not(.colored) { background: #d6eafc; }
         .frac-cell.colored:hover { background: #357abd; }
 
@@ -105,12 +105,12 @@
         .equiv-cell + .equiv-cell { border-left-width: 1.5px; }
         .equiv-cell:first-child { border-radius: 8px 0 0 8px; }
         .equiv-cell:last-child  { border-radius: 0 8px 8px 0; }
-        .equiv-cell.filled { background: #4a90d9; }
+        .equiv-cell.filled { background: var(--color-primary); }
 
         .eq-sign {
             font-size: 1.8em;
             font-weight: bold;
-            color: #4a90d9;
+            color: var(--color-primary);
             flex-shrink: 0;
             height: 56px;
             display: flex;
@@ -146,13 +146,13 @@
             width: 11px;
             height: 11px;
             border-radius: 50%;
-            background: #cce0f5;
+            background: var(--color-surface-alt);
             cursor: pointer;
             border: none;
             padding: 0;
             transition: background 0.2s;
         }
-        .nav-dot.active { background: #4a90d9; }
+        .nav-dot.active { background: var(--color-primary); }
         .nav-dot:hover:not(.active) { background: #a0c4e8; }
 
         /* ── Module 3 ── */
@@ -185,7 +185,7 @@
 
         .bar-seg { flex: 1; background: #ddeaf8; }
         .bar-seg + .bar-seg { border-left: 2.5px solid white; }
-        .bar-seg.active { background: #4a90d9; }
+        .bar-seg.active { background: var(--color-primary); }
 
         .bar-endlabels {
             display: flex;
@@ -214,7 +214,7 @@
             transition: opacity 0.4s, transform 0.4s;
         }
         .step-line.show { opacity: 1; transform: translateY(0); }
-        .step-line .hl    { color: #4a90d9; font-weight: bold; }
+        .step-line .hl    { color: var(--color-primary); font-weight: bold; }
         .step-line .hl-ok { color: #2ecc71; font-weight: bold; }
 
         /* ── Module 5 ── */
@@ -241,7 +241,7 @@
             gap: 8px;
             background: white;
         }
-        .cmp-card:hover:not(.done) { border-color: #4a90d9; background: #f4f9ff; }
+        .cmp-card:hover:not(.done) { border-color: var(--color-primary); background: #f4f9ff; }
         .cmp-card:active:not(.done) { transform: scale(0.97); }
         .cmp-card.ok   { border-color: #2ecc71; background: #f0fff4; }
         .cmp-card.fail { border-color: #e74c3c; background: #fff5f5; }
@@ -254,7 +254,7 @@
         .cmp-cell + .cmp-cell { border-left-width: 1px; }
         .cmp-cell:first-child { border-radius: 6px 0 0 6px; }
         .cmp-cell:last-child  { border-radius: 0 6px 6px 0; }
-        .cmp-cell.active { background: #4a90d9; }
+        .cmp-cell.active { background: var(--color-primary); }
 
         .vs-sign {
             font-size: 0.95em;
@@ -288,9 +288,9 @@
             gap: 8px;
             background: white;
         }
-        .order-card:hover:not(.done) { border-color: #4a90d9; background: #f4f9ff; }
+        .order-card:hover:not(.done) { border-color: var(--color-primary); background: #f4f9ff; }
         .order-card:active:not(.done) { transform: scale(0.97); }
-        .order-card.picked { border-color: #4a90d9; background: #eef6ff; }
+        .order-card.picked { border-color: var(--color-primary); background: #eef6ff; }
         .order-card.ok     { border-color: #2ecc71; background: #f0fff4; }
         .order-card.fail   { border-color: #e74c3c; background: #fff5f5; }
         .order-card.done   { cursor: default; }
@@ -300,7 +300,7 @@
             top: -9px; right: -9px;
             width: 24px; height: 24px;
             border-radius: 50%;
-            background: #4a90d9;
+            background: var(--color-primary);
             color: white;
             font-size: 0.82em;
             font-weight: bold;
@@ -391,7 +391,7 @@
             transition: opacity 0.38s, transform 0.38s;
         }
         .ri-line.show { opacity: 1; transform: translateY(0); }
-        .ri-line .hl    { color: #4a90d9; font-weight: bold; }
+        .ri-line .hl    { color: var(--color-primary); font-weight: bold; }
         .ri-line .hl-ok { color: #2ecc71; font-weight: bold; }
 
         /* ── Del av antal Fas 1: förklaringsbild ── */
@@ -417,9 +417,9 @@
             color: #2c3e50;
         }
         .part-cell.active {
-            background: #4a90d9;
+            background: var(--color-primary);
             color: white;
-            border-color: #3a7fc8;
+            border-color: var(--color-primary);
         }
 
         /* ── Misos varma skogstema (gäller bara brak.html) ── */
