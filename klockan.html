@@ -332,7 +332,9 @@
                 }
                 const timeMinOk = timeMinFilled && parseInt(timeMinVal) === m;
                 if (timeMinFilled) timeMinEl.classList.add(timeMinOk ? 'ok' : 'fel');
-                timeOk = timeHrOk && timeMinOk;
+                const step1Done = document.getElementById('step1').classList.contains('done');
+                const step2Done = document.getElementById('step2').classList.contains('done');
+                timeOk = timeHrOk && timeMinOk && step1Done && step2Done;
                 if (timeOk) document.getElementById('step3').classList.add('done');
             }
 
