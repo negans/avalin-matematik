@@ -6,6 +6,40 @@
     <title>Klockan – Avalins Matematikverkstad</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        :root {
+            --color-bg:             #FDF6EC;
+            --color-surface:        #FFF8F0;
+            --color-surface-alt:    #F5ECD7;
+            --color-border:         #EDE0C8;
+            --color-primary:        #D97B3A;
+            --color-primary-hover:  #E8955A;
+            --color-correct:        #6B9E6B;
+            --color-wrong:          #C0614A;
+            --color-text:           #4A3728;
+            --color-text-secondary: #7A5C42;
+            --color-heading:        #A0784A;
+            --color-badge:          #C8A882;
+
+            --clr-bg:         var(--color-bg);
+            --clr-card:       var(--color-surface);
+            --clr-hover:      var(--color-surface-alt);
+            --clr-badge-bg:   var(--color-surface-alt);
+            --clr-text:       var(--color-text);
+            --clr-text-sub:   var(--color-text-secondary);
+            --clr-text-dim:   var(--color-text-secondary);
+            --clr-nav:        var(--color-text-secondary);
+            --clr-primary:    var(--color-primary);
+            --clr-primary-dk: var(--color-primary-hover);
+            --clr-border:     var(--color-border);
+            --clr-border-dk:  var(--color-border);
+            --clr-ok:         var(--color-correct);
+            --clr-ok-bg:      #E8F5E8;
+            --clr-ok-text:    var(--color-correct);
+            --clr-err:        var(--color-wrong);
+            --clr-err-bg:     #FAEDEA;
+            --clr-err-text:   var(--color-wrong);
+        }
+
         h1 { margin-bottom: 22px; }
 
         /* ── Klock-specifik knapprad ── */
@@ -18,10 +52,10 @@
         button       { font-size: 1.1em; padding: 12px 28px; }
         button:active { transform: scale(0.96); }
 
-        #checkBtn       { background: var(--clr-primary); color: white; box-shadow: 0 4px 12px rgba(74,144,217,0.35); }
-        #checkBtn:hover { background: var(--clr-primary-dk); }
-        #nextBtn        { background: white; color: var(--clr-primary); border: 2px solid var(--clr-primary); }
-        #nextBtn:hover  { background: var(--clr-hover); }
+        #checkBtn       { background: var(--color-primary); color: white; box-shadow: 0 4px 12px rgba(74,144,217,0.35); }
+        #checkBtn:hover { background: var(--color-primary-hover); }
+        #nextBtn        { background: white; color: var(--color-primary); border: 2px solid var(--color-primary); }
+        #nextBtn:hover  { background: var(--color-surface-alt); }
 
         /* ── Klocka ── */
         .clock-wrap { display: flex; justify-content: center; margin-bottom: 28px; }
@@ -30,16 +64,16 @@
         /* ── Steg-lista ── */
         .steps    { max-width: 480px; margin: 0 auto 20px; display: flex; flex-direction: column; gap: 12px; }
         .step     { background: white; border-radius: 16px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(44,62,80,0.08); transition: background 0.3s; }
-        .step.done { background: var(--clr-ok-bg); }
+        .step.done { background: #E8F5E8; }
 
-        .step-num { width: 38px; height: 38px; border-radius: 50%; background: var(--clr-primary); color: white; font-size: 1.15em; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.3s; }
-        .step.done .step-num { background: var(--clr-ok); }
+        .step-num { width: 38px; height: 38px; border-radius: 50%; background: var(--color-primary); color: white; font-size: 1.15em; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.3s; }
+        .step.done .step-num { background: var(--color-correct); }
 
-        .step-label { flex: 1; font-size: 1.1em; color: var(--clr-text-sub); line-height: 1.3; }
+        .step-label { flex: 1; font-size: 1.1em; color: var(--color-text-secondary); line-height: 1.3; }
 
-        .step input { width: 78px; font-size: 1.25em; padding: 7px 8px; border: 2.5px solid var(--clr-border); border-radius: var(--r-sm); text-align: center; outline: none; font-family: var(--font); transition: border-color var(--tr-slow), background var(--tr-slow); }
-        .step input:focus { border-color: var(--clr-primary); }
-        .step input.ok    { border-color: var(--clr-ok);  background: var(--clr-ok-bg); }
+        .step input { width: 78px; font-size: 1.25em; padding: 7px 8px; border: 2.5px solid var(--color-border); border-radius: 8px; text-align: center; outline: none; font-family: inherit; transition: border-color 0.3s, background 0.3s; }
+        .step input:focus { border-color: var(--color-primary); }
+        .step input.ok    { border-color: var(--color-correct);  background: #E8F5E8; }
         .step input.fel   { border-color: #e67e22; background: #fffaf2; }
 
         .input-wrap  { display: flex; flex-direction: column; align-items: center; gap: 4px; }
@@ -47,11 +81,11 @@
         .step-hint   { display: block; max-width: 480px; margin: -6px auto 0; }
         .time-group  { display: flex; align-items: center; gap: 4px; }
         .time-group input, #timeHrIn, #timeMinIn { width: 62px; }
-        .colon { font-size: 1.4em; font-weight: bold; color: var(--clr-text-sub); line-height: 1; }
+        .colon { font-size: 1.4em; font-weight: bold; color: var(--color-text-secondary); line-height: 1; }
 
-        .clock-tip { text-align: center; font-size: 0.85em; color: var(--clr-text-dim); margin-top: -18px; margin-bottom: 22px; }
+        .clock-tip { text-align: center; font-size: 0.85em; color: var(--color-text-secondary); margin-top: -18px; margin-bottom: 22px; }
 
-        #feedback { max-width: 480px; margin: 18px auto 0; font-size: 1.15em; color: var(--clr-text); text-align: center; line-height: 1.7; min-height: 54px; }
+        #feedback { max-width: 480px; margin: 18px auto 0; font-size: 1.15em; color: var(--color-text); text-align: center; line-height: 1.7; min-height: 54px; }
     </style>
 </head>
 <body>
@@ -65,20 +99,20 @@
     <div class="clock-wrap">
         <svg id="clock" width="260" height="260" viewBox="0 0 300 300" aria-label="Analog klocka">
             <!-- Urtavla -->
-            <circle cx="150" cy="150" r="138" fill="white" stroke="#b8d4ef" stroke-width="3"/>
+            <circle cx="150" cy="150" r="138" fill="white" stroke="#C8A882" stroke-width="3"/>
 
             <!-- Streck och siffror fylls i av JS -->
             <g id="ticks"></g>
             <g id="nums" font-family="Arial" font-weight="bold" font-size="22"
-               text-anchor="middle" dominant-baseline="central" fill="#2c3e50"></g>
+               text-anchor="middle" dominant-baseline="central" fill="#4A3728"></g>
 
             <!-- Minutvisare (lång, röd) -->
             <line id="minHand" x1="150" y1="150" x2="150" y2="50"
-                  stroke="#d94a4a" stroke-width="5" stroke-linecap="round"/>
+                  stroke="#7A5C42" stroke-width="5" stroke-linecap="round"/>
 
             <!-- Timvisare (kort, mörk) – ritas ovanpå minutvisaren -->
             <line id="hrHand" x1="150" y1="150" x2="150" y2="82"
-                  stroke="#2c3e50" stroke-width="9" stroke-linecap="round"/>
+                  stroke="#4A3728" stroke-width="9" stroke-linecap="round"/>
 
             <!-- Navknappar -->
             <circle cx="150" cy="150" r="9"   fill="#2c3e50"/>
@@ -128,8 +162,40 @@
     <script>
         let h = 3, m = 20;
         let streak = 0;
+        let hadError = false;
         function setStreak(n) {
             document.getElementById('streak').textContent = n >= 2 ? '🐱\u00a0' + n + '\u00a0i\u00a0rad' : '';
+        }
+
+        const CAT_NAME = "Miso";
+
+        const misoContainer = document.createElement('div');
+        misoContainer.id = 'miso-container';
+        misoContainer.style.cssText = 'position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;z-index:1000;';
+
+        const misoBubble = document.createElement('div');
+        misoBubble.id = 'miso-bubble';
+        misoBubble.style.cssText = 'background:#FFF8F0;border:2px solid #EDE0C8;border-radius:16px;padding:10px 14px;font-size:0.95em;color:#4A3728;max-width:200px;line-height:1.4;display:none;text-align:center;';
+
+        const misoImg = document.createElement('img');
+        misoImg.id = 'miso-img';
+        misoImg.src = 'images/miso/miso-neutral.webp';
+        misoImg.alt = CAT_NAME;
+        misoImg.style.cssText = 'width:clamp(100px,12vw,140px);height:auto;display:block;';
+
+        misoContainer.appendChild(misoBubble);
+        misoContainer.appendChild(misoImg);
+        document.body.appendChild(misoContainer);
+
+        function setMiso(pose, text) {
+            misoImg.src = 'images/miso/' + pose;
+            const bubble = document.getElementById('miso-bubble');
+            if (text) {
+                bubble.innerHTML = text;
+                bubble.style.display = 'block';
+            } else {
+                bubble.style.display = 'none';
+            }
         }
 
         /* ── Bygg urtavlan en gång ── */
@@ -146,7 +212,7 @@
                 ln.setAttribute('y1', 150 + r1  * Math.sin(a));
                 ln.setAttribute('x2', 150 + 136 * Math.cos(a));
                 ln.setAttribute('y2', 150 + 136 * Math.sin(a));
-                ln.setAttribute('stroke', major ? '#8eb8d8' : '#c5ddef');
+                ln.setAttribute('stroke', major ? '#C8A882' : '#EDE0C8');
                 ln.setAttribute('stroke-width', major ? 2.5 : 1.2);
                 tg.appendChild(ln);
             }
@@ -177,6 +243,7 @@
             m = Math.floor(Math.random() * 12) * 5;  // 0, 5, 10, …, 55
             drawHands();
             reset();
+            setMiso('miso-neutral.webp', null);
         }
 
         /* ── Återställ formuläret ── */
@@ -194,6 +261,7 @@
             document.getElementById('streak').textContent = '';
             document.getElementById('feedback').innerHTML = '';
             document.getElementById('nextBtn').classList.remove('btn-pulse');
+            hadError = false;
         }
 
         /* ── Kolla svaret ── */
@@ -214,7 +282,7 @@
             const timeMinVal = timeMinEl.value.trim();
 
             if (!hrVal && !minVal && !timeHrVal && !timeMinVal) {
-                setFb('Titta på klockan och fyll i svaren! 🐱');
+                setFb('Titta på klockan och fyll i svaren! 🐱', 'neutral');
                 return;
             }
 
@@ -275,8 +343,8 @@
                 document.getElementById(id).classList.contains('done'));
 
             if (allDone) {
-                streak++; setStreak(streak);
-                setFb(`🐱 Jättebra, Avalin! Klockan är ${h}:${pad(m)} — du hade rätt på allt!`);
+                if (!hadError) { streak++; } else { streak = 0; } setStreak(streak);
+                setFb(`🐱 Jättebra, Avalin! Klockan är ${h}:${pad(m)} — du hade rätt på allt!`, 'correct');
                 document.getElementById('nextBtn').classList.add('btn-pulse');
                 return;
             }
@@ -305,13 +373,21 @@
                 lines.push('✓ Klockan stämmer!');
             }
 
+            hadError = true;
             streak = 0; setStreak(0);
             document.getElementById('nextBtn').classList.remove('btn-pulse');
-            setFb(lines.join('<br>'));
+            setFb(lines.join('<br>'), 'error');
         }
 
-        function setFb(html) {
+        function setFb(html, type) {
             document.getElementById('feedback').innerHTML = html;
+            if (type === 'correct') {
+                setMiso('miso-glad.webp', 'Jättebra! 🐱');
+            } else if (type === 'error') {
+                setMiso('miso-uppmuntrande.webp', 'Nästan! Titta igen 🐾');
+            } else {
+                setMiso('miso-neutral.webp', null);
+            }
         }
 
         /* ── Händelser ── */
