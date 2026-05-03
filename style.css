@@ -63,7 +63,13 @@
 /* ── Layout ──────────────────────────────────── */
 body {
     font-family: var(--font);
-    background: var(--color-bg);
+    background-color: var(--color-bg);
+    background-image:
+        linear-gradient(rgba(253,246,236,0.82), rgba(253,246,236,0.82)),
+        url('images/forest-bg.webp');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
     min-height: 100vh;
     padding: 16px 16px 48px;
 }
