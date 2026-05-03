@@ -422,6 +422,73 @@
             border-color: #3a7fc8;
         }
 
+        /* ── Misos varma skogstema (gäller bara brak.html) ── */
+        :root {
+            --color-bg:             #FDF6EC;
+            --color-surface:        #FFF8F0;
+            --color-surface-alt:    #F5ECD7;
+            --color-border:         #EDE0C8;
+            --color-primary:        #D97B3A;
+            --color-primary-hover:  #E8955A;
+            --color-correct:        #6B9E6B;
+            --color-wrong:          #C0614A;
+            --color-text:           #4A3728;
+            --color-text-secondary: #7A5C42;
+            --color-heading:        #A0784A;
+            --color-badge:          #C8A882;
+
+            --clr-bg:         var(--color-bg);
+            --clr-card:       var(--color-surface);
+            --clr-hover:      var(--color-surface-alt);
+            --clr-primary:    var(--color-primary);
+            --clr-primary-dk: var(--color-primary-hover);
+            --clr-text:       var(--color-text);
+            --clr-text-sub:   var(--color-text);
+            --clr-text-dim:   var(--color-text-secondary);
+            --clr-nav:        var(--color-text-secondary);
+            --clr-border:     var(--color-border);
+            --clr-border-dk:  var(--color-border);
+            --clr-badge-bg:   var(--color-badge);
+            --clr-ok:         var(--color-correct);
+            --clr-ok-bg:      #EDF4ED;
+            --clr-ok-text:    var(--color-correct);
+            --clr-err:        var(--color-wrong);
+            --clr-err-bg:     #FAEDEA;
+            --clr-err-text:   var(--color-wrong);
+        }
+
+        .section-title { color: var(--color-heading); }
+        .level-badge { color: #FFF8F0; }
+        .choice-btn, .choice-btn-text {
+            background: var(--color-surface);
+            border: 1.5px solid var(--color-border);
+        }
+
+        /* ── Miso-maskot ── */
+        #miso-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1000;
+        }
+        #miso-img { width: clamp(100px, 12vw, 140px); display: block; }
+        #miso-bubble {
+            display: none;
+            background: #FFF8F0;
+            border: 2px solid #EDE0C8;
+            border-radius: 16px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            font-size: 0.85em;
+            max-width: 160px;
+            text-align: center;
+            color: #4A3728;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+
     </style>
 </head>
 <body>
@@ -658,7 +725,25 @@
     <div class="feedback" id="m9Feedback" aria-live="polite"></div>
 </div>
 
+<div id="miso-container">
+    <div id="miso-bubble"></div>
+    <img id="miso-img" src="images/miso/miso-neutral.webp" alt="Miso" width="100">
+</div>
+
 <script>
+const CAT_NAME = "Miso";
+
+let misoTimer = null;
+function showMiso(pose, text) {
+    const poses = { neutral: 'miso-neutral', glad: 'miso-glad', uppmuntrande: 'miso-uppmuntrande' };
+    document.getElementById('miso-img').src = 'images/miso/' + (poses[pose] || 'miso-neutral') + '.webp';
+    const bubble = document.getElementById('miso-bubble');
+    bubble.textContent = text;
+    bubble.style.display = 'block';
+    if (misoTimer) clearTimeout(misoTimer);
+    misoTimer = setTimeout(() => { bubble.style.display = 'none'; }, 3000);
+}
+
 /* ── Streak helper ── */
 function setStreak(id, n) {
     document.getElementById(id).textContent = n >= 2 ? '🐱\u00a0' + n + '\u00a0i\u00a0rad' : '';
@@ -764,6 +849,7 @@ function m1Check() {
         m1Streak++; setStreak('m1Streak', m1Streak);
         fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
         document.getElementById('m1Next').classList.add('btn-pulse');
+        showMiso('glad', 'Rätt svar! Jättebra!');
 
         document.getElementById('rFN').textContent = m1Num;
         document.getElementById('rFD').textContent = m1Den;
@@ -779,11 +865,13 @@ function m1Check() {
         [inpNum, inpDen].forEach(el => el.classList.add('err'));
         m1Streak = 0; setStreak('m1Streak', 0);
         fb.textContent = 'Räkna de färgade rutorna – hur många är det av totalt?';
+        showMiso('uppmuntrande', 'Nästan – titta noga!');
         document.getElementById('m1Next').classList.remove('btn-pulse');
     }
 }
 
 function m1Next() {
+    showMiso('neutral', 'Ny uppgift – kör på!');
     m1Den = DENOMS[Math.floor(Math.random() * DENOMS.length)];
     m1Num = 1 + Math.floor(Math.random() * (m1Den - 1));
     buildM1();
@@ -958,6 +1046,7 @@ function buildM3() {
 }
 
 function m3Next() {
+    showMiso('neutral', 'Ny uppgift – du klarar det!');
     m3Task = genM3Task();
     buildM3();
 }
@@ -993,12 +1082,14 @@ function m3Check() {
         m3Streak++; setStreak('m3Streak', m3Streak);
         fb.textContent = '🐱 Rätt! ' + m3Task.a + ' ' + opTxt + ' ' + m3Task.b + ' = ' + m3Task.ans + '. Jättebra, Avalin!';
         document.getElementById('m3Next').classList.add('btn-pulse');
+        showMiso('glad', 'Rätt! Snyggt räknat!');
     } else {
         inp.classList.add('err');
         m3Streak = 0; setStreak('m3Streak', 0);
         fb.textContent = m3Task.isAdd
             ? 'Räkna de blå och orange rutorna – hur många är det totalt?'
             : 'Räkna bara de blå rutorna som är kvar – hur många är det?';
+        showMiso('uppmuntrande', 'Räkna rutorna – du kan!');
         document.getElementById('m3Next').classList.remove('btn-pulse');
     }
 }
@@ -1093,6 +1184,7 @@ function da1Check(val, btn) {
         if (!da1HadError) { da1Streak++; } else { da1Streak = 0; }
         setStreak('da1Streak', da1Streak);
         fb.textContent = '🐱 Rätt! ' + frac.n + '/' + frac.d + ' av ' + whole + ' = ' + part + '. Jättebra, Avalin!';
+        showMiso('glad', 'Rätt! Bra tänkt!');
 
         const boxWrap = document.getElementById('da1VisBoxes');
         boxWrap.innerHTML = '';
@@ -1111,10 +1203,11 @@ function da1Check(val, btn) {
         btn.classList.add('err');
         btn.disabled = true;
         fb.textContent = 'Nästan! Tänk: om ' + frac.n + '/' + frac.d + ' av helheten är ' + part + ', hur stor är hela?';
+        showMiso('uppmuntrande', 'Nästan – tänk igen!');
     }
 }
 
-document.getElementById('da1Next').addEventListener('click', buildDa1);
+document.getElementById('da1Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildDa1(); });
 buildDa1();
 
 /* ── Fas 2: Bråk gånger heltal ── */
@@ -1186,6 +1279,7 @@ function da2Check(val, btn) {
         if (!da2HadError) { da2Streak++; } else { da2Streak = 0; }
         setStreak('da2Streak', da2Streak);
         fb.textContent = '🐱 Rätt! ' + frac.n + '/' + frac.d + ' · ' + integer + ' = ' + result + '. Jättebra, Avalin!';
+        showMiso('glad', 'Rätt! Du räknar riktigt bra!');
 
         const k2 = integer / frac.d;
         const boxWrap2 = document.getElementById('da2VisBoxes');
@@ -1205,10 +1299,11 @@ function da2Check(val, btn) {
         btn.classList.add('err');
         btn.disabled = true;
         fb.textContent = 'Nästan! Dela upp i lika delar och ta ' + frac.n + ' av dem.';
+        showMiso('uppmuntrande', 'Nästan – försök igen!');
     }
 }
 
-document.getElementById('da2Next').addEventListener('click', buildDa2);
+document.getElementById('da2Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildDa2(); });
 buildDa2();
 
 /* ════════════════════════════════
@@ -1318,16 +1413,18 @@ function m5aPick(idx) {
         m5aStreak++; setStreak('m5aStreak', m5aStreak);
         fb.textContent = '🐱 Rätt! ' + chosen.n + '/' + chosen.d + ' är störst. Jättebra, Avalin!';
         document.getElementById('m5aNext').classList.add('btn-pulse');
+        showMiso('glad', 'Rätt! Snyggt jämfört!');
     } else {
         m5aStreak = 0; setStreak('m5aStreak', 0);
         const big = m5aItems[1 - idx].frac;
         fb.textContent = 'Titta på rektanglarna – ' + big.n + '/' + big.d +
             ' har mer ifärgat och är störst!';
+        showMiso('uppmuntrande', 'Titta noga på rektanglarna!');
         document.getElementById('m5aNext').classList.remove('btn-pulse');
     }
 }
 
-document.getElementById('m5aNext').addEventListener('click', m5aNext);
+document.getElementById('m5aNext').addEventListener('click', () => { showMiso('neutral', 'Nästa bråk – kör på!'); m5aNext(); });
 
 
 /* ── Del B: ordna tre ── */
@@ -1419,6 +1516,7 @@ function m5bEval() {
         m5bStreak++; setStreak('m5bStreak', m5bStreak);
         fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
         document.getElementById('m5bNext').classList.add('btn-pulse');
+        showMiso('glad', 'Rätt ordning! Imponerande!');
     } else {
         // Show correct order with green badges
         m5bItems.forEach(item => {
@@ -1432,12 +1530,13 @@ function m5bEval() {
         fb.textContent = 'Rätt ordning: ' +
             inOrder.map(it => it.frac.n + '/' + it.frac.d).join(' < ') +
             '. Mer ifärgat = större bråk!';
+        showMiso('uppmuntrande', 'Nästan – titta på ifärget!');
         document.getElementById('m5bNext').classList.remove('btn-pulse');
     }
 }
 
 document.getElementById('m5bCheck').addEventListener('click', m5bCheck);
-document.getElementById('m5bNext').addEventListener('click',  m5bNext);
+document.getElementById('m5bNext').addEventListener('click', () => { showMiso('neutral', 'Nästa ordning – lycka till!'); m5bNext(); });
 
 m5aNext();
 m5bNext();
@@ -1559,6 +1658,7 @@ function m6InsightLines(t, sc) {
 }
 
 function m6Next() {
+    showMiso('neutral', 'Nytt förhållande – kör på!');
     const g = genM6();
     m6Task = g.t;
     m6Sc   = g.sc;
@@ -1596,6 +1696,7 @@ function m6Check() {
         m6Streak++; setStreak('m6Streak', m6Streak);
         fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
         document.getElementById('m6Next').classList.add('btn-pulse');
+        showMiso('glad', 'Rätt förhållande! Bra jobbat!');
         const lines = m6InsightLines(m6Task, m6Sc);
         document.getElementById('m6Insight').style.display = 'block';
         ['m6R1','m6R2','m6R3'].forEach((id, i) => {
@@ -1614,6 +1715,7 @@ function m6Check() {
             fb.textContent = m6Task.rawA + ':' + m6Task.rawB +
                 ' kan förenklas – dela båda talen med ' + m6Task.gcd + ' och försök igen!';
         }
+        showMiso('uppmuntrande', 'Försök förenkla – du kan!');
         document.getElementById('m6Next').classList.remove('btn-pulse');
     }
 }
@@ -1758,6 +1860,7 @@ function m7Check(fr, btn) {
         let msg = '🐱 Rätt! ' + a + '/' + d + ' + ' + b + '/' + d + ' = ' + rawN + '/' + d;
         if (rawN !== ansN || d !== ansD) msg += ' = ' + ansN + '/' + ansD;
         fb.textContent = msg + '. Jättebra, Avalin!';
+        showMiso('glad', 'Rätt bråkaddition!');
 
         if (m7CleanCount >= 3 && m7Level < 3) {
             m7Level++;
@@ -1774,11 +1877,12 @@ function m7Check(fr, btn) {
         btn.disabled = true;
         m7Streak = 0; setStreak('m7Streak', 0);
         fb.textContent = 'Inte riktigt – addera täljarna och behåll nämnaren ' + d + '.';
+        showMiso('uppmuntrande', 'Nästan – tänk på täljaren!');
         document.getElementById('m7Next').classList.remove('btn-pulse');
     }
 }
 
-document.getElementById('m7Next').addEventListener('click', buildM7);
+document.getElementById('m7Next').addEventListener('click', () => { showMiso('neutral', 'Ny addition – kör på!'); buildM7(); });
 buildM7();
 
 /* ════════════════════════════════
@@ -1894,6 +1998,7 @@ function m8Check(fr, btn) {
         let msg = '🐱 Rätt! ' + a + '/' + d + ' − ' + b + '/' + d + ' = ' + rawN + '/' + d;
         if (rawN !== ansN || d !== ansD) msg += ' = ' + ansN + '/' + ansD;
         fb.textContent = msg + '. Jättebra, Avalin!';
+        showMiso('glad', 'Rätt bråksubtraktion!');
 
         if (m8CleanCount >= 3 && m8Level < 3) {
             m8Level++;
@@ -1910,11 +2015,12 @@ function m8Check(fr, btn) {
         btn.disabled = true;
         m8Streak = 0; setStreak('m8Streak', 0);
         fb.textContent = 'Inte riktigt – subtrahera täljarna och behåll nämnaren ' + d + '.';
+        showMiso('uppmuntrande', 'Nästan – subtrahera täljarna!');
         document.getElementById('m8Next').classList.remove('btn-pulse');
     }
 }
 
-document.getElementById('m8Next').addEventListener('click', buildM8);
+document.getElementById('m8Next').addEventListener('click', () => { showMiso('neutral', 'Ny subtraktion – kör på!'); buildM8(); });
 buildM8();
 
 /* ════════════════════════════════
@@ -2039,6 +2145,7 @@ function m9Check(val, btn) {
         } else {
             fb.textContent = '🐱 Rätt! ' + pct + '% av ' + whole + ' = ' + ans + '. Jättebra, Avalin!';
         }
+        showMiso('glad', 'Rätt procent! Snyggt!');
 
         if (m9CleanCount >= 3 && m9Level < 3) {
             m9Level++;
@@ -2062,12 +2169,14 @@ function m9Check(val, btn) {
         } else {
             fb.textContent = 'Inte riktigt – räkna ' + pct + '% av ' + whole + ': dela ' + whole + ' med 100 och ta ' + pct + ' delar.';
         }
+        showMiso('uppmuntrande', 'Nästan – tänk procent!');
         document.getElementById('m9Next').classList.remove('btn-pulse');
     }
 }
 
-document.getElementById('m9Next').addEventListener('click', buildM9);
+document.getElementById('m9Next').addEventListener('click', () => { showMiso('neutral', 'Ny procentuppgift – lycka till!'); buildM9(); });
 buildM9();
 </script>
+
 </body>
 </html>

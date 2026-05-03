@@ -39,6 +39,73 @@
         .seq-num   { font-size: 1.4em; font-weight: bold; color: var(--clr-text);    text-align: center; min-width: 52px; }
         .seq-blank { font-size: 1.4em; font-weight: bold; color: var(--clr-primary); text-align: center; min-width: 52px; border-bottom: 3px solid var(--clr-primary); padding-bottom: 2px; }
         .seq-arrow { font-size: 1.1em; color: var(--clr-border-dk); flex-shrink: 0; user-select: none; }
+
+        /* ── Misos varma skogstema (gäller bara taluppfattning.html) ── */
+        :root {
+            --color-bg:             #FDF6EC;
+            --color-surface:        #FFF8F0;
+            --color-surface-alt:    #F5ECD7;
+            --color-border:         #EDE0C8;
+            --color-primary:        #D97B3A;
+            --color-primary-hover:  #E8955A;
+            --color-correct:        #6B9E6B;
+            --color-wrong:          #C0614A;
+            --color-text:           #4A3728;
+            --color-text-secondary: #7A5C42;
+            --color-heading:        #A0784A;
+            --color-badge:          #C8A882;
+
+            --clr-bg:         var(--color-bg);
+            --clr-card:       var(--color-surface);
+            --clr-hover:      var(--color-surface-alt);
+            --clr-primary:    var(--color-primary);
+            --clr-primary-dk: var(--color-primary-hover);
+            --clr-text:       var(--color-text);
+            --clr-text-sub:   var(--color-text);
+            --clr-text-dim:   var(--color-text-secondary);
+            --clr-nav:        var(--color-text-secondary);
+            --clr-border:     var(--color-border);
+            --clr-border-dk:  var(--color-border);
+            --clr-badge-bg:   var(--color-badge);
+            --clr-ok:         var(--color-correct);
+            --clr-ok-bg:      #EDF4ED;
+            --clr-ok-text:    var(--color-correct);
+            --clr-err:        var(--color-wrong);
+            --clr-err-bg:     #FAEDEA;
+            --clr-err-text:   var(--color-wrong);
+        }
+
+        .section-title { color: var(--color-heading); }
+        .level-badge { color: #FFF8F0; }
+        .choice-btn, .choice-btn-text {
+            background: var(--color-surface);
+            border: 1.5px solid var(--color-border);
+        }
+
+        /* ── Miso-maskot ── */
+        #miso-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1000;
+        }
+        #miso-img { width: clamp(100px, 12vw, 140px); display: block; }
+        #miso-bubble {
+            display: none;
+            background: #FFF8F0;
+            border: 2px solid #EDE0C8;
+            border-radius: 16px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            font-size: 0.85em;
+            max-width: 160px;
+            text-align: center;
+            color: #4A3728;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
     </style>
 </head>
 <body>
@@ -171,7 +238,25 @@
     <div class="feedback" id="m6Feedback" aria-live="polite"></div>
 </div>
 
+<div id="miso-container">
+    <div id="miso-bubble"></div>
+    <img id="miso-img" src="images/miso/miso-neutral.webp" alt="Miso" width="100">
+</div>
+
 <script>
+const CAT_NAME = "Miso";
+
+let misoTimer = null;
+function showMiso(pose, text) {
+    const poses = { neutral: 'miso-neutral', glad: 'miso-glad', uppmuntrande: 'miso-uppmuntrande' };
+    document.getElementById('miso-img').src = 'images/miso/' + (poses[pose] || 'miso-neutral') + '.webp';
+    const bubble = document.getElementById('miso-bubble');
+    bubble.textContent = text;
+    bubble.style.display = 'block';
+    if (misoTimer) clearTimeout(misoTimer);
+    misoTimer = setTimeout(() => { bubble.style.display = 'none'; }, 3000);
+}
+
 /* ── Streak helper ── */
 function setStreak(id, n) {
     document.getElementById(id).textContent = n >= 2 ? '🐱 ' + n + ' i rad' : '';
@@ -276,15 +361,17 @@ function m1Check(val, btn) {
         fb.textContent = '🐱 Rätt! Siffran ' + m1Task.digitVal + ' på ' +
             posPlace(m1Task.posValue) + ' är värd ' + m1Task.correct + '. Jättebra, Avalin!';
         document.getElementById('m1Next').classList.add('btn-pulse');
+        showMiso('glad', 'Rätt position! Jättebra!');
     } else {
         m1HadError = true;
         btn.classList.add('err');
         btn.disabled = true;
         fb.textContent = 'Nästan! Titta på vilket ställe siffran står på.';
+        showMiso('uppmuntrande', 'Nästan – titta på platsen!');
     }
 }
 
-document.getElementById('m1Next').addEventListener('click', buildM1);
+document.getElementById('m1Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildM1(); });
 
 buildM1();
 
@@ -408,15 +495,17 @@ function m2Check(val, btn) {
         fb.textContent = '🐱 Rätt! Siffran ' + m2Task.digitVal + ' på ' +
             M2_PLACES[m2Task.posValue] + ' är värd ' + formatNum(m2Task.correct) + '. Jättebra, Avalin!';
         document.getElementById('m2Next').classList.add('btn-pulse');
+        showMiso('glad', 'Rätt! Stora tal fixar du!');
     } else {
         m2HadError = true;
         btn.classList.add('err');
         btn.disabled = true;
         fb.textContent = 'Nästan! Titta på vilket ställe siffran står på.';
+        showMiso('uppmuntrande', 'Nästan – kolla etiketten!');
     }
 }
 
-document.getElementById('m2Next').addEventListener('click', buildM2);
+document.getElementById('m2Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – du fixar det!'); buildM2(); });
 
 buildM2();
 
@@ -544,16 +633,18 @@ function m3Check(val, btn) {
             fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
         }
         document.getElementById('m3Next').classList.add('btn-pulse');
+        showMiso('glad', 'Rätt följd! Snyggt tänkt!');
     } else {
         m3HadError = true;
         m3LevelStreak = 0;
         btn.classList.add('err');
         btn.disabled = true;
         fb.textContent = 'Nästan – det var ' + fmtSeq(m3Task.correct) + '. Titta på steget i följden!';
+        showMiso('uppmuntrande', 'Nästan – räkna steget!');
     }
 }
 
-document.getElementById('m3Next').addEventListener('click', buildM3);
+document.getElementById('m3Next').addEventListener('click', () => { showMiso('neutral', 'Ny följd – lycka till!'); buildM3(); });
 
 buildM3();
 
@@ -624,16 +715,18 @@ function m4Check(val, btn) {
             fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
         }
         document.getElementById('m4Next').classList.add('btn-pulse');
+        showMiso('glad', 'Rätt! Du jämför bra!');
     } else {
         m4HadError = true;
         m4LevelStreak = 0;
         btn.classList.add('err');
         btn.disabled = true;
         fb.textContent = 'Nästan – ' + new Intl.NumberFormat('sv-SE').format(m4Task.correct) + ' är störst.';
+        showMiso('uppmuntrande', 'Nästan – jämför noga!');
     }
 }
 
-document.getElementById('m4Next').addEventListener('click', buildM4);
+document.getElementById('m4Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – jämför och kör!'); buildM4(); });
 
 buildM4();
 
@@ -768,6 +861,7 @@ function m5Check(word, btn) {
             fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
         }
         document.getElementById('m5Next').classList.add('btn-pulse');
+        showMiso('glad', 'Rätt utläst! Imponerande!');
     } else {
         m5HadError    = true;
         m5LevelStreak = 0;
@@ -776,10 +870,11 @@ function m5Check(word, btn) {
         btn.classList.add('err');
         btn.disabled = true;
         fb.textContent = 'Nästan – det var "' + m5Task.word + '".';
+        showMiso('uppmuntrande', 'Nästan – läs siffra för siffra!');
     }
 }
 
-document.getElementById('m5Next').addEventListener('click', buildM5);
+document.getElementById('m5Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – läs noga!'); buildM5(); });
 
 buildM5();
 
@@ -878,16 +973,18 @@ function m6Check(val, btn) {
             fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
         }
         document.getElementById('m6Next').classList.add('btn-pulse');
+        showMiso('glad', 'Rätt avrundat! Bra jobbat!');
     } else {
         m6HadError    = true;
         m6LevelStreak = 0;
         btn.classList.add('err');
         btn.disabled = true;
         fb.textContent = 'Nästan – rätt svar är ' + formatNum(m6Task.correct) + '. Vilket håll ska du avrunda?';
+        showMiso('uppmuntrande', 'Nästan – titta på mittsiffran!');
     }
 }
 
-document.getElementById('m6Next').addEventListener('click', buildM6);
+document.getElementById('m6Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – avrunda!'); buildM6(); });
 
 buildM6();
 </script>
