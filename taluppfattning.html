@@ -18,9 +18,7 @@
         .digit-col { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 100px; border-right: 2px solid var(--clr-border-dk); }
         .digit-col:last-child { border-right: none; }
         .digit { font-size: 3.2em; font-weight: bold; color: var(--clr-text); padding: 16px 10px 10px; width: 100%; text-align: center; line-height: 1; }
-        .digit.highlighted { background: #ffe566; }
         .pos-label { font-size: 0.75em; color: var(--clr-text-dim); padding: 5px 4px 7px; text-align: center; width: 100%; border-top: 1.5px solid var(--clr-border-dk); background: #f8fbff; letter-spacing: 0.01em; }
-        .pos-label.highlighted { color: #9a6900; font-weight: bold; background: #fff8cc; }
 
         .number-display.compact .digit-col { min-width: 78px; }
         .number-display.compact .digit { font-size: 2.3em; padding: 12px 6px 8px; }
@@ -120,9 +118,7 @@
 <p class="section-title" id="modul1">Modul 1 – Positionssystemet</p>
 
 <div class="card">
-    <p class="task-label">Vad är <strong>värdet</strong> av den markerade siffran?</p>
-
-    <div class="number-display" id="m1Display"></div>
+    <p class="task-label" id="m1QuestionLabel"></p>
 
     <div class="choice-row" id="m1Choices"></div>
 
@@ -138,11 +134,7 @@
 <p class="section-title" id="modul2">Modul 2 – Positionssystemet, stora tal</p>
 
 <div class="card">
-    <p class="task-label">Vad är <strong>värdet</strong> av den markerade siffran?</p>
-
-    <div class="display-scroll">
-        <div class="number-display compact" id="m2Display"></div>
-    </div>
+    <p class="task-label" id="m2QuestionLabel"></p>
 
     <div class="choice-row" id="m2Choices"></div>
 
@@ -275,6 +267,24 @@ function posPlace(pv) {
     return pv === 100 ? 'hundratalsplatsen' : pv === 10 ? 'tiotalsplatsen' : 'entalsplatsen';
 }
 
+function makeDistractors(digitVal, posValue, numStr, pos, correct) {
+    const seen = new Set([correct]);
+    const result = [];
+    function add(v) {
+        if (result.length >= 3) return;
+        const n = Math.round(v);
+        if (n > 0 && Number.isInteger(v) && !seen.has(n)) { seen.add(n); result.push(n); }
+    }
+    add(digitVal);                                                      // siffran utan platsvärde
+    add(digitVal * posValue * 10);                                      // ett steg upp
+    if (pos + 1 < numStr.length) add(parseInt(numStr.slice(pos, pos + 2)));  // siffra + höger granne
+    if (pos > 0)                 add(parseInt(numStr.slice(pos - 1, pos + 1))); // vänster granne + siffra
+    add(digitVal * posValue / 10);                                      // ett steg ner
+    add(digitVal * posValue * 100);                                     // två steg upp
+    add(digitVal * posValue / 100);                                     // två steg ner
+    return result;
+}
+
 function genM1Task() {
     const use3 = Math.random() < 0.5;
     const num  = use3
@@ -283,18 +293,16 @@ function genM1Task() {
     const numStr = String(num);
     const len    = numStr.length;
 
-    let pos;
-    do { pos = Math.floor(Math.random() * len); }
-    while (numStr[pos] === '0');
+    let pos, attempts = 0;
+    do {
+        pos = Math.floor(Math.random() * len);
+        attempts++;
+    } while (attempts < 50 && (numStr[pos] === '0' || numStr.split(numStr[pos]).length > 2));
 
     const digitVal = parseInt(numStr[pos], 10);
     const posValue = Math.pow(10, len - 1 - pos);
     const correct  = digitVal * posValue;
-
-    const distractors = [1, 10, 100]
-        .filter(v => v !== posValue)
-        .slice(0, 2)
-        .map(v => digitVal * v);
+    const distractors = makeDistractors(digitVal, posValue, numStr, pos, correct);
 
     return { numStr, len, pos, digitVal, posValue, correct, distractors };
 }
@@ -304,28 +312,9 @@ function buildM1() {
     m1Answered = false;
     m1HadError = false;
 
-    /* positionstabell */
-    const display = document.getElementById('m1Display');
-    display.innerHTML = '';
-    for (let i = 0; i < m1Task.len; i++) {
-        const pv    = Math.pow(10, m1Task.len - 1 - i);
-        const isHl  = i === m1Task.pos;
-
-        const col   = document.createElement('div');
-        col.className = 'digit-col';
-
-        const dEl   = document.createElement('div');
-        dEl.className = 'digit' + (isHl ? ' highlighted' : '');
-        dEl.textContent = m1Task.numStr[i];
-
-        const lEl   = document.createElement('div');
-        lEl.className = 'pos-label' + (isHl ? ' highlighted' : '');
-        lEl.textContent = posLabel(pv);
-
-        col.appendChild(dEl);
-        col.appendChild(lEl);
-        display.appendChild(col);
-    }
+    document.getElementById('m1QuestionLabel').innerHTML =
+        'Vad är <strong>värdet</strong> av siffran <strong>' + m1Task.digitVal +
+        '</strong> i talet <strong>' + m1Task.numStr + '</strong>?';
 
     /* svarsalternativ – blandade */
     const choices = [m1Task.correct, ...m1Task.distractors];
@@ -416,21 +405,16 @@ function genM2Task() {
     const numStr = String(num);
     const len    = numStr.length;
 
-    let pos;
-    do { pos = Math.floor(Math.random() * len); }
-    while (numStr[pos] === '0');
+    let pos, attempts = 0;
+    do {
+        pos = Math.floor(Math.random() * len);
+        attempts++;
+    } while (attempts < 50 && (numStr[pos] === '0' || numStr.split(numStr[pos]).length > 2));
 
     const digitVal = parseInt(numStr[pos], 10);
     const posValue = Math.pow(10, len - 1 - pos);
     const correct  = digitVal * posValue;
-
-    const allPVs   = Array.from({ length: len }, (_, i) => Math.pow(10, len - 1 - i));
-    const otherPVs = allPVs.filter(pv => pv !== posValue);
-    for (let i = otherPVs.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [otherPVs[i], otherPVs[j]] = [otherPVs[j], otherPVs[i]];
-    }
-    const distractors = otherPVs.slice(0, 2).map(pv => digitVal * pv);
+    const distractors = makeDistractors(digitVal, posValue, numStr, pos, correct);
 
     return { numStr, len, pos, digitVal, posValue, correct, distractors };
 }
@@ -440,27 +424,9 @@ function buildM2() {
     m2Answered = false;
     m2HadError = false;
 
-    const display = document.getElementById('m2Display');
-    display.innerHTML = '';
-    for (let i = 0; i < m2Task.len; i++) {
-        const pv   = Math.pow(10, m2Task.len - 1 - i);
-        const isHl = i === m2Task.pos;
-
-        const col  = document.createElement('div');
-        col.className = 'digit-col';
-
-        const dEl  = document.createElement('div');
-        dEl.className   = 'digit' + (isHl ? ' highlighted' : '');
-        dEl.textContent = m2Task.numStr[i];
-
-        const lEl  = document.createElement('div');
-        lEl.className   = 'pos-label' + (isHl ? ' highlighted' : '');
-        lEl.textContent = M2_LABELS[pv];
-
-        col.appendChild(dEl);
-        col.appendChild(lEl);
-        display.appendChild(col);
-    }
+    document.getElementById('m2QuestionLabel').innerHTML =
+        'Vad är <strong>värdet</strong> av siffran <strong>' + m2Task.digitVal +
+        '</strong> i talet <strong>' + formatNum(parseInt(m2Task.numStr)) + '</strong>?';
 
     const choices = [m2Task.correct, ...m2Task.distractors];
     for (let i = choices.length - 1; i > 0; i--) {
