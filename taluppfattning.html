@@ -230,6 +230,50 @@
     <div class="feedback" id="m6Feedback" aria-live="polite"></div>
 </div>
 
+<!-- ══════ Modul 7 ══════ -->
+<p class="section-title">Modul 7 – Negativa tal på tallinjen</p>
+
+<div class="card">
+    <p class="task-label" id="m7Label"></p>
+
+    <div style="text-align:center">
+        <span class="level-badge" id="m7LevelLabel">Nivå 1</span>
+    </div>
+
+    <div style="display:flex; justify-content:center; margin:16px 0">
+        <svg id="m7Svg" viewBox="0 0 440 80" width="100%" style="max-width:440px; display:block"></svg>
+    </div>
+
+    <div class="choice-row" id="m7Choices"></div>
+
+    <div class="btn-row">
+        <button class="btn-secondary" id="m7Next">Ny uppgift →</button>
+    </div>
+
+    <p class="streak" id="m7Streak"></p>
+    <div class="feedback" id="m7Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 8 ══════ -->
+<p class="section-title">Modul 8 – Jämföra negativa tal</p>
+
+<div class="card">
+    <p class="task-label">Vilket tal är <strong>störst</strong>?</p>
+
+    <div style="text-align:center">
+        <span class="level-badge" id="m8LevelLabel">Nivå 1</span>
+    </div>
+
+    <div class="choice-row" id="m8Choices"></div>
+
+    <div class="btn-row">
+        <button class="btn-secondary" id="m8Next">Ny uppgift →</button>
+    </div>
+
+    <p class="streak" id="m8Streak"></p>
+    <div class="feedback" id="m8Feedback" aria-live="polite"></div>
+</div>
+
 <div id="miso-container">
     <div id="miso-bubble"></div>
     <img id="miso-img" src="images/miso/miso-neutral.webp" alt="Miso" width="100">
@@ -953,6 +997,244 @@ function m6Check(val, btn) {
 document.getElementById('m6Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – avrunda!'); buildM6(); });
 
 buildM6();
+
+/* ════════════════════════════════
+   Modul 7 – Negativa tal på tallinjen
+════════════════════════════════ */
+
+let m7Streak = 0, m7Task = null, m7Answered = false, m7HadError = false;
+let m7Level = 0, m7LevelStreak = 0;
+
+function drawM7(task) {
+    const svg = document.getElementById('m7Svg');
+    const lineY = 47, lx1 = 32, lx2 = 408;
+    const ptCY = lineY - 18, ptR = 10;
+
+    function xOf(n) {
+        return lx1 + (n - task.rangeMin) / (task.rangeMax - task.rangeMin) * (lx2 - lx1);
+    }
+
+    let s = '';
+
+    s += `<line x1="${lx1}" y1="${lineY}" x2="${lx2}" y2="${lineY}" stroke="var(--color-text)" stroke-width="2.5"/>`;
+    s += `<polygon points="${lx2 + 10},${lineY} ${lx2},${lineY - 5} ${lx2},${lineY + 5}" fill="var(--color-text)"/>`;
+    s += `<polygon points="${lx1 - 10},${lineY} ${lx1},${lineY - 5} ${lx1},${lineY + 5}" fill="var(--color-text)"/>`;
+
+    for (let n = task.rangeMin; n <= task.rangeMax; n++) {
+        const x = xOf(n);
+        const isAnchor = task.anchors.includes(n);
+        const tickLen = isAnchor ? 8 : 4;
+        s += `<line x1="${x}" y1="${lineY - tickLen}" x2="${x}" y2="${lineY + tickLen}" stroke="var(--color-text)" stroke-width="${isAnchor ? 2 : 1}" opacity="${isAnchor ? 1 : 0.4}"/>`;
+        if (isAnchor) {
+            s += `<text x="${x}" y="${lineY + 16}" text-anchor="middle" font-size="12" fill="var(--color-text)" font-family="sans-serif">${n}</text>`;
+        }
+    }
+
+    task.allPositions.forEach((pos, idx) => {
+        const ptNum = idx + 1;
+        const x = xOf(pos);
+        s += `<line x1="${x}" y1="${ptCY + ptR}" x2="${x}" y2="${lineY - 3}" stroke="var(--color-text)" stroke-width="1.5" opacity="0.5"/>`;
+        s += `<circle cx="${x}" cy="${lineY}" r="3" fill="var(--color-text)"/>`;
+        s += `<circle id="m7-pt-${ptNum}" cx="${x}" cy="${ptCY}" r="${ptR}" fill="var(--color-text)"/>`;
+        s += `<text x="${x}" y="${ptCY}" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="bold" fill="white" font-family="sans-serif" pointer-events="none">${ptNum}</text>`;
+    });
+
+    svg.innerHTML = s;
+}
+
+function genM7Distractors(correct, rangeMin, rangeMax) {
+    const minSep = (rangeMax - rangeMin) > 10 ? 2 : 1;
+    const seen = new Set([correct]);
+    const result = [];
+    for (let d = minSep; d <= 15 && result.length < 3; d++) {
+        for (const sign of [1, -1]) {
+            const candidate = correct + sign * d;
+            if (candidate < rangeMin || candidate > rangeMax || seen.has(candidate)) continue;
+            let ok = true;
+            for (const x of seen) {
+                if (Math.abs(x - candidate) < minSep) { ok = false; break; }
+            }
+            if (ok) { seen.add(candidate); result.push(candidate); }
+            if (result.length >= 3) break;
+        }
+    }
+    return result;
+}
+
+function genM7Task() {
+    let target, rangeMin, rangeMax, anchors;
+    if (m7Level === 0) {
+        target = Math.floor(Math.random() * 11) - 5;
+        rangeMin = -5; rangeMax = 5; anchors = [-5, 0, 5];
+    } else if (m7Level === 1) {
+        target = Math.floor(Math.random() * 21) - 10;
+        rangeMin = -10; rangeMax = 10; anchors = [-10, 0, 10];
+    } else {
+        target = Math.floor(Math.random() * 21) - 10;
+        rangeMin = -10; rangeMax = 10; anchors = [0];
+    }
+    const distractors = genM7Distractors(target, rangeMin, rangeMax);
+    const allPositions = [target, ...distractors];
+    for (let i = allPositions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allPositions[i], allPositions[j]] = [allPositions[j], allPositions[i]];
+    }
+    const correctPt = allPositions.indexOf(target) + 1;
+    return { target, rangeMin, rangeMax, anchors, allPositions, correctPt };
+}
+
+function buildM7() {
+    m7Task = genM7Task(); m7Answered = false; m7HadError = false;
+
+    document.getElementById('m7Label').innerHTML =
+        'Var på tallinjen ligger talet <strong>' + m7Task.target + '</strong>?';
+
+    drawM7(m7Task);
+
+    const row = document.getElementById('m7Choices');
+    row.innerHTML = '';
+    for (let ptNum = 1; ptNum <= 4; ptNum++) {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = 'Punkt ' + ptNum;
+        btn.addEventListener('click', () => m7Check(ptNum, btn));
+        row.appendChild(btn);
+    }
+
+    document.getElementById('m7LevelLabel').textContent = 'Nivå ' + (m7Level + 1);
+    document.getElementById('m7Feedback').textContent = '';
+    document.getElementById('m7Next').classList.remove('btn-pulse');
+}
+
+function m7Check(ptNum, btn) {
+    if (m7Answered) return;
+    const fb = document.getElementById('m7Feedback');
+    const correctCircle = document.getElementById('m7-pt-' + m7Task.correctPt);
+
+    if (ptNum === m7Task.correctPt) {
+        m7Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m7Choices .choice-btn').forEach(b => { b.disabled = true; });
+        if (correctCircle) correctCircle.setAttribute('fill', 'var(--color-correct)');
+
+        if (!m7HadError) { m7Streak++; m7LevelStreak++; } else { m7Streak = 0; m7LevelStreak = 0; }
+        setStreak('m7Streak', m7Streak);
+
+        if (m7LevelStreak >= 3 && m7Level < 2) {
+            m7Level++;
+            m7LevelStreak = 0;
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi nästa nivå!';
+        } else {
+            fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
+        }
+        document.getElementById('m7Next').classList.add('btn-pulse');
+        showMiso('glad', 'Rätt plats på tallinjen!');
+    } else {
+        m7HadError = true;
+        m7LevelStreak = 0;
+        btn.classList.add('err');
+        btn.disabled = true;
+        if (correctCircle) correctCircle.setAttribute('fill', 'var(--color-correct)');
+        fb.textContent = 'Nästan – ' + m7Task.target + ' är på Punkt ' + m7Task.correctPt + '. Räkna stegen från 0!';
+        showMiso('uppmuntrande', 'Nästan – räkna stegen!');
+    }
+}
+
+document.getElementById('m7Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – titta på tallinjen!'); buildM7(); });
+
+buildM7();
+
+/* ════════════════════════════════
+   Modul 8 – Jämföra negativa tal
+════════════════════════════════ */
+
+let m8Streak = 0, m8Task = null, m8Answered = false, m8HadError = false;
+let m8Level = 0, m8LevelStreak = 0;
+
+function genM8Task() {
+    let numbers, correct;
+    if (m8Level === 0) {
+        const neg = -(Math.floor(Math.random() * 9) + 1);
+        const pos =   Math.floor(Math.random() * 9) + 1;
+        numbers = [neg, pos];
+        correct = pos;
+    } else if (m8Level === 1) {
+        let a = -(Math.floor(Math.random() * 9) + 1);
+        let b;
+        do { b = -(Math.floor(Math.random() * 9) + 1); } while (b === a);
+        numbers = [a, b];
+        correct = Math.max(a, b);
+    } else {
+        const a = -(Math.floor(Math.random() * 9) + 1);
+        let b, c;
+        do { b = Math.floor(Math.random() * 19) - 9; } while (b === a);
+        do { c = Math.floor(Math.random() * 19) - 9; } while (c === a || c === b);
+        numbers = [a, b, c];
+        correct = Math.max(a, b, c);
+    }
+    for (let i = numbers.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+    }
+    return { numbers, correct };
+}
+
+function buildM8() {
+    m8Task = genM8Task(); m8Answered = false; m8HadError = false;
+
+    const row = document.getElementById('m8Choices');
+    row.innerHTML = '';
+    m8Task.numbers.forEach(val => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = val;
+        btn.addEventListener('click', () => m8Check(val, btn));
+        row.appendChild(btn);
+    });
+
+    document.getElementById('m8LevelLabel').textContent = 'Nivå ' + (m8Level + 1);
+    document.getElementById('m8Feedback').textContent = '';
+    document.getElementById('m8Next').classList.remove('btn-pulse');
+}
+
+function m8Check(val, btn) {
+    if (m8Answered) return;
+    const fb = document.getElementById('m8Feedback');
+
+    if (val === m8Task.correct) {
+        m8Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m8Choices .choice-btn').forEach(b => { b.disabled = true; });
+
+        if (!m8HadError) { m8Streak++; m8LevelStreak++; } else { m8Streak = 0; m8LevelStreak = 0; }
+        setStreak('m8Streak', m8Streak);
+
+        if (m8LevelStreak >= 3 && m8Level < 2) {
+            m8Level++;
+            m8LevelStreak = 0;
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi svårare!';
+        } else {
+            fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
+        }
+        document.getElementById('m8Next').classList.add('btn-pulse');
+        showMiso('glad', 'Rätt! Du förstår negativa tal!');
+    } else {
+        m8HadError = true;
+        m8LevelStreak = 0;
+        btn.classList.add('err');
+        btn.disabled = true;
+        if (m8Level === 1) {
+            fb.textContent = 'Nästan — ju längre från noll, desto mindre är talet.';
+        } else {
+            fb.textContent = 'Nästan – rätt svar är ' + m8Task.correct + '. Tänk på vad som är närmast noll!';
+        }
+        showMiso('uppmuntrande', 'Nästan – tänk på noll!');
+    }
+}
+
+document.getElementById('m8Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – jämför talen!'); buildM8(); });
+
+buildM8();
 </script>
 </body>
 </html>
