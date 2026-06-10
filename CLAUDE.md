@@ -18,14 +18,31 @@ Intressen: katter, rita, pyssla. Gillar mjuka varma färger med natur och djur.
 - Auto Save aktiverat i VS Code
 - npx serve . i separat PowerShell-terminal för lokal testning
 
+## DESIGN-DNA
+Färgpalett definieras som CSS-variabler i varje fils <style>-block.
+Varma skogsfärger: bg #FDF6EC, surface #FFF8F0, primary #D97B3A, correct #6B9E6B, wrong #C0614A.
+Inga hårdkodade färger — använd alltid --color-* variabler.
+
+## MISO-MASKOTEN
+- Kattmaskot, fixed position bottom:20px right:20px
+- Storlek: clamp(100px, 12vw, 140px)
+- Tre poser: miso-neutral.webp, miso-glad.webp, miso-uppmuntrande.webp
+- Pratbubbla: background #FFF8F0, border 2px solid #EDE0C8, border-radius 16px, ingen pil
+- Bubblan auto-döljs efter 3000ms
+- const CAT_NAME = "Miso" högst upp i varje fils script-block
+- Miso-containern placeras precis före </script>
+
 ## FILSTRUKTUR
 avalin-matematik/
-├── index.html          (startsida, alla modulknappar live)
-├── klockan.html        (✅ klar)
-├── brak.html           (✅ klar — Modul 1–9)
-├── taluppfattning.html (✅ klar — Modul 1–6)
-├── decimaltal.html     (✅ klar — Modul 1–4)
-├── test.html           (fungerar endast via npx serve .)
+├── index.html           (startsida, alla modulknappar live)
+├── style.css            (delad bas-CSS)
+├── klockan.html         (✅ klar)
+├── brak.html            (✅ klar — Modul 1–9)
+├── taluppfattning.html  (✅ klar — Modul 1–8, inkl. negativa tal m7–m8)
+├── decimaltal.html      (✅ klar — Modul 1–4)
+├── test.html            (fungerar endast via npx serve .)
+├── images/miso/         (miso-neutral.webp, miso-glad.webp, miso-uppmuntrande.webp)
+├── images/forest-bg.webp
 ├── CLAUDE.md
 └── README.md
 
@@ -41,13 +58,10 @@ avalin-matematik/
 - avancera efter 3 rena rätt i rad (hadError = false)
 
 ## NÄSTA STEG — PRIORITERAD ORDNING
-1. CSS-refaktor — bryt ut gemensam style.css (PÅGÅR NÄSTA)
-2. Designlyft — varma mjuka färger, katt-maskot, illustrationer
-3. Gamification — streak-belöningar, localStorage-poäng
-4. Negativa tal — taluppfattning.html
-5. Koordinatsystem — ny fil
-6. Geometri — ny fil
-7. Sannolikhet/statistik — ny fil
+1. Gamification — streak-belöningar, localStorage-poäng
+2. Koordinatsystem — ny fil
+3. Geometri — ny fil
+4. Sannolikhet/statistik — ny fil
 
 ## RÖDA FLAGGOR
 - Git körs i PowerShell — inte i Claude-terminalen
@@ -56,3 +70,11 @@ avalin-matematik/
 - npx serve . i egen terminal, inte Claude Code-terminalen
 - Lägg inte till navigeringsknappar eller extra features utan att Mats bett om det
 - Stoppa design-tangenter innan funktionen är klar
+- Inga hårdkodade färger — använd alltid --color-* variabler
+
+## SESSIONSAVSLUT
+Innan du avslutar varje session, uppdatera CLAUDE.md automatiskt:
+- Markera moduler som klara om de testats och godkänts av Mats
+- Uppdatera NÄSTA STEG om prioriteringen förändrats
+- Lägg till nya röda flaggor om sådana uppstått
+- Ändra ingenting annat utan att Mats bett om det
