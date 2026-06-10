@@ -1,50 +1,66 @@
 # CLAUDE.md — Avalins Matematikverkstad
 
 ## PROJEKTÖVERSIKT
-Interaktiv matematikplattform för Avalin (f. 2014, åk 5, NPF/autismutredning pågår).
+Interaktiv matematikplattform för Avalin (f. 2014, åk 6 från hösten 2025).
 Live: negans.github.io/avalin-matematik
 Repo: github.com/negans/avalin-matematik
 Stack: HTML/CSS/JavaScript — inga ramverk.
 
 ## AVALINS PROFIL
-Begränsat verbalt arbetsminne — inte bristande grundförmåga.
+Utredning klar: bekräftat svagt verbalt arbetsminne — milda tendenser till autism och dyskalkyli.
+Behöver tydliga instruktioner i steg — ett steg i taget, aldrig flera saker samtidigt.
 Lärstil: kropp → bild → förståelse → abstraktion.
 Visuellt, konkret, steg för steg. Teknikvän, jobbar självständigt.
 Intressen: katter, rita, pyssla. Gillar mjuka varma färger med natur och djur.
+Mål: minst godkänt i matematik åk 6.
+
+## PEDAGOGISK ROLL
+Plattformen är komplement till SINGMA/skolan — inte fristående.
+Avalin möter ett begrepp i skolan → befäster det här.
+Samma moment som skolan, men mer visuellt, mer konkret, mer anpassat.
+Följer SINGMA-strukturen: 5A och 5B är referens för innehåll och ordning.
 
 ## ARBETSFLÖDE
 - Claude Code CLI: claude --dangerously-skip-permissions i VS Code-terminalen
-- PowerShell för git: add → commit → push
+- PowerShell för git: add → commit → push (semikolon som separator, inte &&)
 - Auto Save aktiverat i VS Code
 - npx serve . i separat PowerShell-terminal för lokal testning
 
-## DESIGN-DNA
-Färgpalett definieras som CSS-variabler i varje fils <style>-block.
-Varma skogsfärger: bg #FDF6EC, surface #FFF8F0, primary #D97B3A, correct #6B9E6B, wrong #C0614A.
-Inga hårdkodade färger — använd alltid --color-* variabler.
-
-## MISO-MASKOTEN
-- Kattmaskot, fixed position bottom:20px right:20px
-- Storlek: clamp(100px, 12vw, 140px)
-- Tre poser: miso-neutral.webp, miso-glad.webp, miso-uppmuntrande.webp
-- Pratbubbla: background #FFF8F0, border 2px solid #EDE0C8, border-radius 16px, ingen pil
-- Bubblan auto-döljs efter 3000ms
-- const CAT_NAME = "Miso" högst upp i varje fils script-block
-- Miso-containern placeras precis före </script>
-
 ## FILSTRUKTUR
 avalin-matematik/
-├── index.html           (startsida, alla modulknappar live)
-├── style.css            (delad bas-CSS)
-├── klockan.html         (✅ klar)
-├── brak.html            (✅ klar — Modul 1–9)
-├── taluppfattning.html  (✅ klar — Modul 1–8, inkl. negativa tal m7–m8)
-├── decimaltal.html      (✅ klar — Modul 1–4)
-├── test.html            (fungerar endast via npx serve .)
-├── images/miso/         (miso-neutral.webp, miso-glad.webp, miso-uppmuntrande.webp)
-├── images/forest-bg.webp
+├── index.html          (startsida, alla modulknappar live)
+├── style.css           (⬜ ej skapad ännu — Fas 1, steg 1)
+├── klockan.html        (✅ klar)
+├── brak.html           (✅ klar — Modul 1–9 inkl. procent)
+├── taluppfattning.html (✅ klar — Modul 1–8 inkl. negativa tal)
+├── decimaltal.html     (✅ klar — Modul 1–4)
+├── koordinat.html      (⬜ ej skapad — Fas 3, steg 6)
+├── geometri.html       (⬜ ej skapad — Fas 3, steg 7)
+├── algebra.html        (⬜ ej skapad — Fas 3, steg 8)
+├── statistik.html      (⬜ ej skapad — Fas 3, steg 9)
+├── template.html       (⬜ skapas EFTER koordinat.html är klar — inte innan)
+├── test.html           (fungerar endast via npx serve .)
 ├── CLAUDE.md
 └── README.md
+
+## HANDLINGSPLAN — PRIORITERAD ORDNING
+
+### Fas 1 — Skal och infrastruktur (byggs en gång, gäller alla filer)
+1. CSS-refaktor — bryt ut gemensam style.css från befintliga filer
+2. Designlyft — Miso-maskot (3 poser), varm färgpalett, skogsbakgrund
+3. Gamification — streak-belöningar, localStorage-poäng, stjärnor/medaljer
+   → poäng per korrekt svar utan fel, daglig streak, visuell belöning vid ny nivå
+
+### Fas 2 — Komplettera åk 5 (befintliga filer, uppdateras med ny style.css)
+4. Procent ↔ bråk ↔ decimal — sambandet explicit (brak.html, ny modul)
+5. Decimaltal i mätsammanhang — enhetsbyten cm↔m, ml↔l, g↔kg (decimaltal.html)
+
+### Fas 3 — Nya filer åk 5–6 (shell-first: bygg ett, extrahera template, repetera)
+6. koordinat.html — koordinatsystem, plotta punkter (SINGMA 5A kap 6)
+   → Efter denna: extrahera template.html från det som byggts
+7. geometri.html — vinklar, former, symmetri, omkrets, area (SINGMA 5B kap 4–5)
+8. algebra.html — uttryck, variabler, enkla ekvationer (SINGMA 5B kap 1)
+9. statistik.html — diagram, medelvärde, sannolikhet, kombinatorik (SINGMA 5B kap 6)
 
 ## TEKNISKA STANDARDER
 - answered-flagga blockerar dubbelklick
@@ -56,25 +72,14 @@ avalin-matematik/
 - multiple choice föredras över textinput
 - nivå-badge synlig
 - avancera efter 3 rena rätt i rad (hadError = false)
-
-## NÄSTA STEG — PRIORITERAD ORDNING
-1. Gamification — streak-belöningar, localStorage-poäng
-2. Koordinatsystem — ny fil
-3. Geometri — ny fil
-4. Sannolikhet/statistik — ny fil
+- ett steg i taget i UI — aldrig flera krav synliga samtidigt
 
 ## RÖDA FLAGGOR
-- Git körs i PowerShell — inte i Claude-terminalen
 - Starta alltid med claude --dangerously-skip-permissions
 - test.html fungerar inte via file:// — använd npx serve .
 - npx serve . i egen terminal, inte Claude Code-terminalen
 - Lägg inte till navigeringsknappar eller extra features utan att Mats bett om det
 - Stoppa design-tangenter innan funktionen är klar
-- Inga hårdkodade färger — använd alltid --color-* variabler
-
-## SESSIONSAVSLUT
-Innan du avslutar varje session, uppdatera CLAUDE.md automatiskt:
-- Markera moduler som klara om de testats och godkänts av Mats
-- Uppdatera NÄSTA STEG om prioriteringen förändrats
-- Lägg till nya röda flaggor om sådana uppstått
-- Ändra ingenting annat utan att Mats bett om det
+- Abstrahera inte för tidigt — bygg koordinat.html färdigt innan template.html skapas
+- Miso DOM-placering: container måste ligga omedelbart före </script>-taggen
+- Bygg aldrig mer än ett steg åt gången utan Mats godkännande
