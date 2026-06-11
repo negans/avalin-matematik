@@ -1002,6 +1002,12 @@ buildM6();
    Modul 7 – Negativa tal på tallinjen
 ════════════════════════════════ */
 
+const M7_LEVELS = [
+    { range: 11, offset: 5,  rangeMin: -5,  rangeMax: 5,  anchors: [-5, 0, 5]    },
+    { range: 21, offset: 10, rangeMin: -10, rangeMax: 10, anchors: [-10, 0, 10] },
+    { range: 21, offset: 10, rangeMin: -10, rangeMax: 10, anchors: [0]           }
+];
+
 let m7Streak = 0, m7Task = null, m7Answered = false, m7HadError = false;
 let m7Level = 0, m7LevelStreak = 0;
 
@@ -1040,6 +1046,7 @@ function drawM7(task) {
     });
 
     svg.innerHTML = s;
+    task.correctCircleEl = document.getElementById('m7-pt-' + task.correctPt);
 }
 
 function genM7Distractors(correct, rangeMin, rangeMax) {
@@ -1051,8 +1058,10 @@ function genM7Distractors(correct, rangeMin, rangeMax) {
             const candidate = correct + sign * d;
             if (candidate < rangeMin || candidate > rangeMax || seen.has(candidate)) continue;
             let ok = true;
-            for (const x of seen) {
-                if (Math.abs(x - candidate) < minSep) { ok = false; break; }
+            if (minSep > 1) {
+                for (const x of seen) {
+                    if (Math.abs(x - candidate) < minSep) { ok = false; break; }
+                }
             }
             if (ok) { seen.add(candidate); result.push(candidate); }
             if (result.length >= 3) break;
@@ -1062,25 +1071,16 @@ function genM7Distractors(correct, rangeMin, rangeMax) {
 }
 
 function genM7Task() {
-    let target, rangeMin, rangeMax, anchors;
-    if (m7Level === 0) {
-        target = Math.floor(Math.random() * 11) - 5;
-        rangeMin = -5; rangeMax = 5; anchors = [-5, 0, 5];
-    } else if (m7Level === 1) {
-        target = Math.floor(Math.random() * 21) - 10;
-        rangeMin = -10; rangeMax = 10; anchors = [-10, 0, 10];
-    } else {
-        target = Math.floor(Math.random() * 21) - 10;
-        rangeMin = -10; rangeMax = 10; anchors = [0];
-    }
-    const distractors = genM7Distractors(target, rangeMin, rangeMax);
+    const cfg = M7_LEVELS[m7Level];
+    const target = Math.floor(Math.random() * cfg.range) - cfg.offset;
+    const distractors = genM7Distractors(target, cfg.rangeMin, cfg.rangeMax);
     const allPositions = [target, ...distractors];
     for (let i = allPositions.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [allPositions[i], allPositions[j]] = [allPositions[j], allPositions[i]];
     }
     const correctPt = allPositions.indexOf(target) + 1;
-    return { target, rangeMin, rangeMax, anchors, allPositions, correctPt };
+    return { target, rangeMin: cfg.rangeMin, rangeMax: cfg.rangeMax, anchors: cfg.anchors, allPositions, correctPt };
 }
 
 function buildM7() {
@@ -1093,7 +1093,7 @@ function buildM7() {
 
     const row = document.getElementById('m7Choices');
     row.innerHTML = '';
-    for (let ptNum = 1; ptNum <= 4; ptNum++) {
+    for (let ptNum = 1; ptNum <= m7Task.allPositions.length; ptNum++) {
         const btn = document.createElement('button');
         btn.className = 'choice-btn';
         btn.textContent = 'Punkt ' + ptNum;
@@ -1109,7 +1109,7 @@ function buildM7() {
 function m7Check(ptNum, btn) {
     if (m7Answered) return;
     const fb = document.getElementById('m7Feedback');
-    const correctCircle = document.getElementById('m7-pt-' + m7Task.correctPt);
+    const correctCircle = m7Task.correctCircleEl;
 
     if (ptNum === m7Task.correctPt) {
         m7Answered = true;
@@ -1120,7 +1120,7 @@ function m7Check(ptNum, btn) {
         if (!m7HadError) { m7Streak++; m7LevelStreak++; } else { m7Streak = 0; m7LevelStreak = 0; }
         setStreak('m7Streak', m7Streak);
 
-        if (m7LevelStreak >= 3 && m7Level < 2) {
+        if (m7LevelStreak >= 3 && m7Level < M7_LEVELS.length - 1) {
             m7Level++;
             m7LevelStreak = 0;
             fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi nästa nivå!';
@@ -1157,7 +1157,7 @@ function genM8Task() {
         const neg = -(Math.floor(Math.random() * 9) + 1);
         const pos =   Math.floor(Math.random() * 9) + 1;
         numbers = [neg, pos];
-        correct = pos;
+        correct = Math.max(neg, pos);
     } else if (m8Level === 1) {
         let a = -(Math.floor(Math.random() * 9) + 1);
         let b;
