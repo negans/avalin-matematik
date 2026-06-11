@@ -1223,10 +1223,12 @@ function m8Check(val, btn) {
         m8LevelStreak = 0;
         btn.classList.add('err');
         btn.disabled = true;
-        if (m8Level === 1) {
-            fb.textContent = 'Nästan — ju längre från noll, desto mindre är talet.';
+        if (m8Level === 0) {
+            fb.textContent = 'Nästan – rätt svar är ' + m8Task.correct + '. Positiva tal är alltid större än negativa tal.';
+        } else if (m8Level === 1) {
+            fb.textContent = 'Nästan — ju längre från noll, desto mindre är det negativa talet.';
         } else {
-            fb.textContent = 'Nästan – rätt svar är ' + m8Task.correct + '. Tänk på vad som är närmast noll!';
+            fb.textContent = 'Nästan – rätt svar är ' + m8Task.correct + '. Längre åt höger på tallinjen = störst.';
         }
         showMiso('uppmuntrande', 'Nästan – tänk på noll!');
     }
