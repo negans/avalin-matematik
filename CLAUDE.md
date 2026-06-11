@@ -29,7 +29,7 @@ Följer SINGMA-strukturen: 5A och 5B är referens för innehåll och ordning.
 ## FILSTRUKTUR
 avalin-matematik/
 ├── index.html          (startsida, alla modulknappar live)
-├── style.css           (⬜ ej skapad ännu — Fas 1, steg 1)
+├── style.css           (✅ klar — gemensam stilmall)
 ├── klockan.html        (✅ klar)
 ├── brak.html           (✅ klar — Modul 1–9 inkl. procent)
 ├── taluppfattning.html (✅ klar — Modul 1–8 inkl. negativa tal)
@@ -46,10 +46,10 @@ avalin-matematik/
 ## HANDLINGSPLAN — PRIORITERAD ORDNING
 
 ### Fas 1 — Skal och infrastruktur (byggs en gång, gäller alla filer)
-1. CSS-refaktor — bryt ut gemensam style.css från befintliga filer
-2. Designlyft — Miso-maskot (3 poser), varm färgpalett, skogsbakgrund
-3. Gamification — streak-belöningar, localStorage-poäng, stjärnor/medaljer
-   → poäng per korrekt svar utan fel, daglig streak, visuell belöning vid ny nivå
+1. ✅ CSS-refaktor — gemensam style.css bruten ut
+2. ✅ Designlyft — Miso-maskot (3 poser), varm färgpalett, skogsbakgrund
+3. ⬜ Gamification — localStorage-poäng, daglig streak, stjärnor/medaljer
+   → streak visas per session men sparas inte; poäng och visuell belöning saknas
 
 ### Fas 2 — Komplettera åk 5 (befintliga filer, uppdateras med ny style.css)
 4. Procent ↔ bråk ↔ decimal — sambandet explicit (brak.html, ny modul)
