@@ -638,6 +638,7 @@ function m3Check(val, btn) {
         if (m3LevelStreak >= 3 && m3Level < M3_LEVELS.length - 1) {
             m3Level++;
             m3LevelStreak = 0;
+            document.getElementById('m3LevelLabel').textContent = 'Nivå ' + (m3Level + 1);
             fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi ännu större tal!';
         } else {
             fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
@@ -720,6 +721,7 @@ function m4Check(val, btn) {
         if (m4LevelStreak >= 3 && m4Level < M4_LEVELS.length - 1) {
             m4Level++;
             m4LevelStreak = 0;
+            document.getElementById('m4LevelLabel').textContent = 'Nivå ' + (m4Level + 1);
             fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi större tal!';
         } else {
             fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
@@ -866,6 +868,7 @@ function m5Check(word, btn) {
         if (m5LevelStreak >= 3 && m5Level < M5_LEVELS.length - 1) {
             m5Level++;
             m5LevelStreak = 0;
+            document.getElementById('m5LevelLabel').textContent = 'Nivå ' + (m5Level + 1);
             fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi större tal!';
         } else {
             fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
@@ -875,8 +878,6 @@ function m5Check(word, btn) {
     } else {
         m5HadError    = true;
         m5LevelStreak = 0;
-        m5Streak      = 0;
-        setStreak('m5Streak', 0);
         btn.classList.add('err');
         btn.disabled = true;
         fb.textContent = 'Nästan – det var "' + m5Task.word + '".';
@@ -978,6 +979,7 @@ function m6Check(val, btn) {
         if (m6LevelStreak >= 3 && m6Level < M6_LEVELS.length - 1) {
             m6Level++;
             m6LevelStreak = 0;
+            document.getElementById('m6LevelLabel').textContent = 'Nivå ' + (m6Level + 1);
             fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi större tal!';
         } else {
             fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
@@ -1123,6 +1125,7 @@ function m7Check(ptNum, btn) {
         if (m7LevelStreak >= 3 && m7Level < M7_LEVELS.length - 1) {
             m7Level++;
             m7LevelStreak = 0;
+            document.getElementById('m7LevelLabel').textContent = 'Nivå ' + (m7Level + 1);
             fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi nästa nivå!';
         } else {
             fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
@@ -1212,6 +1215,7 @@ function m8Check(val, btn) {
         if (m8LevelStreak >= 3 && m8Level < 2) {
             m8Level++;
             m8LevelStreak = 0;
+            document.getElementById('m8LevelLabel').textContent = 'Nivå ' + (m8Level + 1);
             fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi svårare!';
         } else {
             fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
