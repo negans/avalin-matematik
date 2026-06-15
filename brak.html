@@ -748,6 +748,8 @@ function showMiso(pose, text) {
 function setStreak(id, n) {
     document.getElementById(id).textContent = n >= 2 ? '🐱\u00a0' + n + '\u00a0i\u00a0rad' : '';
 }
+function hl(s)   { return '<span class="hl">'    + s + '</span>'; }
+function hlOk(s) { return '<span class="hl-ok">' + s + '</span>'; }
 let m1Streak = 0, m3Streak = 0;
 let m5aStreak = 0, m5bStreak = 0, m6Streak = 0;
 
@@ -757,7 +759,7 @@ let m5aStreak = 0, m5bStreak = 0, m6Streak = 0;
 
 const DENOMS = [2, 3, 4, 5, 8, 10];
 let m1Num = 3, m1Den = 4;
-let m1Done = false;
+let m1Done = false, m1HadError = false;
 
 function isTerminating(den) {
     let d = den;
@@ -794,6 +796,7 @@ function buildM1() {
     const rect = document.getElementById('m1Rect');
     rect.innerHTML = '';
     m1Done = false;
+    m1HadError = false;
 
     const maxW = Math.min(440, (window.innerWidth || 500) - 80);
     const cellW = Math.max(24, Math.floor(maxW / m1Den));
@@ -846,7 +849,8 @@ function m1Check() {
         inpDen.classList.add('ok');
         m1Done = true;
         document.getElementById('m1Check').disabled = true;
-        m1Streak++; setStreak('m1Streak', m1Streak);
+        if (!m1HadError) { m1Streak++; } else { m1Streak = 0; }
+        setStreak('m1Streak', m1Streak);
         fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
         document.getElementById('m1Next').classList.add('btn-pulse');
         showMiso('glad', 'Rätt svar! Jättebra!');
@@ -863,6 +867,7 @@ function m1Check() {
         }, 30);
     } else {
         [inpNum, inpDen].forEach(el => el.classList.add('err'));
+        m1HadError = true;
         m1Streak = 0; setStreak('m1Streak', 0);
         fb.textContent = 'Räkna de färgade rutorna – hur många är det av totalt?';
         showMiso('uppmuntrande', 'Nästan – titta noga!');
@@ -975,7 +980,7 @@ buildM2();
 
 const M3_DENOMS = [3, 4, 5, 6, 8, 10];
 let m3Task = null;
-let m3Answered = false;
+let m3Answered = false, m3HadError = false;
 
 function fracHTML(n, d) {
     return '<span class="fs"><span class="fn">' + n + '</span><span class="fd">' + d + '</span></span>';
@@ -1042,6 +1047,7 @@ function buildM3() {
     document.getElementById('m3Feedback').textContent = '';
     document.getElementById('m3Next').classList.remove('btn-pulse');
     m3Answered = false;
+    m3HadError = false;
     document.getElementById('m3Check').disabled = false;
 }
 
@@ -1079,12 +1085,14 @@ function m3Check() {
         m3Answered = true;
         document.getElementById('m3Check').disabled = true;
         const opTxt = m3Task.isAdd ? '+' : '\u2212';
-        m3Streak++; setStreak('m3Streak', m3Streak);
+        if (!m3HadError) { m3Streak++; } else { m3Streak = 0; }
+        setStreak('m3Streak', m3Streak);
         fb.textContent = '🐱 Rätt! ' + m3Task.a + ' ' + opTxt + ' ' + m3Task.b + ' = ' + m3Task.ans + '. Jättebra, Avalin!';
         document.getElementById('m3Next').classList.add('btn-pulse');
         showMiso('glad', 'Rätt! Snyggt räknat!');
     } else {
         inp.classList.add('err');
+        m3HadError = true;
         m3Streak = 0; setStreak('m3Streak', 0);
         fb.textContent = m3Task.isAdd
             ? 'Räkna de blå och orange rutorna – hur många är det totalt?'
@@ -1580,7 +1588,7 @@ const M6_SCENARIOS = [
 
 let m6Task = null;
 let m6Sc   = null;
-let m6Done = false;
+let m6Done = false, m6HadError = false;
 let m6Timers = [];
 
 function genM6() {
@@ -1595,6 +1603,7 @@ function buildM6() {
     const t  = m6Task;
     const sc = m6Sc;
     m6Done = false;
+    m6HadError = false;
 
     document.getElementById('m6Context').textContent =
         'Det finns ' + t.rawA + ' ' + form(t.rawA, sc.labelA, sc.singA) +
@@ -1693,7 +1702,8 @@ function m6Check() {
         inpB.classList.add('ok');
         m6Done = true;
         document.getElementById('m6Check').disabled = true;
-        m6Streak++; setStreak('m6Streak', m6Streak);
+        if (!m6HadError) { m6Streak++; } else { m6Streak = 0; }
+        setStreak('m6Streak', m6Streak);
         fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
         document.getElementById('m6Next').classList.add('btn-pulse');
         showMiso('glad', 'Rätt förhållande! Bra jobbat!');
@@ -1707,6 +1717,7 @@ function m6Check() {
     } else {
         inpA.classList.add('err');
         inpB.classList.add('err');
+        m6HadError = true;
         m6Streak = 0; setStreak('m6Streak', 0);
         if (nA === m6Task.rawA && nB === m6Task.rawB) {
             fb.textContent = 'Du räknade rätt! Men ' + m6Task.rawA + ':' + m6Task.rawB +
