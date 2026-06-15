@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Klockan – Avalins Matematikverkstad</title>
     <link rel="stylesheet" href="style.css">
+    <script src="storage.js"></script>
     <style>
         :root {
             --color-bg:             #FDF6EC;
@@ -168,6 +169,7 @@
         }
 
         const CAT_NAME = "Miso";
+        initStatsBar();
 
         const misoContainer = document.createElement('div');
         misoContainer.id = 'miso-container';
@@ -345,7 +347,7 @@
                 document.getElementById(id).classList.contains('done'));
 
             if (allDone) {
-                if (!hadError) { streak++; } else { streak = 0; } setStreak(streak);
+                if (!hadError) { streak++; recordCorrect(); } else { streak = 0; } setStreak(streak);
                 setFb(`🐱 Jättebra, Avalin! Klockan är ${h}:${pad(m)} — du hade rätt på allt!`, 'correct');
                 document.getElementById('nextBtn').classList.add('btn-pulse');
                 return;

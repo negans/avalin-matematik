@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Decimaltal – Avalins Matematikverkstad</title>
     <link rel="stylesheet" href="style.css">
+    <script src="storage.js"></script>
     <style>
         /* ── Misos varma skogstema (gäller bara decimaltal.html) ── */
         :root {
@@ -185,6 +186,7 @@
 
 <script>
 const CAT_NAME = "Miso";
+initStatsBar();
 
 let misoTimer = null;
 function showMiso(pose, text) {
@@ -346,7 +348,7 @@ function m1Check(word, btn) {
         btn.classList.add('ok');
         document.querySelectorAll('#m1Choices .choice-btn-text').forEach(b => { b.disabled = true; });
 
-        if (!m1HadError) { m1Streak++; m1LevelStreak++; }
+        if (!m1HadError) { m1Streak++; m1LevelStreak++; recordCorrect(); }
         else             { m1Streak = 0; m1LevelStreak = 0; }
         setStreak('m1Streak', m1Streak);
 
@@ -456,7 +458,7 @@ function m2Check(disp, btn) {
         btn.classList.add('ok');
         document.querySelectorAll('#m2Choices .choice-btn').forEach(b => { b.disabled = true; });
 
-        if (!m2HadError) { m2Streak++; m2LevelStreak++; }
+        if (!m2HadError) { m2Streak++; m2LevelStreak++; recordCorrect(); }
         else             { m2Streak = 0; m2LevelStreak = 0; }
         setStreak('m2Streak', m2Streak);
 
@@ -636,7 +638,7 @@ function m3Check(val, btn) {
         btn.classList.add('ok');
         document.querySelectorAll('#m3Choices .choice-btn').forEach(b => { b.disabled = true; });
 
-        if (!m3HadError) { m3Streak++; m3LevelStreak++; }
+        if (!m3HadError) { m3Streak++; m3LevelStreak++; recordCorrect(); }
         else             { m3Streak = 0; m3LevelStreak = 0; }
         setStreak('m3Streak', m3Streak);
 
@@ -771,7 +773,7 @@ function m4Check(val, btn) {
         btn.classList.add('ok');
         document.querySelectorAll('#m4Choices .choice-btn').forEach(b => { b.disabled = true; });
 
-        if (!m4HadError) { m4Streak++; m4LevelStreak++; }
+        if (!m4HadError) { m4Streak++; m4LevelStreak++; recordCorrect(); }
         else             { m4Streak = 0; m4LevelStreak = 0; }
         setStreak('m4Streak', m4Streak);
 

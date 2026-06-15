@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bråk – Avalins Matematikverkstad</title>
     <link rel="stylesheet" href="style.css">
+    <script src="storage.js"></script>
     <style>
         /* ── Modul 1: klickbar rektangel ── */
         .rect-outer {
@@ -732,6 +733,7 @@
 
 <script>
 const CAT_NAME = "Miso";
+initStatsBar();
 
 let misoTimer = null;
 function showMiso(pose, text) {
@@ -849,7 +851,7 @@ function m1Check() {
         inpDen.classList.add('ok');
         m1Done = true;
         document.getElementById('m1Check').disabled = true;
-        if (!m1HadError) { m1Streak++; } else { m1Streak = 0; }
+        if (!m1HadError) { m1Streak++; recordCorrect(); } else { m1Streak = 0; }
         setStreak('m1Streak', m1Streak);
         fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
         document.getElementById('m1Next').classList.add('btn-pulse');
@@ -1085,7 +1087,7 @@ function m3Check() {
         m3Answered = true;
         document.getElementById('m3Check').disabled = true;
         const opTxt = m3Task.isAdd ? '+' : '\u2212';
-        if (!m3HadError) { m3Streak++; } else { m3Streak = 0; }
+        if (!m3HadError) { m3Streak++; recordCorrect(); } else { m3Streak = 0; }
         setStreak('m3Streak', m3Streak);
         fb.textContent = '🐱 Rätt! ' + m3Task.a + ' ' + opTxt + ' ' + m3Task.b + ' = ' + m3Task.ans + '. Jättebra, Avalin!';
         document.getElementById('m3Next').classList.add('btn-pulse');
@@ -1189,7 +1191,7 @@ function da1Check(val, btn) {
         da1Answered = true;
         btn.classList.add('ok');
         document.querySelectorAll('#da1Choices .choice-btn').forEach(b => { b.disabled = true; });
-        if (!da1HadError) { da1Streak++; } else { da1Streak = 0; }
+        if (!da1HadError) { da1Streak++; recordCorrect(); } else { da1Streak = 0; }
         setStreak('da1Streak', da1Streak);
         fb.textContent = '🐱 Rätt! ' + frac.n + '/' + frac.d + ' av ' + whole + ' = ' + part + '. Jättebra, Avalin!';
         showMiso('glad', 'Rätt! Bra tänkt!');
@@ -1284,7 +1286,7 @@ function da2Check(val, btn) {
         da2Answered = true;
         btn.classList.add('ok');
         document.querySelectorAll('#da2Choices .choice-btn').forEach(b => { b.disabled = true; });
-        if (!da2HadError) { da2Streak++; } else { da2Streak = 0; }
+        if (!da2HadError) { da2Streak++; recordCorrect(); } else { da2Streak = 0; }
         setStreak('da2Streak', da2Streak);
         fb.textContent = '🐱 Rätt! ' + frac.n + '/' + frac.d + ' · ' + integer + ' = ' + result + '. Jättebra, Avalin!';
         showMiso('glad', 'Rätt! Du räknar riktigt bra!');
@@ -1418,7 +1420,7 @@ function m5aPick(idx) {
 
     const fb = document.getElementById('m5aFeedback');
     if (ok) {
-        m5aStreak++; setStreak('m5aStreak', m5aStreak);
+        m5aStreak++; recordCorrect(); setStreak('m5aStreak', m5aStreak);
         fb.textContent = '🐱 Rätt! ' + chosen.n + '/' + chosen.d + ' är störst. Jättebra, Avalin!';
         document.getElementById('m5aNext').classList.add('btn-pulse');
         showMiso('glad', 'Rätt! Snyggt jämfört!');
@@ -1521,7 +1523,7 @@ function m5bEval() {
 
     if (correct) {
         m5bItems.forEach(item => { item.card.classList.add('done', 'ok'); });
-        m5bStreak++; setStreak('m5bStreak', m5bStreak);
+        m5bStreak++; recordCorrect(); setStreak('m5bStreak', m5bStreak);
         fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
         document.getElementById('m5bNext').classList.add('btn-pulse');
         showMiso('glad', 'Rätt ordning! Imponerande!');
@@ -1702,7 +1704,7 @@ function m6Check() {
         inpB.classList.add('ok');
         m6Done = true;
         document.getElementById('m6Check').disabled = true;
-        if (!m6HadError) { m6Streak++; } else { m6Streak = 0; }
+        if (!m6HadError) { m6Streak++; recordCorrect(); } else { m6Streak = 0; }
         setStreak('m6Streak', m6Streak);
         fb.textContent = '🐱 Rätt! Jättebra, Avalin!';
         document.getElementById('m6Next').classList.add('btn-pulse');
@@ -1864,7 +1866,7 @@ function m7Check(fr, btn) {
         btn.classList.add('ok');
         document.querySelectorAll('#m7Choices .choice-btn').forEach(b => { b.disabled = true; });
 
-        if (!m7HadError) { m7Streak++; m7CleanCount++; } else { m7Streak = 0; m7CleanCount = 0; }
+        if (!m7HadError) { m7Streak++; m7CleanCount++; recordCorrect(); } else { m7Streak = 0; m7CleanCount = 0; }
         setStreak('m7Streak', m7Streak);
         document.getElementById('m7Next').classList.add('btn-pulse');
 
@@ -2002,7 +2004,7 @@ function m8Check(fr, btn) {
         btn.classList.add('ok');
         document.querySelectorAll('#m8Choices .choice-btn').forEach(b => { b.disabled = true; });
 
-        if (!m8HadError) { m8Streak++; m8CleanCount++; } else { m8Streak = 0; m8CleanCount = 0; }
+        if (!m8HadError) { m8Streak++; m8CleanCount++; recordCorrect(); } else { m8Streak = 0; m8CleanCount = 0; }
         setStreak('m8Streak', m8Streak);
         document.getElementById('m8Next').classList.add('btn-pulse');
 
@@ -2147,7 +2149,7 @@ function m9Check(val, btn) {
         btn.classList.add('ok');
         document.querySelectorAll('#m9Choices .choice-btn').forEach(b => { b.disabled = true; });
 
-        if (!m9HadError) { m9Streak++; m9CleanCount++; } else { m9Streak = 0; m9CleanCount = 0; }
+        if (!m9HadError) { m9Streak++; m9CleanCount++; recordCorrect(); } else { m9Streak = 0; m9CleanCount = 0; }
         setStreak('m9Streak', m9Streak);
         document.getElementById('m9Next').classList.add('btn-pulse');
 

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Taluppfattning – Avalins Matematikverkstad</title>
     <link rel="stylesheet" href="style.css">
+    <script src="storage.js"></script>
     <style>
         /* ── Modul 1 & 2: positionstabell ── */
         .number-display {
@@ -281,6 +282,7 @@
 
 <script>
 const CAT_NAME = "Miso";
+initStatsBar();
 
 let misoTimer = null;
 function showMiso(pose, text) {
@@ -389,7 +391,7 @@ function m1Check(val, btn) {
         m1Answered = true;
         btn.classList.add('ok');
         document.querySelectorAll('#m1Choices .choice-btn').forEach(b => { b.disabled = true; });
-        if (!m1HadError) { m1Streak++; } else { m1Streak = 0; }
+        if (!m1HadError) { m1Streak++; recordCorrect(); } else { m1Streak = 0; }
         setStreak('m1Streak', m1Streak);
         fb.textContent = '🐱 Rätt! Siffran ' + m1Task.digitVal + ' på ' +
             posPlace(m1Task.posValue) + ' är värd ' + m1Task.correct + '. Jättebra, Avalin!';
@@ -500,7 +502,7 @@ function m2Check(val, btn) {
         m2Answered = true;
         btn.classList.add('ok');
         document.querySelectorAll('#m2Choices .choice-btn').forEach(b => { b.disabled = true; });
-        if (!m2HadError) { m2Streak++; } else { m2Streak = 0; }
+        if (!m2HadError) { m2Streak++; recordCorrect(); } else { m2Streak = 0; }
         setStreak('m2Streak', m2Streak);
         fb.textContent = '🐱 Rätt! Siffran ' + m2Task.digitVal + ' på ' +
             M2_PLACES[m2Task.posValue] + ' är värd ' + formatNum(m2Task.correct) + '. Jättebra, Avalin!';
@@ -629,6 +631,7 @@ function m3Check(val, btn) {
         if (!m3HadError) {
             m3Streak++;
             m3LevelStreak++;
+            recordCorrect();
         } else {
             m3Streak = 0;
             m3LevelStreak = 0;
@@ -714,7 +717,7 @@ function m4Check(val, btn) {
         btn.classList.add('ok');
         document.querySelectorAll('#m4Choices .choice-btn').forEach(b => { b.disabled = true; });
 
-        if (!m4HadError) { m4Streak++; m4LevelStreak++; }
+        if (!m4HadError) { m4Streak++; m4LevelStreak++; recordCorrect(); }
         else             { m4Streak = 0; m4LevelStreak = 0; }
         setStreak('m4Streak', m4Streak);
 
@@ -861,7 +864,7 @@ function m5Check(word, btn) {
         btn.classList.add('ok');
         document.querySelectorAll('#m5Choices .choice-btn-text').forEach(b => { b.disabled = true; });
 
-        if (!m5HadError) { m5Streak++; m5LevelStreak++; }
+        if (!m5HadError) { m5Streak++; m5LevelStreak++; recordCorrect(); }
         else             { m5Streak = 0; m5LevelStreak = 0; }
         setStreak('m5Streak', m5Streak);
 
@@ -972,7 +975,7 @@ function m6Check(val, btn) {
         btn.classList.add('ok');
         document.querySelectorAll('#m6Choices .choice-btn').forEach(b => { b.disabled = true; });
 
-        if (!m6HadError) { m6Streak++; m6LevelStreak++; }
+        if (!m6HadError) { m6Streak++; m6LevelStreak++; recordCorrect(); }
         else             { m6Streak = 0; m6LevelStreak = 0; }
         setStreak('m6Streak', m6Streak);
 
@@ -1119,7 +1122,7 @@ function m7Check(ptNum, btn) {
         document.querySelectorAll('#m7Choices .choice-btn').forEach(b => { b.disabled = true; });
         if (correctCircle) correctCircle.setAttribute('fill', 'var(--color-correct)');
 
-        if (!m7HadError) { m7Streak++; m7LevelStreak++; } else { m7Streak = 0; m7LevelStreak = 0; }
+        if (!m7HadError) { m7Streak++; m7LevelStreak++; recordCorrect(); } else { m7Streak = 0; m7LevelStreak = 0; }
         setStreak('m7Streak', m7Streak);
 
         if (m7LevelStreak >= 3 && m7Level < M7_LEVELS.length - 1) {
@@ -1209,7 +1212,7 @@ function m8Check(val, btn) {
         btn.classList.add('ok');
         document.querySelectorAll('#m8Choices .choice-btn').forEach(b => { b.disabled = true; });
 
-        if (!m8HadError) { m8Streak++; m8LevelStreak++; } else { m8Streak = 0; m8LevelStreak = 0; }
+        if (!m8HadError) { m8Streak++; m8LevelStreak++; recordCorrect(); } else { m8Streak = 0; m8LevelStreak = 0; }
         setStreak('m8Streak', m8Streak);
 
         if (m8LevelStreak >= 3 && m8Level < 2) {
