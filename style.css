@@ -267,17 +267,6 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .choice-btn .fs .fn { border-bottom-color: currentColor; }
 
 /* ── Stats bar (persistent score / daily streak) ── */
-#av-stats-bar {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    padding: 7px 16px;
-    background: var(--color-surface-alt);
-    border-bottom: 1px solid var(--color-border);
-    font-size: 0.88em;
-    font-weight: 600;
-    color: var(--color-text);
-    letter-spacing: 0.01em;
-}
-#av-stats-bar span:empty { display: none; }
+/* Dold på begäran — poäng/stjärnor sparas fortfarande i localStorage
+   via recordCorrect(); endast den visuella baren är borttagen. */
+#av-stats-bar { display: none; }
