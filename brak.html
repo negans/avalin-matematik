@@ -692,6 +692,42 @@
     <div class="feedback" id="m9Feedback" aria-live="polite"></div>
 </div>
 
+<!-- ══════ Modul 10 ══════ -->
+<p class="section-title">Modul 10 – Samma tal, tre former</p>
+<div class="card">
+    <div style="text-align:center; margin-bottom:10px">
+        <span class="level-badge" id="m10LevelBadge">Nivå 1</span>
+    </div>
+    <p class="task-label" id="m10Label"></p>
+    <div id="m10Source" style="text-align:center; font-size:2.2em; font-weight:bold; color:var(--color-text); margin:6px 0 10px"></div>
+    <div class="rect-outer"><div class="frac-rect static" id="m10Rect"></div></div>
+    <div class="choice-row" id="m10Choices"></div>
+
+    <div id="m10ResultArea" style="display:none">
+        <p style="text-align:center; font-size:0.85em; color:var(--color-text-secondary); margin:6px 0 0">Samma tal i tre former:</p>
+        <div class="result-row">
+            <div class="result-pill">
+                <span class="pill-label">bråkform</span>
+                <span class="pill-value" id="m10rFrac"></span>
+            </div>
+            <div class="result-pill">
+                <span class="pill-label">decimalform</span>
+                <span class="pill-value" id="m10rDec"></span>
+            </div>
+            <div class="result-pill">
+                <span class="pill-label">procent</span>
+                <span class="pill-value" id="m10rPct"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="btn-row">
+        <button class="btn-secondary" id="m10Next">Ny uppgift →</button>
+    </div>
+    <p class="streak" id="m10Streak"></p>
+    <div class="feedback" id="m10Feedback" aria-live="polite"></div>
+</div>
+
 <div id="miso-container">
     <div id="miso-bubble"></div>
     <img id="miso-img" src="images/miso/miso-neutral.webp" alt="Miso" width="100">
@@ -2140,6 +2176,152 @@ function m9Check(val, btn) {
 
 document.getElementById('m9Next').addEventListener('click', () => { showMiso('neutral', 'Ny procentuppgift – lycka till!'); buildM9(); });
 buildM9();
+
+/* ════════════════════════════════
+   Modul 10 – Samma tal, tre former
+   (procent ↔ bråk ↔ decimal)
+════════════════════════════════ */
+
+const M10_POOL = [
+    { n: 1, d: 2 }, { n: 1, d: 4 }, { n: 3, d: 4 },
+    { n: 1, d: 5 }, { n: 2, d: 5 }, { n: 3, d: 5 }, { n: 4, d: 5 },
+    { n: 1, d: 10 }, { n: 3, d: 10 }, { n: 7, d: 10 }, { n: 9, d: 10 }
+];
+const M10_FORMS  = ['frac', 'dec', 'pct'];
+const M10_LABELS = { frac: 'bråk', dec: 'decimaltal', pct: 'procent' };
+
+let m10Level = 1, m10CleanCount = 0, m10Streak = 0;
+let m10Task = null, m10Answered = false, m10HadError = false, m10Timer = null;
+let m10PillTimers = [];
+
+function m10Val(fr)  { return fr.n / fr.d; }
+function m10Render(kind, fr) {
+    if (kind === 'frac') return fracHTML(fr.n, fr.d);
+    if (kind === 'dec')  return fmtDec(fr.n, fr.d);
+    return fmtPct(fr.n, fr.d);
+}
+
+function genM10Task() {
+    const fr = M10_POOL[Math.floor(Math.random() * M10_POOL.length)];
+    let from, to;
+    if (m10Level === 1)      { from = 'frac'; to = 'dec'; }
+    else if (m10Level === 2) { from = 'frac'; to = 'pct'; }
+    else {
+        from = M10_FORMS[Math.floor(Math.random() * 3)];
+        do { to = M10_FORMS[Math.floor(Math.random() * 3)]; } while (to === from);
+    }
+    return { n: fr.n, d: fr.d, from, to };
+}
+
+function m10Choices(task) {
+    const others = M10_POOL.filter(fr => m10Val(fr) !== m10Val(task));
+    for (let i = others.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [others[i], others[j]] = [others[j], others[i]];
+    }
+    const out = [{ n: task.n, d: task.d }, others[0], others[1], others[2]];
+    for (let i = out.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [out[i], out[j]] = [out[j], out[i]];
+    }
+    return out;
+}
+
+function buildM10() {
+    if (m10Timer) { clearTimeout(m10Timer); m10Timer = null; }
+    m10PillTimers.forEach(clearTimeout);
+    m10PillTimers = [];
+    m10Task     = genM10Task();
+    m10Answered = false;
+    m10HadError = false;
+
+    const { n, d, from, to } = m10Task;
+
+    document.getElementById('m10LevelBadge').textContent = 'Nivå ' + m10Level;
+    document.getElementById('m10Next').classList.remove('btn-pulse');
+    document.getElementById('m10Feedback').textContent = '';
+    document.getElementById('m10Streak').textContent = '';
+    document.getElementById('m10Label').textContent = 'Hur skrivs detta som ' + M10_LABELS[to] + '?';
+    document.getElementById('m10Source').innerHTML = m10Render(from, m10Task);
+
+    const resArea = document.getElementById('m10ResultArea');
+    resArea.style.display = 'none';
+    resArea.querySelectorAll('.result-pill').forEach(p => p.classList.remove('show'));
+
+    const rect = document.getElementById('m10Rect');
+    rect.innerHTML = '';
+    const maxW  = Math.min(440, (window.innerWidth || 500) - 80);
+    const cellW = Math.max(24, Math.floor(maxW / d));
+    for (let i = 0; i < d; i++) {
+        const c = document.createElement('div');
+        c.className = 'frac-cell' + (i < n ? ' colored' : '');
+        c.style.width = cellW + 'px';
+        rect.appendChild(c);
+    }
+
+    const row = document.getElementById('m10Choices');
+    row.innerHTML = '';
+    m10Choices(m10Task).forEach(fr => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.innerHTML = m10Render(to, fr);
+        btn.addEventListener('click', () => m10Check(fr, btn));
+        row.appendChild(btn);
+    });
+}
+
+function m10Check(fr, btn) {
+    if (m10Answered) return;
+    const { n, d, to } = m10Task;
+    const fb      = document.getElementById('m10Feedback');
+    const correct = m10Val(fr) === m10Val(m10Task);
+
+    if (correct) {
+        m10Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m10Choices .choice-btn').forEach(b => { b.disabled = true; });
+
+        if (!m10HadError) { m10Streak++; m10CleanCount++; recordCorrect(); } else { m10Streak = 0; m10CleanCount = 0; }
+        setStreak('m10Streak', m10Streak);
+        document.getElementById('m10Next').classList.add('btn-pulse');
+
+        document.getElementById('m10rFrac').innerHTML  = fracHTML(n, d);
+        document.getElementById('m10rDec').textContent  = fmtDec(n, d);
+        document.getElementById('m10rPct').textContent  = fmtPct(n, d);
+        const resArea = document.getElementById('m10ResultArea');
+        resArea.style.display = 'block';
+        m10PillTimers.push(setTimeout(() => {
+            resArea.querySelectorAll('.result-pill').forEach((p, i) =>
+                m10PillTimers.push(setTimeout(() => p.classList.add('show'), i * 160)));
+        }, 30));
+
+        fb.innerHTML = '🐱 Rätt! ' + fracHTML(n, d) + ' = ' + fmtDec(n, d) + ' = ' + fmtPct(n, d) + '. Jättebra, Avalin!';
+        showMiso('glad', 'Rätt – samma tal, tre former!');
+
+        if (m10CleanCount >= 3 && m10Level < 3) {
+            m10Level++;
+            m10CleanCount = 0;
+            m10Timer = setTimeout(() => {
+                document.getElementById('m10Feedback').innerHTML += ' 🌟 Nivå ' + m10Level + '!';
+                document.getElementById('m10LevelBadge').textContent = 'Nivå ' + m10Level;
+                m10Timer = null;
+            }, 700);
+        }
+    } else {
+        m10HadError = true;
+        btn.classList.add('err');
+        btn.disabled = true;
+        m10Streak = 0; setStreak('m10Streak', 0);
+        if (to === 'dec')      fb.textContent = 'Inte riktigt – dela täljaren med nämnaren: ' + n + ' ÷ ' + d + '.';
+        else if (to === 'pct') fb.textContent = 'Inte riktigt – hur många hundradelar är bråket? Tänk "av hundra".';
+        else                   fb.textContent = 'Inte riktigt – vilket bråk har samma värde? Titta på stapeln.';
+        showMiso('uppmuntrande', 'Nästan – titta på stapeln!');
+        document.getElementById('m10Next').classList.remove('btn-pulse');
+    }
+}
+
+document.getElementById('m10Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildM10(); });
+buildM10();
 </script>
 
 </body>
