@@ -6,44 +6,9 @@
     <title>Decimaltal – Avalins Matematikverkstad</title>
     <link rel="stylesheet" href="style.css">
     <script src="storage.js"></script>
+    <script src="ui.js"></script>
     <style>
-        /* ── Misos varma skogstema (gäller bara decimaltal.html) ── */
-        :root {
-            --color-bg:             #FDF6EC;
-            --color-surface:        #FFF8F0;
-            --color-surface-alt:    #F5ECD7;
-            --color-border:         #EDE0C8;
-            --color-primary:        #D97B3A;
-            --color-primary-hover:  #E8955A;
-            --color-correct:        #6B9E6B;
-            --color-wrong:          #C0614A;
-            --color-text:           #4A3728;
-            --color-text-secondary: #7A5C42;
-            --color-heading:        #A0784A;
-            --color-badge:          #C8A882;
-
-            /* Remap delade --clr-*-variabler */
-            --clr-bg:         var(--color-bg);
-            --clr-card:       var(--color-surface);
-            --clr-hover:      var(--color-surface-alt);
-            --clr-primary:    var(--color-primary);
-            --clr-primary-dk: var(--color-primary-hover);
-            --clr-text:       var(--color-text);
-            --clr-text-sub:   var(--color-text);
-            --clr-text-dim:   var(--color-text-secondary);
-            --clr-nav:        var(--color-text-secondary);
-            --clr-border:     var(--color-border);
-            --clr-border-dk:  var(--color-border);
-            --clr-badge-bg:   var(--color-badge);
-            --clr-ok:         var(--color-correct);
-            --clr-ok-bg:      #EDF4ED;
-            --clr-ok-text:    var(--color-correct);
-            --clr-err:        var(--color-wrong);
-            --clr-err-bg:     #FAEDEA;
-            --clr-err-text:   var(--color-wrong);
-        }
-
-        /* section-title använder --clr-primary men ska ha heading-färg */
+        /* Rubrik i heading-färg istället för style.css primary */
         .section-title { color: var(--color-heading); }
 
         /* Badge: ljus text mot #C8A882-bakgrund */
@@ -71,14 +36,14 @@
         #miso-bubble {
             display: none;
             background: rgba(255,248,240,0.88);
-            border: 2px solid #e0c8a0;
+            border: 2px solid var(--color-border);
             border-radius: 16px;
             padding: 8px 12px;
             margin-bottom: 8px;
             font-size: 0.85em;
             max-width: 160px;
             text-align: center;
-            color: #3a3a3a;
+            color: var(--color-text);
             box-shadow: 0 2px 8px rgba(0,0,0,0.12);
         }
     </style>
@@ -101,7 +66,7 @@
         <span class="level-badge" id="m1LevelLabel">Nivå 1</span>
     </div>
 
-    <p id="m1Number" style="text-align:center; font-size:3em; font-weight:bold; color:#2c3e50; margin:8px 0 20px; letter-spacing:0.05em"></p>
+    <p id="m1Number" style="text-align:center; font-size:3em; font-weight:bold; color:var(--color-text); margin:8px 0 20px; letter-spacing:0.05em"></p>
 
     <div class="choice-col" id="m1Choices"></div>
 
@@ -167,7 +132,7 @@
         <span class="level-badge" id="m4LevelLabel">Nivå 1</span>
     </div>
 
-    <p id="m4Expr" style="text-align:center; font-size:2em; font-weight:bold; color:#2c3e50; margin:8px 0 20px; letter-spacing:0.03em"></p>
+    <p id="m4Expr" style="text-align:center; font-size:2em; font-weight:bold; color:var(--color-text); margin:8px 0 20px; letter-spacing:0.03em"></p>
 
     <div class="choice-row" id="m4Choices"></div>
 
@@ -188,21 +153,8 @@
 const CAT_NAME = "Miso";
 initStatsBar();
 
-let misoTimer = null;
-function showMiso(pose, text) {
-    const poses = { neutral: 'miso-neutral', glad: 'miso-glad', uppmuntrande: 'miso-uppmuntrande' };
-    document.getElementById('miso-img').src = 'images/miso/' + (poses[pose] || 'miso-neutral') + '.webp';
-    const bubble = document.getElementById('miso-bubble');
-    bubble.textContent = text;
-    bubble.style.display = 'block';
-    if (misoTimer) clearTimeout(misoTimer);
-    misoTimer = setTimeout(() => { bubble.style.display = 'none'; }, 3000);
-}
 
 /* ── Hjälpfunktioner ── */
-function setStreak(id, n) {
-    document.getElementById(id).textContent = n >= 2 ? '🐱 ' + n + ' i rad' : '';
-}
 
 function rnd(a, b) {
     return Math.floor(Math.random() * (b - a + 1)) + a;
@@ -522,7 +474,7 @@ function drawM3SVG(pos, leftLabel, rightLabel) {
         const t = svgEl('line');
         t.setAttribute('x1', x); t.setAttribute('y1', lineY - tickH / 2);
         t.setAttribute('x2', x); t.setAttribute('y2', lineY + tickH / 2);
-        t.setAttribute('stroke', isMajor ? '#2c3e50' : '#8aaabf');
+        t.setAttribute('stroke', isMajor ? '#4A3728' : '#7A5C42');
         t.setAttribute('stroke-width', isMajor ? '2' : '1.5');
         svg.appendChild(t);
 
@@ -533,7 +485,7 @@ function drawM3SVG(pos, leftLabel, rightLabel) {
             lbl.setAttribute('text-anchor', 'middle');
             lbl.setAttribute('font-size', '14');
             lbl.setAttribute('font-family', 'Arial, sans-serif');
-            lbl.setAttribute('fill', '#2c3e50');
+            lbl.setAttribute('fill', '#4A3728');
             lbl.textContent = i === 0 ? leftLabel : rightLabel;
             svg.appendChild(lbl);
         }

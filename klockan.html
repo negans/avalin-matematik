@@ -6,40 +6,8 @@
     <title>Klockan – Avalins Matematikverkstad</title>
     <link rel="stylesheet" href="style.css">
     <script src="storage.js"></script>
+    <script src="ui.js"></script>
     <style>
-        :root {
-            --color-bg:             #FDF6EC;
-            --color-surface:        #FFF8F0;
-            --color-surface-alt:    #F5ECD7;
-            --color-border:         #EDE0C8;
-            --color-primary:        #D97B3A;
-            --color-primary-hover:  #E8955A;
-            --color-correct:        #6B9E6B;
-            --color-wrong:          #C0614A;
-            --color-text:           #4A3728;
-            --color-text-secondary: #7A5C42;
-            --color-heading:        #A0784A;
-            --color-badge:          #C8A882;
-
-            --clr-bg:         var(--color-bg);
-            --clr-card:       var(--color-surface);
-            --clr-hover:      var(--color-surface-alt);
-            --clr-badge-bg:   var(--color-surface-alt);
-            --clr-text:       var(--color-text);
-            --clr-text-sub:   var(--color-text-secondary);
-            --clr-text-dim:   var(--color-text-secondary);
-            --clr-nav:        var(--color-text-secondary);
-            --clr-primary:    var(--color-primary);
-            --clr-primary-dk: var(--color-primary-hover);
-            --clr-border:     var(--color-border);
-            --clr-border-dk:  var(--color-border);
-            --clr-ok:         var(--color-correct);
-            --clr-ok-bg:      #E8F5E8;
-            --clr-ok-text:    var(--color-correct);
-            --clr-err:        var(--color-wrong);
-            --clr-err-bg:     #FAEDEA;
-            --clr-err-text:   var(--color-wrong);
-        }
 
         h1 { margin-bottom: 22px; }
 
@@ -53,18 +21,18 @@
         button       { font-size: 1.1em; padding: 12px 28px; }
         button:active { transform: scale(0.96); }
 
-        #checkBtn       { background: var(--color-primary); color: white; box-shadow: 0 4px 12px rgba(74,144,217,0.35); }
+        #checkBtn       { background: var(--color-primary); color: white; box-shadow: 0 4px 12px rgba(217,123,58,0.35); }
         #checkBtn:hover { background: var(--color-primary-hover); }
         #nextBtn        { background: white; color: var(--color-primary); border: 2px solid var(--color-primary); }
         #nextBtn:hover  { background: var(--color-surface-alt); }
 
         /* ── Klocka ── */
         .clock-wrap { display: flex; justify-content: center; margin-bottom: 28px; }
-        svg#clock   { filter: drop-shadow(0 4px 16px rgba(44,62,80,0.18)); }
+        svg#clock   { filter: drop-shadow(0 4px 16px rgba(74,55,40,0.18)); }
 
         /* ── Steg-lista ── */
         .steps    { max-width: 480px; margin: 0 auto 20px; display: flex; flex-direction: column; gap: 12px; }
-        .step     { background: rgba(255,248,240,0.88); border-radius: 16px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(44,62,80,0.08); transition: background 0.3s; }
+        .step     { background: rgba(255,248,240,0.88); border-radius: 16px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(74,55,40,0.08); transition: background 0.3s; }
         .step.done { background: #E8F5E8; }
 
         .step-num { width: 38px; height: 38px; border-radius: 50%; background: var(--color-primary); color: white; font-size: 1.15em; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.3s; }
@@ -116,7 +84,7 @@
                   stroke="#4A3728" stroke-width="9" stroke-linecap="round"/>
 
             <!-- Navknappar -->
-            <circle cx="150" cy="150" r="9"   fill="#2c3e50"/>
+            <circle cx="150" cy="150" r="9"   fill="#4A3728"/>
             <circle cx="150" cy="150" r="4.5" fill="#d94a4a"/>
         </svg>
     </div>
@@ -164,10 +132,6 @@
         let h = 3, m = 20;
         let streak = 0;
         let hadError = false;
-        function setStreak(n) {
-            document.getElementById('streak').textContent = n >= 2 ? '🐱\u00a0' + n + '\u00a0i\u00a0rad' : '';
-        }
-
         const CAT_NAME = "Miso";
         initStatsBar();
 
@@ -347,7 +311,7 @@
                 document.getElementById(id).classList.contains('done'));
 
             if (allDone) {
-                if (!hadError) { streak++; recordCorrect(); } else { streak = 0; } setStreak(streak);
+                if (!hadError) { streak++; recordCorrect(); } else { streak = 0; } setStreak('streak', streak);
                 setFb(`🐱 Jättebra, Avalin! Klockan är ${h}:${pad(m)} — du hade rätt på allt!`, 'correct');
                 document.getElementById('nextBtn').classList.add('btn-pulse');
                 return;
@@ -378,7 +342,7 @@
             }
 
             hadError = true;
-            streak = 0; setStreak(0);
+            streak = 0; setStreak('streak', 0);
             document.getElementById('nextBtn').classList.remove('btn-pulse');
             setFb(lines.join('<br>'), 'error');
         }

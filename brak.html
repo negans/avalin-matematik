@@ -1,4 +1,4 @@
-﻿<!-- <!DOCTYPE html> -->
+﻿<!DOCTYPE html>
 <html lang="sv">
 <head>
     <meta charset="UTF-8">
@@ -6,6 +6,7 @@
     <title>Bråk – Avalins Matematikverkstad</title>
     <link rel="stylesheet" href="style.css">
     <script src="storage.js"></script>
+    <script src="ui.js"></script>
     <style>
         /* ── Modul 1: klickbar rektangel ── */
         .rect-outer {
@@ -27,13 +28,13 @@
         .frac-cell:first-child { border-radius: 10px 0 0 10px; }
         .frac-cell:last-child  { border-radius: 0 10px 10px 0; }
         .frac-cell.colored { background: var(--color-primary); }
-        .frac-cell:hover:not(.colored) { background: #d6eafc; }
-        .frac-cell.colored:hover { background: #357abd; }
+        .frac-cell:hover:not(.colored) { background: var(--color-surface-alt); }
+        .frac-cell.colored:hover { background: var(--color-primary-hover); }
 
         .counter-label {
             text-align: center;
             font-size: 0.9em;
-            color: #8aaabf;
+            color: var(--color-text-secondary);
             min-height: 18px;
             margin-bottom: 12px;
         }
@@ -48,7 +49,7 @@
         }
 
         .result-pill {
-            background: #f0f7ff;
+            background: var(--color-surface);
             border: 2px solid #EDE0C8;
             border-radius: 14px;
             padding: 10px 18px;
@@ -63,14 +64,14 @@
         .pill-label {
             display: block;
             font-size: 0.72em;
-            color: #8aaabf;
+            color: var(--color-text-secondary);
             margin-bottom: 4px;
         }
 
         .pill-value {
             font-size: 1.3em;
             font-weight: bold;
-            color: #2c3e50;
+            color: var(--color-text);
         }
 
         /* ── Modul 2: likvärda bråk ── */
@@ -93,7 +94,7 @@
         .equiv-frac {
             font-size: 1.15em;
             font-weight: bold;
-            color: #2c3e50;
+            color: var(--color-text);
         }
 
         .equiv-rect { display: flex; height: 56px; }
@@ -121,7 +122,7 @@
         .pct-badge {
             font-size: 1.45em;
             font-weight: bold;
-            color: #2ecc71;
+            color: var(--color-correct);
             flex-shrink: 0;
             height: 56px;
             display: flex;
@@ -131,7 +132,7 @@
         .equiv-desc {
             text-align: center;
             font-size: 0.95em;
-            color: #555;
+            color: var(--color-text-secondary);
             margin-bottom: 12px;
             line-height: 1.5;
         }
@@ -154,14 +155,14 @@
             transition: background 0.2s;
         }
         .nav-dot.active { background: var(--color-primary); }
-        .nav-dot:hover:not(.active) { background: #a0c4e8; }
+        .nav-dot:hover:not(.active) { background: var(--color-primary-hover); }
 
         /* ── Module 3 ── */
         .task-label .fs { vertical-align: middle; }
 
         .frac-rect.static .frac-cell { cursor: default; pointer-events: none; }
         .frac-cell.colored2 { background: #e8832a; }
-        .frac-cell.removed  { background: #e67e74; }
+        .frac-cell.removed  { background: var(--color-wrong); }
 
         .answer-row {
             display: flex;
@@ -170,7 +171,7 @@
             gap: 8px;
             margin: 14px 0 0;
             font-size: 1.15em;
-            color: #2c3e50;
+            color: var(--color-text);
         }
 
         /* ── Modul 4 ── */
@@ -184,7 +185,7 @@
             border: 2.5px solid #EDE0C8;
         }
 
-        .bar-seg { flex: 1; background: #ddeaf8; }
+        .bar-seg { flex: 1; background: var(--color-surface-alt); }
         .bar-seg + .bar-seg { border-left: 2.5px solid white; }
         .bar-seg.active { background: var(--color-primary); }
 
@@ -192,14 +193,14 @@
             display: flex;
             justify-content: space-between;
             font-size: 0.88em;
-            color: #8aaabf;
+            color: var(--color-text-secondary);
             margin-top: 4px;
             padding: 0 2px;
         }
 
         .steps-area {
             margin-top: 14px;
-            background: #f8fbff;
+            background: var(--color-surface);
             border-radius: 12px;
             padding: 14px 16px;
             border: 1.5px solid #EDE0C8;
@@ -207,7 +208,7 @@
 
         .step-line {
             font-size: 1.05em;
-            color: #2c3e50;
+            color: var(--color-text);
             padding: 3px 0;
             line-height: 1.65;
             opacity: 0;
@@ -216,7 +217,7 @@
         }
         .step-line.show { opacity: 1; transform: translateY(0); }
         .step-line .hl    { color: var(--color-primary); font-weight: bold; }
-        .step-line .hl-ok { color: #2ecc71; font-weight: bold; }
+        .step-line .hl-ok { color: var(--color-correct); font-weight: bold; }
 
         /* ── Module 5 ── */
         .cmp-row {
@@ -242,13 +243,13 @@
             gap: 8px;
             background: rgba(255,248,240,0.88);
         }
-        .cmp-card:hover:not(.done) { border-color: var(--color-primary); background: #f4f9ff; }
+        .cmp-card:hover:not(.done) { border-color: var(--color-primary); background: var(--color-surface-alt); }
         .cmp-card:active:not(.done) { transform: scale(0.97); }
-        .cmp-card.ok   { border-color: #2ecc71; background: #f0fff4; }
-        .cmp-card.fail { border-color: #e74c3c; background: #fff5f5; }
+        .cmp-card.ok   { border-color: var(--color-correct); background: var(--color-correct-bg); }
+        .cmp-card.fail { border-color: var(--color-wrong); background: var(--color-wrong-bg); }
         .cmp-card.done { cursor: default; }
 
-        .cmp-frac { font-size: 1.15em; font-weight: bold; color: #2c3e50; }
+        .cmp-frac { font-size: 1.15em; font-weight: bold; color: var(--color-text); }
 
         .cmp-rect  { display: flex; width: 100%; height: 44px; }
         .cmp-cell  { flex: 1; border: 2px solid #EDE0C8; background: rgba(255,248,240,0.88); }
@@ -289,11 +290,11 @@
             gap: 8px;
             background: rgba(255,248,240,0.88);
         }
-        .order-card:hover:not(.done) { border-color: var(--color-primary); background: #f4f9ff; }
+        .order-card:hover:not(.done) { border-color: var(--color-primary); background: var(--color-surface-alt); }
         .order-card:active:not(.done) { transform: scale(0.97); }
-        .order-card.picked { border-color: var(--color-primary); background: #eef6ff; }
-        .order-card.ok     { border-color: #2ecc71; background: #f0fff4; }
-        .order-card.fail   { border-color: #e74c3c; background: #fff5f5; }
+        .order-card.picked { border-color: var(--color-primary); background: var(--color-surface-alt); }
+        .order-card.ok     { border-color: var(--color-correct); background: var(--color-correct-bg); }
+        .order-card.fail   { border-color: var(--color-wrong); background: var(--color-wrong-bg); }
         .order-card.done   { cursor: default; }
 
         .order-badge {
@@ -308,11 +309,11 @@
             display: none;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 1px 5px rgba(74,144,217,0.4);
+            box-shadow: 0 1px 5px rgba(217,123,58,0.4);
         }
         .order-badge.show           { display: flex; }
-        .order-card.ok   .order-badge { background: #2ecc71; }
-        .order-card.fail .order-badge { background: #e74c3c; }
+        .order-card.ok   .order-badge { background: var(--color-correct); }
+        .order-card.fail .order-badge { background: var(--color-wrong); }
 
         /* ── Module 6 ── */
         .ratio-visual {
@@ -333,7 +334,7 @@
         .ratio-group-label {
             font-size: 0.92em;
             font-weight: bold;
-            color: #34495e;
+            color: var(--color-text);
             text-align: center;
         }
 
@@ -370,13 +371,13 @@
         .ratio-colon {
             font-size: 1.6em;
             font-weight: bold;
-            color: #2c3e50;
+            color: var(--color-text);
             line-height: 1;
         }
 
         .ratio-insight {
             margin-top: 14px;
-            background: #f8fbff;
+            background: var(--color-surface);
             border-radius: 12px;
             padding: 12px 16px;
             border: 1.5px solid #EDE0C8;
@@ -384,7 +385,7 @@
 
         .ri-line {
             font-size: 1.02em;
-            color: #2c3e50;
+            color: var(--color-text);
             padding: 3px 0;
             line-height: 1.65;
             opacity: 0;
@@ -393,7 +394,7 @@
         }
         .ri-line.show { opacity: 1; transform: translateY(0); }
         .ri-line .hl    { color: var(--color-primary); font-weight: bold; }
-        .ri-line .hl-ok { color: #2ecc71; font-weight: bold; }
+        .ri-line .hl-ok { color: var(--color-correct); font-weight: bold; }
 
         /* ── Del av antal Fas 1: förklaringsbild ── */
         .part-visual {
@@ -409,53 +410,18 @@
             height: 56px;
             border: 2.5px solid #EDE0C8;
             border-radius: 12px;
-            background: #ddeaf8;
+            background: var(--color-surface-alt);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.05em;
             font-weight: bold;
-            color: #2c3e50;
+            color: var(--color-text);
         }
         .part-cell.active {
             background: var(--color-primary);
             color: white;
             border-color: var(--color-primary);
-        }
-
-        /* ── Misos varma skogstema (gäller bara brak.html) ── */
-        :root {
-            --color-bg:             #FDF6EC;
-            --color-surface:        #FFF8F0;
-            --color-surface-alt:    #F5ECD7;
-            --color-border:         #EDE0C8;
-            --color-primary:        #D97B3A;
-            --color-primary-hover:  #E8955A;
-            --color-correct:        #6B9E6B;
-            --color-wrong:          #C0614A;
-            --color-text:           #4A3728;
-            --color-text-secondary: #7A5C42;
-            --color-heading:        #A0784A;
-            --color-badge:          #C8A882;
-
-            --clr-bg:         var(--color-bg);
-            --clr-card:       var(--color-surface);
-            --clr-hover:      var(--color-surface-alt);
-            --clr-primary:    var(--color-primary);
-            --clr-primary-dk: var(--color-primary-hover);
-            --clr-text:       var(--color-text);
-            --clr-text-sub:   var(--color-text);
-            --clr-text-dim:   var(--color-text-secondary);
-            --clr-nav:        var(--color-text-secondary);
-            --clr-border:     var(--color-border);
-            --clr-border-dk:  var(--color-border);
-            --clr-badge-bg:   var(--color-badge);
-            --clr-ok:         var(--color-correct);
-            --clr-ok-bg:      #EDF4ED;
-            --clr-ok-text:    var(--color-correct);
-            --clr-err:        var(--color-wrong);
-            --clr-err-bg:     #FAEDEA;
-            --clr-err-text:   var(--color-wrong);
         }
 
         .section-title { color: var(--color-heading); }
@@ -512,7 +478,7 @@
 
     <div class="answer-row" style="margin-top:14px">
         <input class="answer-input" id="m1InpNum" type="text" inputmode="numeric" placeholder="" maxlength="1">
-        <span style="font-size:1.5em; font-weight:bold; color:#2c3e50; line-height:1">/</span>
+        <span style="font-size:1.5em; font-weight:bold; color:var(--color-text); line-height:1">/</span>
         <input class="answer-input" id="m1InpDen" type="text" inputmode="numeric" placeholder="" maxlength="2">
     </div>
 
@@ -735,21 +701,6 @@
 const CAT_NAME = "Miso";
 initStatsBar();
 
-let misoTimer = null;
-function showMiso(pose, text) {
-    const poses = { neutral: 'miso-neutral', glad: 'miso-glad', uppmuntrande: 'miso-uppmuntrande' };
-    document.getElementById('miso-img').src = 'images/miso/' + (poses[pose] || 'miso-neutral') + '.webp';
-    const bubble = document.getElementById('miso-bubble');
-    bubble.textContent = text;
-    bubble.style.display = 'block';
-    if (misoTimer) clearTimeout(misoTimer);
-    misoTimer = setTimeout(() => { bubble.style.display = 'none'; }, 3000);
-}
-
-/* ── Streak helper ── */
-function setStreak(id, n) {
-    document.getElementById(id).textContent = n >= 2 ? '🐱\u00a0' + n + '\u00a0i\u00a0rad' : '';
-}
 function hl(s)   { return '<span class="hl">'    + s + '</span>'; }
 function hlOk(s) { return '<span class="hl-ok">' + s + '</span>'; }
 let m1Streak = 0, m3Streak = 0;
@@ -1006,7 +957,7 @@ function buildM3() {
     const t = m3Task;
     const op = t.isAdd ? '+' : '\u2212';
 
-    const fQ = '<span class="fs"><span class="fn" style="color:#8aaabf">?</span><span class="fd">' + t.d + '</span></span>';
+    const fQ = '<span class="fs"><span class="fn" style="color:var(--color-text-secondary)">?</span><span class="fd">' + t.d + '</span></span>';
     document.getElementById('m3Label').innerHTML =
         fracHTML(t.a, t.d) + '&nbsp;&nbsp;' + op + '&nbsp;&nbsp;' + fracHTML(t.b, t.d) + '&nbsp;&nbsp;=&nbsp;&nbsp;' + fQ;
 

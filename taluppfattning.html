@@ -6,6 +6,7 @@
     <title>Taluppfattning – Avalins Matematikverkstad</title>
     <link rel="stylesheet" href="style.css">
     <script src="storage.js"></script>
+    <script src="ui.js"></script>
     <style>
         /* ── Modul 1 & 2: positionstabell ── */
         .number-display {
@@ -19,7 +20,7 @@
         .digit-col { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 100px; border-right: 2px solid var(--clr-border-dk); }
         .digit-col:last-child { border-right: none; }
         .digit { font-size: 3.2em; font-weight: bold; color: var(--clr-text); padding: 16px 10px 10px; width: 100%; text-align: center; line-height: 1; }
-        .pos-label { font-size: 0.75em; color: var(--clr-text-dim); padding: 5px 4px 7px; text-align: center; width: 100%; border-top: 1.5px solid var(--clr-border-dk); background: #f8fbff; letter-spacing: 0.01em; }
+        .pos-label { font-size: 0.75em; color: var(--clr-text-dim); padding: 5px 4px 7px; text-align: center; width: 100%; border-top: 1.5px solid var(--clr-border-dk); background: var(--color-surface); letter-spacing: 0.01em; }
 
         .number-display.compact .digit-col { min-width: 78px; }
         .number-display.compact .digit { font-size: 2.3em; padding: 12px 6px 8px; }
@@ -199,7 +200,7 @@
         <span class="level-badge" id="m5LevelLabel">Nivå 1</span>
     </div>
 
-    <p id="m5Number" style="text-align:center; font-size:2.6em; font-weight:bold; color:#2c3e50; margin:10px 0 18px; letter-spacing:0.03em"></p>
+    <p id="m5Number" style="text-align:center; font-size:2.6em; font-weight:bold; color:var(--color-text); margin:10px 0 18px; letter-spacing:0.03em"></p>
 
     <div class="choice-col" id="m5Choices"></div>
 
@@ -284,21 +285,6 @@
 const CAT_NAME = "Miso";
 initStatsBar();
 
-let misoTimer = null;
-function showMiso(pose, text) {
-    const poses = { neutral: 'miso-neutral', glad: 'miso-glad', uppmuntrande: 'miso-uppmuntrande' };
-    document.getElementById('miso-img').src = 'images/miso/' + (poses[pose] || 'miso-neutral') + '.webp';
-    const bubble = document.getElementById('miso-bubble');
-    bubble.textContent = text;
-    bubble.style.display = 'block';
-    if (misoTimer) clearTimeout(misoTimer);
-    misoTimer = setTimeout(() => { bubble.style.display = 'none'; }, 3000);
-}
-
-/* ── Streak helper ── */
-function setStreak(id, n) {
-    document.getElementById(id).textContent = n >= 2 ? '🐱 ' + n + ' i rad' : '';
-}
 let m1Streak = 0;
 
 let m1Task     = null;

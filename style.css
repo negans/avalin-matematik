@@ -273,11 +273,11 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
     align-items: center;
     gap: 20px;
     padding: 7px 16px;
-    background: var(--clr-hover, #F5ECD7);
-    border-bottom: 1px solid var(--clr-border, #EDE0C8);
+    background: var(--color-surface-alt);
+    border-bottom: 1px solid var(--color-border);
     font-size: 0.88em;
     font-weight: 600;
-    color: var(--clr-text, #4A3728);
+    color: var(--color-text);
     letter-spacing: 0.01em;
 }
 #av-stats-bar span:empty { display: none; }
