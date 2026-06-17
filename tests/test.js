@@ -242,6 +242,31 @@ eq(tal.numToSv(2025), 'tvåtusentjugofem',    'numToSv 2025');
     ok(t.numbers.includes(t.correct), 'M8 nivå'+lvl+': facit finns bland talen');
 }));
 
+/* ═══════════ klockan ═══════════ */
+const klock = require('../logic/klockan.js');
+
+/* — exakta visarvinklar — */
+const A = (h,m) => klock.clockHandAngles(h,m);
+eq(A(3,0).hrDeg,   90,  'klocka 3:00 timvinkel');
+eq(A(3,0).minDeg,  0,   'klocka 3:00 minutvinkel');
+eq(A(6,0).hrDeg,   180, 'klocka 6:00 timvinkel');
+eq(A(12,0).hrDeg,  0,   'klocka 12:00 timvinkel (h%12=0)');
+eq(A(6,30).minDeg, 180, 'klocka 6:30 minutvinkel');
+eq(A(6,30).hrDeg,  195, 'klocka 6:30 timvinkel (halvvägs)');
+eq(A(9,15).minDeg, 90,  'klocka 9:15 minutvinkel');
+eq(A(9,15).hrDeg,  277.5, 'klocka 9:15 timvinkel');
+eq(A(1,0).hrDeg,   30,  'klocka 1:00 timvinkel');
+
+/* — invarianter över alla giltiga tider (h 1–12, m 0,5,…,55) — */
+for (let h = 1; h <= 12; h++) {
+    for (let m = 0; m < 60; m += 5) {
+        const a = A(h, m);
+        ok(a.minDeg === m * 6, 'klocka '+h+':'+m+' minutvinkel = m·6');
+        ok(a.hrDeg >= 0 && a.hrDeg < 360, 'klocka '+h+':'+m+' timvinkel inom [0,360)');
+        ok(a.minDeg >= 0 && a.minDeg < 360, 'klocka '+h+':'+m+' minutvinkel inom [0,360)');
+    }
+}
+
 /* ═══════════ Resultat ═══════════ */
 console.log('');
 console.log('  PASS: ' + pass);
