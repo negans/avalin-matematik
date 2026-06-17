@@ -84,6 +84,92 @@ eq(dec.fmtOp(200), '2,0',  'fmtOp 200');
     eq(t.correctStr, expected, 'M5 nivå'+lvl+': facit matchar omvandlingen ('+t.smallInt+' '+t.smallUnit+')');
 }));
 
+/* ═══════════ brak ═══════════ */
+const brak = require('../logic/brak.js');
+const APX = '≈ ';
+
+/* — M1: fmtDec/fmtPct exakta värden — */
+eq(brak.fmtDec(1,2), '0,5',  'fmtDec 1/2');
+eq(brak.fmtDec(1,4), '0,25', 'fmtDec 1/4');
+eq(brak.fmtDec(3,4), '0,75', 'fmtDec 3/4');
+eq(brak.fmtDec(1,5), '0,2',  'fmtDec 1/5');
+eq(brak.fmtDec(7,10),'0,7',  'fmtDec 7/10');
+eq(brak.fmtDec(1,3), APX+'0,33', 'fmtDec 1/3 (approx)');
+eq(brak.fmtDec(2,3), APX+'0,67', 'fmtDec 2/3 (approx)');
+eq(brak.fmtPct(1,2), '50%', 'fmtPct 1/2');
+eq(brak.fmtPct(1,4), '25%', 'fmtPct 1/4');
+eq(brak.fmtPct(3,5), '60%', 'fmtPct 3/5');
+eq(brak.fmtPct(3,4), '75%', 'fmtPct 3/4');
+eq(brak.fmtPct(1,3), APX+'33,3%', 'fmtPct 1/3 (approx)');
+
+const fkey = fr => fr.n + '/' + fr.d;
+
+/* — M3: addition/subtraktion samma nämnare — */
+forEachRun(brak.genM3Task, undefined, RUNS, t => {
+    ok(t.a >= 1 && t.b >= 1, 'M3: a,b >= 1');
+    ok(t.ans === (t.isAdd ? t.a + t.b : t.a - t.b), 'M3: ans = a±b');
+    ok(t.ans >= 1 && t.ans < t.d, 'M3: 1 <= ans < d');
+});
+
+/* — Del av antal 1 & 2 — */
+forEachRun(brak.genDa1Task, undefined, RUNS, t => {
+    ok(t.distractors.length === 3, 'Da1: 3 distraktorer');
+    ok(distinct([t.whole, ...t.distractors]), 'Da1: 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.whole), 'Da1: facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Da1: positiva heltal');
+    ok(t.whole === t.frac.d * t.k && t.part === t.frac.n * t.k, 'Da1: helhet/del korrekt');
+});
+forEachRun(brak.genDa2Task, undefined, RUNS, t => {
+    ok(t.distractors.length === 3, 'Da2: 3 distraktorer');
+    ok(distinct([t.result, ...t.distractors]), 'Da2: 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.result), 'Da2: facit ej bland distraktorer');
+    ok(t.result === t.frac.n * (t.integer / t.frac.d), 'Da2: resultat korrekt');
+});
+
+/* — M7 & M8: bråkaddition/subtraktion med distraktorer — */
+[1,2,3].forEach(lvl => forEachRun(brak.genM7Task, lvl, RUNS, t => {
+    const exp = brak.simplify(t.a + t.b, t.d);
+    ok(t.ansN === exp.n && t.ansD === exp.d, 'M7 nivå'+lvl+': facit = simplify(a+b,d)');
+    const ds = brak.m7Distractors(t);
+    ok(ds.length === 3, 'M7 nivå'+lvl+': 3 distraktorer');
+    const keys = [fkey({n:t.ansN,d:t.ansD}), ...ds.map(fkey)];
+    ok(distinct(keys), 'M7 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!ds.some(d => d.n === t.ansN && d.d === t.ansD), 'M7 nivå'+lvl+': facit ej bland distraktorer');
+    ok(ds.every(d => d.n > 0 && d.d > 0), 'M7 nivå'+lvl+': giltiga bråk');
+}));
+[1,2,3].forEach(lvl => forEachRun(brak.genM8Task, lvl, RUNS, t => {
+    ok(t.a > t.b, 'M8 nivå'+lvl+': a > b (positivt svar)');
+    const exp = brak.simplify(t.a - t.b, t.d);
+    ok(t.ansN === exp.n && t.ansD === exp.d, 'M8 nivå'+lvl+': facit = simplify(a-b,d)');
+    const ds = brak.m8Distractors(t);
+    ok(ds.length === 3, 'M8 nivå'+lvl+': 3 distraktorer');
+    const keys = [fkey({n:t.ansN,d:t.ansD}), ...ds.map(fkey)];
+    ok(distinct(keys), 'M8 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!ds.some(d => d.n === t.ansN && d.d === t.ansD), 'M8 nivå'+lvl+': facit ej bland distraktorer');
+}));
+
+/* — M9: procent — */
+[1,2,3].forEach(lvl => forEachRun(brak.genM9Task, lvl, RUNS, t => {
+    ok(Number.isInteger(t.ans) && t.ans > 0, 'M9 nivå'+lvl+': heltalssvar > 0');
+    const ds = (lvl === 3) ? t.distractors : brak.m9NumDistractors(t.ans, t.pct, t.whole);
+    ok(ds.length === 3, 'M9 nivå'+lvl+': 3 distraktorer');
+    ok(distinct([t.ans, ...ds]), 'M9 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!ds.includes(t.ans), 'M9 nivå'+lvl+': facit ej bland distraktorer');
+}));
+/* M9 nivå 2: svaret är alltid pct% av whole */
+forEachRun(brak.genM9Task, 2, RUNS, t => {
+    ok(t.ans === t.pct * t.whole / 100, 'M9 nivå2: ans = pct% av whole');
+});
+
+/* — M10: samma tal i tre former — */
+[1,2,3].forEach(lvl => forEachRun(brak.genM10Task, lvl, RUNS, t => {
+    ok(t.from !== t.to, 'M10 nivå'+lvl+': från ≠ till');
+    const ch = brak.m10Choices(t);
+    ok(ch.length === 4, 'M10 nivå'+lvl+': 4 alternativ');
+    ok(distinct(ch.map(brak.m10Val)), 'M10 nivå'+lvl+': distinkta värden');
+    ok(ch.some(fr => brak.m10Val(fr) === brak.m10Val(t)), 'M10 nivå'+lvl+': facit finns bland alternativen');
+}));
+
 /* ═══════════ Resultat ═══════════ */
 console.log('');
 console.log('  PASS: ' + pass);
