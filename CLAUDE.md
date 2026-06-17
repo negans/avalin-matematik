@@ -31,16 +31,17 @@ avalin-matematik/
 ├── index.html          (startsida, alla modulknappar live)
 ├── style.css           (✅ klar — gemensam stilmall)
 ├── klockan.html        (✅ klar)
-├── brak.html           (✅ klar — Modul 1–9 inkl. procent)
+├── brak.html           (✅ klar — Modul 1–10 inkl. procent + tre former)
 ├── taluppfattning.html (✅ klar — Modul 1–8 inkl. negativa tal)
-├── decimaltal.html     (✅ klar — Modul 1–4)
+├── decimaltal.html     (✅ klar — Modul 1–5 inkl. enhetsbyten)
 ├── multiplikation.html (⬜ ej skapad — Fas 2, steg 6)
 ├── koordinat.html      (⬜ ej skapad — Fas 3, steg 7)
 ├── geometri.html       (⬜ ej skapad — Fas 3, steg 8)
 ├── algebra.html        (⬜ ej skapad — Fas 3, steg 9)
 ├── statistik.html      (⬜ ej skapad — Fas 3, steg 10)
 ├── template.html       (⬜ skapas EFTER koordinat.html är klar — inte innan)
-├── test.html           (fungerar endast via npx serve .)
+├── logic/              (✅ delad ren logik: shared, decimaltal, brak, taluppfattning, klockan)
+├── tests/              (✅ test.js — beroendefri svit, körs med "node tests/test.js")
 ├── CLAUDE.md
 └── README.md
 
@@ -79,8 +80,8 @@ avalin-matematik/
 
 ## RÖDA FLAGGOR
 - Starta alltid med claude --dangerously-skip-permissions
-- test.html fungerar inte via file:// — använd npx serve .
 - npx serve . i egen terminal, inte Claude Code-terminalen
+- Ren logik hör hemma i logic/*.js (testbar) — kör node tests/test.js efter ändring
 - Lägg inte till navigeringsknappar eller extra features utan att Mats bett om det
 - Stoppa design-tangenter innan funktionen är klar
 - Abstrahera inte för tidigt — bygg koordinat.html färdigt innan template.html skapas
