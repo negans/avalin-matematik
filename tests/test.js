@@ -170,6 +170,78 @@ forEachRun(brak.genM9Task, 2, RUNS, t => {
     ok(ch.some(fr => brak.m10Val(fr) === brak.m10Val(t)), 'M10 nivå'+lvl+': facit finns bland alternativen');
 }));
 
+/* ═══════════ taluppfattning ═══════════ */
+const tal = require('../logic/taluppfattning.js');
+
+/* — numToSv: exakta ord — */
+eq(tal.numToSv(1),    'ett',                 'numToSv 1');
+eq(tal.numToSv(21),   'tjugoett',            'numToSv 21');
+eq(tal.numToSv(40),   'fyrtio',              'numToSv 40');
+eq(tal.numToSv(100),  'enhundra',            'numToSv 100');
+eq(tal.numToSv(342),  'trehundrafyrtiotvå',  'numToSv 342');
+eq(tal.numToSv(1000), 'etttusen',            'numToSv 1000');
+eq(tal.numToSv(2025), 'tvåtusentjugofem',    'numToSv 2025');
+
+/* — M1 & M2: positionsvärde — */
+[['M1', tal.genM1Task], ['M2', tal.genM2Task]].forEach(([nm, gen]) =>
+    forEachRun(gen, undefined, RUNS, t => {
+        ok(t.correct === t.digitVal * t.posValue, nm + ': correct = digit·platsvärde');
+        ok(t.distractors.length === 3, nm + ': 3 distraktorer (fick ' + t.distractors.length + ')');
+        ok(distinct([t.correct, ...t.distractors]), nm + ': 4 distinkta alternativ');
+        ok(!t.distractors.includes(t.correct), nm + ': facit ej bland distraktorer');
+        ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), nm + ': positiva heltal');
+    }));
+
+/* — M3: talföljder (correct + 2 distraktorer) — */
+[0,1,2].forEach(lvl => forEachRun(tal.genM3Task, lvl, RUNS, t => {
+    ok(t.correct === t.series[t.missingIdx], 'M3 nivå'+lvl+': facit = saknad position');
+    ok(t.series.every((v,i) => i === 0 || v - t.series[i-1] === t.step), 'M3 nivå'+lvl+': konstant steg');
+    ok(t.distractors.length === 2, 'M3 nivå'+lvl+': 2 distraktorer');
+    ok(distinct([t.correct, ...t.distractors]), 'M3 nivå'+lvl+': distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'M3 nivå'+lvl+': facit ej bland distraktorer');
+}));
+
+/* — M4: jämföra (störst av A,B) — */
+[0,1,2].forEach(lvl => forEachRun(tal.genM4Task, lvl, RUNS, t => {
+    ok(t.A !== t.B, 'M4 nivå'+lvl+': olika tal');
+    ok(t.correct === Math.max(t.A, t.B), 'M4 nivå'+lvl+': facit = störst');
+}));
+
+/* — M5: läsa tal — */
+[0,1,2].forEach(lvl => forEachRun(tal.genM5Task, lvl, RUNS, t => {
+    ok(t.word === tal.numToSv(t.n), 'M5 nivå'+lvl+': ord = numToSv(n)');
+    ok(t.distractors.length === 3, 'M5 nivå'+lvl+': 3 distraktorer');
+    ok(distinct([t.n, ...t.distractors]), 'M5 nivå'+lvl+': distinkta tal');
+    ok(!t.distractors.includes(t.n), 'M5 nivå'+lvl+': facit ej bland distraktorer');
+}));
+
+/* — M6: avrundning — */
+[0,1,2].forEach(lvl => forEachRun(tal.genM6Task, lvl, RUNS, t => {
+    const step = t.cfg.step;
+    const exp  = Math.round(t.n / step) * step;
+    ok(t.correct === exp, 'M6 nivå'+lvl+': facit = avrundat n');
+    ok(t.correct % step === 0, 'M6 nivå'+lvl+': facit jämnt delbart med steg');
+    ok(t.distractors.length === 3, 'M6 nivå'+lvl+': 3 distraktorer');
+    ok(distinct([t.correct, ...t.distractors]), 'M6 nivå'+lvl+': distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'M6 nivå'+lvl+': facit ej bland distraktorer');
+}));
+
+/* — M7: negativa tal på tallinjen — */
+[0,1,2].forEach(lvl => forEachRun(tal.genM7Task, lvl, RUNS, t => {
+    ok(t.allPositions.length === 4, 'M7 nivå'+lvl+': 4 punkter');
+    ok(distinct(t.allPositions), 'M7 nivå'+lvl+': distinkta positioner');
+    ok(t.allPositions[t.correctPt - 1] === t.target, 'M7 nivå'+lvl+': correctPt pekar på target');
+    ok(t.allPositions.every(p => p >= t.rangeMin && p <= t.rangeMax), 'M7 nivå'+lvl+': inom intervall');
+}));
+
+/* — M8: jämföra negativa tal — */
+[0,1,2].forEach(lvl => forEachRun(tal.genM8Task, lvl, RUNS, t => {
+    ok(t.numbers.length === (lvl === 2 ? 3 : 2), 'M8 nivå'+lvl+': rätt antal tal');
+    ok(distinct(t.numbers), 'M8 nivå'+lvl+': distinkta tal');
+    ok(t.correct === Math.max(...t.numbers), 'M8 nivå'+lvl+': facit = störst');
+    ok(t.numbers.includes(t.correct), 'M8 nivå'+lvl+': facit finns bland talen');
+}));
+
 /* ═══════════ Resultat ═══════════ */
 console.log('');
 console.log('  PASS: ' + pass);
