@@ -50,14 +50,14 @@ avalin-matematik/
 ### Fas 1 — Skal och infrastruktur (byggs en gång, gäller alla filer)
 1. ✅ CSS-refaktor — gemensam style.css bruten ut
 2. ✅ Designlyft — Miso-maskot (3 poser), varm färgpalett, skogsbakgrund
-3. ⬜ Gamification — localStorage-poäng, daglig streak, stjärnor/medaljer
-   → streak visas per session men sparas inte; poäng och visuell belöning saknas
+3. ✅ Gamification — localStorage-poäng, daglig streak, stjärnor (storage.js)
+   → statsbaren är dold på begäran (style.css), men poäng/stjärnor sparas och Miso firar milstolpar
 
 ### Fas 2 — Komplettera åk 5 (befintliga filer + ny multiplikation.html)
-4. ✅ Procent ↔ bråk ↔ decimal — sambandet explicit (brak.html, ny modul)
-5. Decimaltal i mätsammanhang — enhetsbyten cm↔m, ml↔l, g↔kg (decimaltal.html)
-6. multiplikation.html — multiplikation och division med hela tal och decimaltal (SINGMA 5A kap 2)
-   → Täcker gap i läroplanen: inget i kodbasen tränar detta som räknesätt
+4. ✅ Procent ↔ bråk ↔ decimal — sambandet explicit (brak.html, Modul 10)
+5. ✅ Decimaltal i mätsammanhang — enhetsbyten cm↔m, ml↔l, g↔kg (decimaltal.html, Modul 5)
+6. ⬜ multiplikation.html — multiplikation och division med hela tal och decimaltal (SINGMA 5A kap 2)
+   → NÄSTA STEG. Täcker gap i läroplanen: inget i kodbasen tränar detta som räknesätt
 
 ### Fas 3 — Nya filer åk 5–6 (shell-first: bygg ett, extrahera template, repetera)
 7. koordinat.html — koordinatsystem, plotta punkter (SINGMA 5A kap 6)
