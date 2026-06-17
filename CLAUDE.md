@@ -21,7 +21,7 @@ Samma moment som skolan, men mer visuellt, mer konkret, mer anpassat.
 Följer SINGMA-strukturen: 5A och 5B är referens för innehåll och ordning.
 
 ## ARBETSFLÖDE
-- Claude Code CLI: claude --dangerously-skip-permissions i VS Code-terminalen
+- Claude Code CLI: kör `claude` i VS Code-terminalen med auto mode (auto-accept edits) — INTE --dangerously-skip-permissions
 - PowerShell för git: add → commit → push (semikolon som separator, inte &&)
 - Auto Save aktiverat i VS Code
 - npx serve . i separat PowerShell-terminal för lokal testning
@@ -79,7 +79,7 @@ avalin-matematik/
 - ett steg i taget i UI — aldrig flera krav synliga samtidigt
 
 ## RÖDA FLAGGOR
-- Starta alltid med claude --dangerously-skip-permissions
+- Använd INTE --dangerously-skip-permissions. Kör med auto mode (auto-accept edits).
 - npx serve . i egen terminal, inte Claude Code-terminalen
 - Ren logik hör hemma i logic/*.js (testbar) — kör node tests/test.js efter ändring
 - Lägg inte till navigeringsknappar eller extra features utan att Mats bett om det
