@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="style.css">
     <script src="storage.js"></script>
     <script src="ui.js"></script>
+    <script src="logic/shared.js"></script>
+    <script src="logic/decimaltal.js"></script>
     <style>
         /* Rubrik i heading-färg istället för style.css primary */
         .section-title { color: var(--color-heading); }
@@ -144,6 +146,24 @@
     <div class="feedback" id="m4Feedback" aria-live="polite"></div>
 </div>
 
+<!-- ══════ Modul 5 ══════ -->
+<p class="section-title">Modul 5 – Enhetsbyten</p>
+<div class="card">
+    <div style="text-align:center; margin-bottom:6px">
+        <span class="level-badge" id="m5LevelLabel">Nivå 1</span>
+    </div>
+    <p class="task-label" id="m5Label"></p>
+    <div class="number-line-wrap">
+        <svg id="m5SVG" width="100%" style="display:block; overflow:visible"></svg>
+    </div>
+    <div class="choice-row" id="m5Choices"></div>
+    <div class="btn-row">
+        <button class="btn-secondary" id="m5Next">Ny uppgift →</button>
+    </div>
+    <p class="streak" id="m5Streak"></p>
+    <div class="feedback" id="m5Feedback" aria-live="polite"></div>
+</div>
+
 <div id="miso-container">
     <div id="miso-bubble"></div>
     <img id="miso-img" src="images/miso/miso-neutral.webp" alt="Miso" width="100">
@@ -156,117 +176,11 @@ initStatsBar();
 
 /* ── Hjälpfunktioner ── */
 
-function rnd(a, b) {
-    return Math.floor(Math.random() * (b - a + 1)) + a;
-}
-
-/* ════════════════════════════════
-   Modul 1 – Vad är ett decimaltal?
-════════════════════════════════ */
-
-const WHOLE_WORDS = [
-    'noll', 'ett', 'två', 'tre', 'fyra', 'fem', 'sex', 'sju', 'åtta', 'nio',
-    'tio', 'elva', 'tolv', 'tretton', 'fjorton', 'femton', 'sexton', 'sjutton', 'arton', 'nitton'
-];
-
-const DEC_ONES = ['', 'en', 'två', 'tre', 'fyra', 'fem', 'sex', 'sju', 'åtta', 'nio'];
-
-function decWord(d, unit) {
-    if (d === 1) return 'en ' + unit;
-    return DEC_ONES[d] + ' ' + unit + 'ar';
-}
-
-function makeDesc(whole, d1, d2) {
-    /* d2 undefined → Nivå 1 (bara tiondelar) */
-    let decPart;
-    if (d2 === undefined) {
-        decPart = decWord(d1, 'tiondel');
-    } else if (d1 === 0) {
-        decPart = decWord(d2, 'hundradel');
-    } else {
-        decPart = decWord(d1, 'tiondel') + ' och ' + decWord(d2, 'hundradel');
-    }
-    return whole === 0 ? decPart : WHOLE_WORDS[whole] + ' och ' + decPart;
-}
-
 let m1Streak = 0, m1Task = null, m1Answered = false, m1HadError = false;
 let m1Level = 0, m1LevelStreak = 0;
 
-function genM1Task() {
-    let whole, d1, d2, display;
-
-    if (m1Level === 0) {
-        whole   = rnd(0, 9);
-        d1      = rnd(1, 9);
-        d2      = undefined;
-        display = whole + ',' + d1;
-    } else if (m1Level === 1) {
-        whole   = rnd(0, 9);
-        d1      = rnd(0, 9);
-        d2      = rnd(1, 9);
-        display = whole + ',' + d1 + d2;
-    } else {
-        whole   = rnd(0, 19);
-        d1      = rnd(1, 9);
-        d2      = rnd(1, 9);
-        display = whole + ',' + d1 + d2;
-    }
-
-    const correct = makeDesc(whole, d1, d2);
-
-    /* Bygg distraktorer */
-    const seen = new Set([correct]);
-    const pool = [];
-
-    if (m1Level === 0) {
-        pool.push(makeDesc(whole, 0, d1));                         /* byt enhet: som hundradelar */
-        if (d1 > 1) pool.push(makeDesc(whole, d1 - 1, undefined));
-        if (d1 < 9) pool.push(makeDesc(whole, d1 + 1, undefined));
-        if (whole === 0) {
-            pool.push(makeDesc(1, d1, undefined));
-            pool.push(makeDesc(2, d1, undefined));
-        } else {
-            pool.push(makeDesc(0, d1, undefined));
-            if (whole > 1) pool.push(makeDesc(whole - 1, d1, undefined));
-            if (whole < 9) pool.push(makeDesc(whole + 1, d1, undefined));
-        }
-    } else if (m1Level === 1) {
-        if (d1 === 0) {
-            pool.push(makeDesc(whole, d2, undefined));             /* byt enhet: som tiondelar */
-            if (d2 > 1) pool.push(makeDesc(whole, 0, d2 - 1));
-            if (d2 < 9) pool.push(makeDesc(whole, 0, d2 + 1));
-            if (whole === 0) { pool.push(makeDesc(1, 0, d2)); pool.push(makeDesc(2, 0, d2)); }
-            else             { pool.push(makeDesc(0, 0, d2)); pool.push(makeDesc(whole + 1, 0, d2)); }
-        } else {
-            pool.push(makeDesc(whole, d1, undefined));             /* utelämna hundradelar */
-            pool.push(makeDesc(whole, 0, d2));                     /* utelämna tiondelar */
-            if (d1 > 1) pool.push(makeDesc(whole, d1 - 1, d2));
-            if (d1 < 9) pool.push(makeDesc(whole, d1 + 1, d2));
-            if (d2 > 1) pool.push(makeDesc(whole, d1, d2 - 1));
-            if (d2 < 9) pool.push(makeDesc(whole, d1, d2 + 1));
-        }
-    } else {
-        pool.push(makeDesc(whole, d1, undefined));
-        pool.push(makeDesc(whole, 0, d2));
-        if (d1 > 1) pool.push(makeDesc(whole, d1 - 1, d2));
-        if (d1 < 9) pool.push(makeDesc(whole, d1 + 1, d2));
-        if (d2 > 1) pool.push(makeDesc(whole, d1, d2 - 1));
-        if (d2 < 9) pool.push(makeDesc(whole, d1, d2 + 1));
-        if (whole > 0)  pool.push(makeDesc(whole - 1, d1, d2));
-        if (whole < 19) pool.push(makeDesc(whole + 1, d1, d2));
-    }
-
-    const distractors = [];
-    for (const c of pool) {
-        if (!seen.has(c)) { seen.add(c); distractors.push(c); }
-        if (distractors.length >= 3) break;
-    }
-
-    return { display, correct, distractors };
-}
-
 function buildM1() {
-    m1Task = genM1Task(); m1Answered = false; m1HadError = false;
+    m1Task = genM1Task(m1Level); m1Answered = false; m1HadError = false;
 
     document.getElementById('m1Number').textContent = m1Task.display;
 
@@ -334,56 +248,8 @@ buildM1();
 let m2Streak = 0, m2Task = null, m2Answered = false, m2HadError = false;
 let m2Level = 0, m2LevelStreak = 0;
 
-function genM2Task() {
-    let optA, optB, correctDisp, feedback;
-
-    if (m2Level === 0) {
-        /* Nivå 1: 0,X vs 0,Y — båda tiondelar */
-        const d1 = rnd(1, 9);
-        let d2;
-        do { d2 = rnd(1, 9); } while (d2 === d1);
-        const dispD1 = '0,' + d1, dispD2 = '0,' + d2;
-        correctDisp = d1 > d2 ? dispD1 : dispD2;
-        feedback = 'Nästan – ' + correctDisp + ' är störst.';
-        if (Math.random() < 0.5) { optA = dispD1; optB = dispD2; }
-        else                      { optA = dispD2; optB = dispD1; }
-
-    } else if (m2Level === 1) {
-        /* Nivå 2: 0,X vs 0,0Y (Y > X) — vanlig fälla */
-        const X = rnd(1, 7);
-        const Y = rnd(X + 1, 9);
-        const tenth = '0,' + X;
-        const hund  = '0,0' + Y;
-        correctDisp = tenth;   /* 0,X > 0,0Y alltid */
-        feedback = 'Nästan – ' + tenth + ' är större än ' + hund +
-                   ' även om ' + Y + ' > ' + X + '. Titta på tiondelarna först!';
-        if (Math.random() < 0.5) { optA = tenth; optB = hund; }
-        else                      { optA = hund;  optB = tenth; }
-
-    } else {
-        /* Nivå 3: W,D vs W,d2d3 — en mot två decimaler, samma heltal */
-        const whole = rnd(1, 5);
-        const d1    = rnd(1, 9);
-        const d2    = rnd(1, 9);
-        const d3    = rnd(1, 9);
-        const dispA0 = whole + ',' + d1;
-        const dispB0 = whole + ',' + d2 + '' + d3;
-        /* Jämför med heltal för att undvika floating-point-fel:
-           valA = d1*10, valB = d2*10+d3. Eftersom d3 ≥ 1 är valB inte
-           delbart med 10, medan valA är det — de är alltid olika. */
-        const valA   = d1 * 10;
-        const valB   = d2 * 10 + d3;
-        correctDisp  = valA > valB ? dispA0 : dispB0;
-        feedback = 'Nästan – ' + correctDisp + ' är störst. Jämför tiondel för tiondel!';
-        if (Math.random() < 0.5) { optA = dispA0; optB = dispB0; }
-        else                      { optA = dispB0; optB = dispA0; }
-    }
-
-    return { optA, optB, correctDisp, feedback };
-}
-
 function buildM2() {
-    m2Task = genM2Task(); m2Answered = false; m2HadError = false;
+    m2Task = genM2Task(m2Level); m2Answered = false; m2HadError = false;
 
     const row = document.getElementById('m2Choices');
     row.innerHTML = '';
@@ -510,53 +376,8 @@ function drawM3SVG(pos, leftLabel, rightLabel) {
     svg.appendChild(q);
 }
 
-function genM3Task() {
-    const pos = rnd(1, 9);
-    let leftLabel, rightLabel, correct, pool = [];
-
-    if (m3Level === 0) {
-        /* Nivå 1: 0 – 1, tiondelar */
-        leftLabel  = '0';
-        rightLabel = '1';
-        correct    = '0,' + pos;
-        for (const d of [pos-1, pos+1, pos-2, pos+2, pos-3, pos+3]) {
-            if (d >= 1 && d <= 9) pool.push('0,' + d);
-        }
-    } else if (m3Level === 1) {
-        /* Nivå 2: 0,X0 – 0,(X+1)0, hundradelar */
-        const tenth = rnd(1, 8);
-        leftLabel   = '0,' + tenth + '0';
-        rightLabel  = '0,' + (tenth + 1) + '0';
-        correct     = '0,' + tenth + pos;
-        pool.push('0,' + pos);                                  /* vanlig fälla: förväxlar tiondel */
-        for (const d of [pos-1, pos+1, pos-2, pos+2, pos-3, pos+3]) {
-            if (d >= 1 && d <= 9) pool.push('0,' + tenth + d);
-        }
-    } else {
-        /* Nivå 3: N – N+1, tiondelar */
-        const N    = rnd(1, 9);
-        leftLabel  = '' + N;
-        rightLabel = '' + (N + 1);
-        correct    = N + ',' + pos;
-        pool.push((N + 1) + ',' + pos);
-        if (N > 1) pool.push((N - 1) + ',' + pos);
-        for (const d of [pos-1, pos+1, pos-2, pos+2, pos-3, pos+3]) {
-            if (d >= 1 && d <= 9) pool.push(N + ',' + d);
-        }
-    }
-
-    const seen = new Set([correct]);
-    const distractors = [];
-    for (const c of pool) {
-        if (!seen.has(c)) { seen.add(c); distractors.push(c); }
-        if (distractors.length >= 3) break;
-    }
-
-    return { pos, leftLabel, rightLabel, correct, distractors };
-}
-
 function buildM3() {
-    m3Task = genM3Task(); m3Answered = false; m3HadError = false;
+    m3Task = genM3Task(m3Level); m3Answered = false; m3HadError = false;
 
     drawM3SVG(m3Task.pos, m3Task.leftLabel, m3Task.rightLabel);
 
@@ -624,74 +445,8 @@ buildM3();
 let m4Streak = 0, m4Task = null, m4Answered = false, m4HadError = false;
 let m4Level = 0, m4LevelStreak = 0;
 
-function fmtOp(v) {
-    /* v i hundradelar (t.ex. 125 → "1,25", 130 → "1,3") */
-    const whole     = Math.floor(v / 100);
-    const frac      = v % 100;
-    const tenths    = Math.floor(frac / 10);
-    const hundredths = frac % 10;
-    if (hundredths === 0) return whole + ',' + tenths;
-    return whole + ',' + tenths + hundredths;
-}
-
-function genM4Task() {
-    let a, b, op, result;
-
-    if (m4Level === 0) {
-        /* Nivå 1: tiondelar, svar 0–5
-           Allt i hundradelar (multiplar av 10). Ingen retry behövs. */
-        op = Math.random() < 0.5 ? '+' : '-';
-        if (op === '+') {
-            a = rnd(1, 24) * 10;              /* 0,10 – 2,40 */
-            b = rnd(1, 24) * 10;
-            result = a + b;                    /* max 480 ✓ */
-        } else {
-            a = rnd(2, 39) * 10;              /* 0,20 – 3,90 */
-            b = rnd(1, Math.floor(a / 10) - 1) * 10;   /* b < a → result > 0 */
-            result = a - b;
-        }
-
-    } else if (m4Level === 1) {
-        /* Nivå 2: hundradelar, båda operanderna X,YZ (Z ≠ 0) */
-        do {
-            a  = rnd(0, 2) * 100 + rnd(0, 9) * 10 + rnd(1, 9);
-            b  = rnd(0, 1) * 100 + rnd(0, 9) * 10 + rnd(1, 9);
-            op = Math.random() < 0.5 ? '+' : '-';
-            if (op === '-' && a <= b) [a, b] = [b, a];
-            result = op === '+' ? a + b : a - b;
-        } while (result <= 0 || result > 999);
-
-    } else {
-        /* Nivå 3: blandade — en operand tiondelar, en hundradel */
-        do {
-            a  = rnd(1, 3) * 100 + rnd(1, 9) * 10 + rnd(1, 9);  /* alltid hundradel */
-            b  = Math.random() < 0.5
-                ? rnd(1, 29) * 10                                  /* tiondel */
-                : rnd(0, 1) * 100 + rnd(0, 9) * 10 + rnd(1, 9);  /* hundradel */
-            op = Math.random() < 0.5 ? '+' : '-';
-            if (op === '-' && a <= b) [a, b] = [b, a];
-            result = op === '+' ? a + b : a - b;
-        } while (result <= 0 || result > 999);
-    }
-
-    /* Distraktorer: ±steg, inga negativa */
-    const seen   = new Set([result]);
-    const deltas = m4Level === 0 ? [10, -10, 20, -20, 30, -30] : [1, -1, 10, -10, 11, -11, 2, -2];
-    const distractors = [];
-    for (const d of deltas) {
-        const v = result + d;
-        if (v > 0 && !seen.has(v)) { seen.add(v); distractors.push(v); }
-        if (distractors.length >= 3) break;
-    }
-
-    const opChar = op === '+' ? ' + ' : ' − ';
-    const label  = fmtOp(a) + opChar + fmtOp(b) + ' = ?';
-
-    return { result, distractors, label };
-}
-
 function buildM4() {
-    m4Task = genM4Task(); m4Answered = false; m4HadError = false;
+    m4Task = genM4Task(m4Level); m4Answered = false; m4HadError = false;
 
     document.getElementById('m4Expr').textContent = m4Task.label;
 
@@ -751,6 +506,305 @@ function m4Check(val, btn) {
 
 document.getElementById('m4Next').addEventListener('click', () => { showMiso('neutral', 'Ny uträkning – kör på!'); buildM4(); });
 buildM4();
+
+/* ════════════════════════════════
+   Modul 5 – Enhetsbyten
+════════════════════════════════ */
+
+let m5Level = 0, m5LevelStreak = 0, m5Streak = 0;
+let m5Task = null, m5Answered = false, m5HadError = false;
+
+function drawM5Linjal(smallInt, fromVal, fromUnit) {
+    const svg = document.getElementById('m5SVG');
+    const maxCm = 300, W = 400, H = 168, lineY = 96;
+    const x0 = 50, x1 = 370, len = x1 - x0;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.innerHTML = '';
+
+    const ln = svgEl('line');
+    ln.setAttribute('x1', x0);  ln.setAttribute('y1', lineY);
+    ln.setAttribute('x2', x1);  ln.setAttribute('y2', lineY);
+    ln.setAttribute('stroke', '#EDE0C8'); ln.setAttribute('stroke-width', '3');
+    svg.appendChild(ln);
+
+    for (let cm = 0; cm <= maxCm; cm += 25) {
+        const x     = x0 + (cm / maxCm) * len;
+        const major = cm % 100 === 0;
+        const tickH = major ? 18 : 9;
+        const t = svgEl('line');
+        t.setAttribute('x1', x); t.setAttribute('y1', lineY - tickH / 2);
+        t.setAttribute('x2', x); t.setAttribute('y2', lineY + tickH / 2);
+        t.setAttribute('stroke', major ? '#4A3728' : '#C8A882');
+        t.setAttribute('stroke-width', major ? '2' : '1');
+        svg.appendChild(t);
+        if (major) {
+            const lbl = svgEl('text');
+            lbl.setAttribute('x', x); lbl.setAttribute('y', lineY + 28);
+            lbl.setAttribute('text-anchor', 'middle');
+            lbl.setAttribute('font-size', '12');
+            lbl.setAttribute('font-family', 'Arial, sans-serif');
+            lbl.setAttribute('fill', '#7A5C42');
+            lbl.textContent = (cm / 100) + ' m';
+            svg.appendChild(lbl);
+        }
+    }
+
+    const mx  = x0 + (smallInt / maxCm) * len;
+    const dot = svgEl('circle');
+    dot.setAttribute('cx', mx); dot.setAttribute('cy', lineY);
+    dot.setAttribute('r', '9'); dot.setAttribute('fill', '#D97B3A');
+    dot.setAttribute('stroke', 'white'); dot.setAttribute('stroke-width', '2.5');
+    svg.appendChild(dot);
+
+    const dotLbl = svgEl('text');
+    dotLbl.setAttribute('x', mx); dotLbl.setAttribute('y', lineY - 16);
+    dotLbl.setAttribute('text-anchor', 'middle');
+    dotLbl.setAttribute('font-size', '13'); dotLbl.setAttribute('font-weight', 'bold');
+    dotLbl.setAttribute('font-family', 'Arial, sans-serif');
+    dotLbl.setAttribute('fill', '#D97B3A');
+    dotLbl.textContent = fromVal + ' ' + fromUnit;
+    svg.appendChild(dotLbl);
+}
+
+/* ── SVG: Mätbägare (ml ↔ l) ── */
+function drawM5Bagare(smallInt, fromVal, fromUnit) {
+    const svg   = document.getElementById('m5SVG');
+    const maxMl = 2000, W = 400, H = 168;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.innerHTML = '';
+
+    const cupX = 150, cupW = 84, cupTop = 26, cupBot = 150, r = 14;
+    const cupH = cupBot - cupTop;
+
+    const interior = 'M' + cupX + ' ' + cupTop +
+        ' L' + cupX + ' ' + (cupBot - r) +
+        ' Q' + cupX + ' ' + cupBot + ' ' + (cupX + r) + ' ' + cupBot +
+        ' L' + (cupX + cupW - r) + ' ' + cupBot +
+        ' Q' + (cupX + cupW) + ' ' + cupBot + ' ' + (cupX + cupW) + ' ' + (cupBot - r) +
+        ' L' + (cupX + cupW) + ' ' + cupTop;
+
+    const defs = svgEl('defs');
+    const clip = svgEl('clipPath');
+    clip.setAttribute('id', 'm5JugClip');
+    const clipPath = svgEl('path');
+    clipPath.setAttribute('d', interior + ' Z');
+    clip.appendChild(clipPath);
+    defs.appendChild(clip);
+    svg.appendChild(defs);
+
+    const fillH = (smallInt / maxMl) * cupH;
+    const fillY = cupBot - fillH;
+    const liquid = svgEl('rect');
+    liquid.setAttribute('x', cupX - 2); liquid.setAttribute('y', fillY);
+    liquid.setAttribute('width', cupW + 4); liquid.setAttribute('height', fillH + r);
+    liquid.setAttribute('fill', 'rgba(217,123,58,0.30)');
+    liquid.setAttribute('clip-path', 'url(#m5JugClip)');
+    svg.appendChild(liquid);
+
+    if (fillH > 1) {
+        const surf = svgEl('line');
+        surf.setAttribute('x1', cupX - 2); surf.setAttribute('y1', fillY);
+        surf.setAttribute('x2', cupX + cupW + 2); surf.setAttribute('y2', fillY);
+        surf.setAttribute('stroke', '#D97B3A'); surf.setAttribute('stroke-width', '2');
+        surf.setAttribute('clip-path', 'url(#m5JugClip)');
+        svg.appendChild(surf);
+    }
+
+    const handle = svgEl('path');
+    const hx = cupX + cupW;
+    handle.setAttribute('d', 'M' + hx + ' ' + (cupTop + 20) +
+        ' q34 4 34 42 q0 30 -34 28');
+    handle.setAttribute('fill', 'none');
+    handle.setAttribute('stroke', '#C8A882'); handle.setAttribute('stroke-width', '2.5');
+    svg.appendChild(handle);
+
+    const outline = svgEl('path');
+    outline.setAttribute('d', interior);
+    outline.setAttribute('fill', 'none');
+    outline.setAttribute('stroke', '#C8A882'); outline.setAttribute('stroke-width', '2.5');
+    outline.setAttribute('stroke-linejoin', 'round');
+    svg.appendChild(outline);
+
+    const spout = svgEl('path');
+    spout.setAttribute('d', 'M' + cupX + ' ' + cupTop + ' q-13 0 -16 9');
+    spout.setAttribute('fill', 'none');
+    spout.setAttribute('stroke', '#C8A882'); spout.setAttribute('stroke-width', '2.5');
+    spout.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(spout);
+
+    for (let i = 0; i <= 4; i++) {
+        const ml = (maxMl / 4) * i;
+        const y  = cupBot - (i / 4) * cupH;
+        const tick = svgEl('line');
+        tick.setAttribute('x1', cupX - 7); tick.setAttribute('y1', y);
+        tick.setAttribute('x2', cupX);     tick.setAttribute('y2', y);
+        tick.setAttribute('stroke', '#7A5C42'); tick.setAttribute('stroke-width', '1.5');
+        svg.appendChild(tick);
+        const lbl = svgEl('text');
+        lbl.setAttribute('x', cupX - 11); lbl.setAttribute('y', y + 4);
+        lbl.setAttribute('text-anchor', 'end');
+        lbl.setAttribute('font-size', '10');
+        lbl.setAttribute('font-family', 'Arial, sans-serif');
+        lbl.setAttribute('fill', '#7A5C42');
+        lbl.textContent = ml + ' ml';
+        svg.appendChild(lbl);
+    }
+
+    const fromLbl = svgEl('text');
+    fromLbl.setAttribute('x', cupX + cupW / 2); fromLbl.setAttribute('y', cupTop - 9);
+    fromLbl.setAttribute('text-anchor', 'middle');
+    fromLbl.setAttribute('font-size', '14'); fromLbl.setAttribute('font-weight', 'bold');
+    fromLbl.setAttribute('font-family', 'Arial, sans-serif');
+    fromLbl.setAttribute('fill', '#D97B3A');
+    fromLbl.textContent = fromVal + ' ' + fromUnit;
+    svg.appendChild(fromLbl);
+}
+
+/* ── SVG: Våg (g ↔ kg) ── */
+function drawM5Vag(smallInt, fromVal, fromUnit) {
+    const svg = document.getElementById('m5SVG');
+    const maxG = 2000, W = 400, H = 168;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.innerHTML = '';
+    const cx = 200, cy = 124, r = 74;
+
+    const body = svgEl('rect');
+    body.setAttribute('x', cx - 112); body.setAttribute('y', 40);
+    body.setAttribute('width', 224); body.setAttribute('height', 112);
+    body.setAttribute('rx', 18);
+    body.setAttribute('fill', '#F5ECD7');
+    body.setAttribute('stroke', '#C8A882'); body.setAttribute('stroke-width', '2.5');
+    svg.appendChild(body);
+
+    const face = svgEl('path');
+    face.setAttribute('d', 'M' + (cx - r) + ' ' + cy +
+        ' A' + r + ' ' + r + ' 0 0 1 ' + (cx + r) + ' ' + cy + ' Z');
+    face.setAttribute('fill', '#FFF8F0');
+    face.setAttribute('stroke', '#EDE0C8'); face.setAttribute('stroke-width', '2');
+    svg.appendChild(face);
+
+    for (let i = 0; i <= 4; i++) {
+        const t = i / 4;
+        const a = Math.PI * (1 - t);
+        const cosA = Math.cos(a), sinA = Math.sin(a);
+        const tick = svgEl('line');
+        tick.setAttribute('x1', cx + cosA * r);        tick.setAttribute('y1', cy - sinA * r);
+        tick.setAttribute('x2', cx + cosA * (r - 11)); tick.setAttribute('y2', cy - sinA * (r - 11));
+        tick.setAttribute('stroke', '#7A5C42'); tick.setAttribute('stroke-width', '1.5');
+        svg.appendChild(tick);
+        const lbl = svgEl('text');
+        lbl.setAttribute('x', cx + cosA * (r - 24));
+        lbl.setAttribute('y', cy - sinA * (r - 24) + 4);
+        lbl.setAttribute('text-anchor', 'middle');
+        lbl.setAttribute('font-size', '9');
+        lbl.setAttribute('font-family', 'Arial, sans-serif');
+        lbl.setAttribute('fill', '#7A5C42');
+        lbl.textContent = (maxG / 4) * i;
+        svg.appendChild(lbl);
+    }
+
+    const tv = smallInt / maxG;
+    const av = Math.PI * (1 - tv);
+    const needle = svgEl('line');
+    needle.setAttribute('x1', cx); needle.setAttribute('y1', cy);
+    needle.setAttribute('x2', cx + Math.cos(av) * (r - 6));
+    needle.setAttribute('y2', cy - Math.sin(av) * (r - 6));
+    needle.setAttribute('stroke', '#D97B3A'); needle.setAttribute('stroke-width', '3');
+    needle.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(needle);
+
+    const hub = svgEl('circle');
+    hub.setAttribute('cx', cx); hub.setAttribute('cy', cy); hub.setAttribute('r', '6');
+    hub.setAttribute('fill', '#4A3728');
+    svg.appendChild(hub);
+
+    const valTxt = svgEl('text');
+    valTxt.setAttribute('x', cx); valTxt.setAttribute('y', 146);
+    valTxt.setAttribute('text-anchor', 'middle');
+    valTxt.setAttribute('font-size', '15'); valTxt.setAttribute('font-weight', 'bold');
+    valTxt.setAttribute('font-family', 'Arial, sans-serif');
+    valTxt.setAttribute('fill', '#D97B3A');
+    valTxt.textContent = fromVal + ' ' + fromUnit;
+    svg.appendChild(valTxt);
+}
+
+function buildM5() {
+    m5Task = genM5Task(m5Level); m5Answered = false; m5HadError = false;
+
+    document.getElementById('m5Label').textContent =
+        'Hur skrivs ' + m5Task.fromVal + ' ' + m5Task.fromUnit +
+        ' i ' + m5Task.toUnit + '?';
+
+    if (m5Task.smallUnit === 'cm')      drawM5Linjal(m5Task.smallInt, m5Task.fromVal, m5Task.fromUnit);
+    else if (m5Task.smallUnit === 'ml') drawM5Bagare(m5Task.smallInt, m5Task.fromVal, m5Task.fromUnit);
+    else                                drawM5Vag(m5Task.smallInt, m5Task.fromVal, m5Task.fromUnit);
+
+    const allChoices = [m5Task.correctStr, ...m5Task.distractors];
+    for (let i = allChoices.length - 1; i > 0; i--) {
+        const j = rnd(0, i);
+        [allChoices[i], allChoices[j]] = [allChoices[j], allChoices[i]];
+    }
+
+    const row = document.getElementById('m5Choices');
+    row.innerHTML = '';
+    allChoices.forEach(val => {
+        const btn = document.createElement('button');
+        btn.className      = 'choice-btn';
+        btn.style.fontSize = '1.3em';
+        btn.textContent    = val + ' ' + m5Task.toUnit;
+        btn.addEventListener('click', () => m5Check(val, btn));
+        row.appendChild(btn);
+    });
+
+    document.getElementById('m5LevelLabel').textContent = 'Nivå ' + (m5Level + 1);
+    document.getElementById('m5Feedback').textContent   = '';
+    document.getElementById('m5Next').classList.remove('btn-pulse');
+}
+
+function m5Check(val, btn) {
+    if (m5Answered) return;
+    const fb = document.getElementById('m5Feedback');
+
+    if (val === m5Task.correctStr) {
+        m5Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m5Choices .choice-btn').forEach(b => { b.disabled = true; });
+
+        if (!m5HadError) { m5Streak++; m5LevelStreak++; recordCorrect(); }
+        else             { m5Streak = 0; m5LevelStreak = 0; }
+        setStreak('m5Streak', m5Streak);
+
+        if (m5LevelStreak >= 3 && m5Level < 2) {
+            m5Level++;
+            m5LevelStreak = 0;
+            document.getElementById('m5LevelLabel').textContent = 'Nivå ' + (m5Level + 1);
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi andra mätningar!';
+        } else {
+            fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
+        }
+        showMiso('glad', 'Rätt omvandling! Toppen!');
+        document.getElementById('m5Next').classList.add('btn-pulse');
+    } else {
+        m5HadError    = true;
+        m5LevelStreak = 0;
+        btn.classList.add('err');
+        btn.disabled = true;
+        const hint = M5_FACTOR[m5Task.smallUnit] + ' ' +
+                     m5Task.smallUnit + ' = 1 ' + M5_BIG[m5Task.smallUnit];
+        fb.textContent = 'Nästan! Rätt svar: ' + m5Task.correctStr + ' ' +
+                         m5Task.toUnit + '. Tips: ' + hint + '.';
+        showMiso('uppmuntrande', 'Nästan – tänk på faktorn!');
+    }
+}
+
+document.getElementById('m5Next').addEventListener('click', () => {
+    showMiso('neutral', 'Ny mätning – du fixar det!');
+    buildM5();
+});
+buildM5();
 </script>
 </body>
 </html>
