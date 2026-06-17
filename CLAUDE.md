@@ -34,10 +34,11 @@ avalin-matematik/
 ├── brak.html           (✅ klar — Modul 1–9 inkl. procent)
 ├── taluppfattning.html (✅ klar — Modul 1–8 inkl. negativa tal)
 ├── decimaltal.html     (✅ klar — Modul 1–4)
-├── koordinat.html      (⬜ ej skapad — Fas 3, steg 6)
-├── geometri.html       (⬜ ej skapad — Fas 3, steg 7)
-├── algebra.html        (⬜ ej skapad — Fas 3, steg 8)
-├── statistik.html      (⬜ ej skapad — Fas 3, steg 9)
+├── multiplikation.html (⬜ ej skapad — Fas 2, steg 6)
+├── koordinat.html      (⬜ ej skapad — Fas 3, steg 7)
+├── geometri.html       (⬜ ej skapad — Fas 3, steg 8)
+├── algebra.html        (⬜ ej skapad — Fas 3, steg 9)
+├── statistik.html      (⬜ ej skapad — Fas 3, steg 10)
 ├── template.html       (⬜ skapas EFTER koordinat.html är klar — inte innan)
 ├── test.html           (fungerar endast via npx serve .)
 ├── CLAUDE.md
@@ -51,16 +52,18 @@ avalin-matematik/
 3. ⬜ Gamification — localStorage-poäng, daglig streak, stjärnor/medaljer
    → streak visas per session men sparas inte; poäng och visuell belöning saknas
 
-### Fas 2 — Komplettera åk 5 (befintliga filer, uppdateras med ny style.css)
-4. Procent ↔ bråk ↔ decimal — sambandet explicit (brak.html, ny modul)
+### Fas 2 — Komplettera åk 5 (befintliga filer + ny multiplikation.html)
+4. ✅ Procent ↔ bråk ↔ decimal — sambandet explicit (brak.html, ny modul)
 5. Decimaltal i mätsammanhang — enhetsbyten cm↔m, ml↔l, g↔kg (decimaltal.html)
+6. multiplikation.html — multiplikation och division med hela tal och decimaltal (SINGMA 5A kap 2)
+   → Täcker gap i läroplanen: inget i kodbasen tränar detta som räknesätt
 
 ### Fas 3 — Nya filer åk 5–6 (shell-first: bygg ett, extrahera template, repetera)
-6. koordinat.html — koordinatsystem, plotta punkter (SINGMA 5A kap 6)
+7. koordinat.html — koordinatsystem, plotta punkter (SINGMA 5A kap 6)
    → Efter denna: extrahera template.html från det som byggts
-7. geometri.html — vinklar, former, symmetri, omkrets, area (SINGMA 5B kap 4–5)
-8. algebra.html — uttryck, variabler, enkla ekvationer (SINGMA 5B kap 1)
-9. statistik.html — diagram, medelvärde, sannolikhet, kombinatorik (SINGMA 5B kap 6)
+8. geometri.html — vinklar, former, symmetri, omkrets, area (SINGMA 5B kap 4–5)
+9. algebra.html — uttryck, variabler, enkla ekvationer (SINGMA 5B kap 1)
+10. statistik.html — diagram, medelvärde, sannolikhet, kombinatorik (SINGMA 5B kap 6)
 
 ## TEKNISKA STANDARDER
 - answered-flagga blockerar dubbelklick
