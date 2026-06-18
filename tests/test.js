@@ -251,6 +251,60 @@ eq(geo.classifyAngle(180), 'Rak',     'classifyAngle 180');
     ok(t.correct === t.a * t.b, 'Geo M5 nivå'+lvl+': facit = a·b');
 }));
 
+/* ═══════════ algebra ═══════════ */
+const alg = require('../logic/algebra.js');
+
+/* — M1: substitution (matematisk korrekthet) — */
+[0,1,2].forEach(lvl => forEachRun(alg.genM1Task, lvl, RUNS, t => {
+    const exp = t.op === '+' ? t.a * t.x + t.b : t.a * t.x - t.b;
+    ok(t.correct === exp, 'Alg M1 nivå'+lvl+': facit = a·x ± b');
+    ok(t.correct > 0, 'Alg M1 nivå'+lvl+': facit > 0');
+    ok(t.distractors.length === 3, 'Alg M1 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correct, ...t.distractors]), 'Alg M1 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Alg M1 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Alg M1 nivå'+lvl+': positiva heltal');
+}));
+
+/* — M2: skriv uttryck (struktur) — */
+[0,1,2].forEach(lvl => forEachRun(alg.genM2Task, lvl, RUNS, t => {
+    ok(typeof t.correct === 'string' && t.correct.length > 0, 'Alg M2 nivå'+lvl+': facit ej tomt');
+    ok(t.distractors.length === 3, 'Alg M2 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correct, ...t.distractors]), 'Alg M2 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Alg M2 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.text.includes('x'), 'Alg M2 nivå'+lvl+': frågetexten nämner x');
+}));
+
+/* — M3: förenkla (samla termer) — */
+[0,1,2].forEach(lvl => forEachRun(alg.genM3Task, lvl, RUNS, t => {
+    ok(t.correctStr === t.coef + 'x', 'Alg M3 nivå'+lvl+': facit = coef·x');
+    ok(t.coef >= 2, 'Alg M3 nivå'+lvl+': coef >= 2');
+    ok(t.distractors.length === 3, 'Alg M3 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correctStr, ...t.distractors]), 'Alg M3 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correctStr), 'Alg M3 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.exprStr.includes('x'), 'Alg M3 nivå'+lvl+': uttrycket innehåller x');
+}));
+
+/* — M4: lös ekvation (facit löser ekvationen) — */
+[0,1,2].forEach(lvl => forEachRun(alg.genM4Task, lvl, RUNS, t => {
+    ok(t.correct === t.x, 'Alg M4 nivå'+lvl+': facit = x');
+    ok(t.distractors.length === 3, 'Alg M4 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correct, ...t.distractors]), 'Alg M4 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Alg M4 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Alg M4 nivå'+lvl+': positiva heltal');
+    ok(t.eqStr.includes('=') && t.eqStr.includes('x'), 'Alg M4 nivå'+lvl+': ekvation med x och =');
+}));
+
+/* — M5: mönster (aritmetisk följd) — */
+[0,1,2].forEach(lvl => forEachRun(alg.genM5Task, lvl, RUNS, t => {
+    ok(t.figures.length === 3, 'Alg M5 nivå'+lvl+': 3 figurer');
+    ok(t.figures.every((v,i) => i === 0 || v - t.figures[i-1] === t.step), 'Alg M5 nivå'+lvl+': konstant steg');
+    ok(t.correct === t.start + t.step * (t.askIndex - 1), 'Alg M5 nivå'+lvl+': facit = start + steg·(n-1)');
+    ok(t.distractors.length === 3, 'Alg M5 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correct, ...t.distractors]), 'Alg M5 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Alg M5 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Alg M5 nivå'+lvl+': positiva heltal');
+}));
+
 /* ═══════════ brak ═══════════ */
 const brak = require('../logic/brak.js');
 const APX = '≈ ';

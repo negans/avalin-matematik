@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algebra – Avalins Matematikverkstad</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="storage.js"></script>
+    <script src="ui.js"></script>
+    <script src="logic/shared.js"></script>
+    <script src="logic/algebra.js"></script>
+    <style>
+        .section-title { color: var(--color-heading); }
+        .level-badge { color: #FFF8F0; }
+        .choice-btn { background: var(--color-surface); border: 1.5px solid var(--color-border); }
+
+        .expr {
+            text-align: center; font-size: 2em; font-weight: bold;
+            color: var(--color-text); margin: 10px 0 4px; letter-spacing: 0.03em;
+        }
+        .given { text-align: center; font-size: 1.2em; color: var(--color-text-secondary); margin: 0 0 14px; }
+        .phrase {
+            text-align: center; font-size: 1.25em; color: var(--color-text);
+            margin: 12px auto 16px; max-width: 380px; line-height: 1.5;
+        }
+        .fig-wrap { width: 100%; max-width: 320px; margin: 6px auto 12px; }
+        #m4SVG, #m5SVG { display: block; overflow: visible; }
+
+        #miso-container {
+            position: fixed; bottom: 20px; right: 20px;
+            display: flex; flex-direction: column; align-items: center; z-index: 1000;
+        }
+        #miso-img { width: clamp(100px, 12vw, 140px); display: block; }
+        #miso-bubble {
+            display: none; background: rgba(255,248,240,0.88);
+            border: 2px solid var(--color-border); border-radius: 16px;
+            padding: 8px 12px; margin-bottom: 8px; font-size: 0.85em;
+            max-width: 160px; text-align: center; color: var(--color-text);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+    </style>
+</head>
+<body>
+
+<nav class="top-nav">
+    <a href="index.html">← Avalins Matematikverkstad</a>
+</nav>
+
+<h1>🧮 Algebra</h1>
+
+<!-- ══════ Modul 1 ══════ -->
+<p class="section-title">Modul 1 – Räkna ut uttryckets värde</p>
+
+<div class="card">
+    <p class="task-label">Sätt in värdet på x och räkna ut.</p>
+    <div style="text-align:center"><span class="level-badge" id="m1LevelLabel">Nivå 1</span></div>
+    <p class="expr" id="m1Expr"></p>
+    <p class="given" id="m1Given"></p>
+    <div class="choice-row" id="m1Choices"></div>
+    <div class="btn-row"><button class="btn-secondary" id="m1Next">Ny uppgift →</button></div>
+    <p class="streak" id="m1Streak"></p>
+    <div class="feedback" id="m1Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 2 ══════ -->
+<p class="section-title">Modul 2 – Skriv uttrycket</p>
+
+<div class="card">
+    <p class="task-label">Vilket uttryck stämmer? (x är talet)</p>
+    <div style="text-align:center"><span class="level-badge" id="m2LevelLabel">Nivå 1</span></div>
+    <p class="phrase" id="m2Text"></p>
+    <div class="choice-row" id="m2Choices"></div>
+    <div class="btn-row"><button class="btn-secondary" id="m2Next">Ny uppgift →</button></div>
+    <p class="streak" id="m2Streak"></p>
+    <div class="feedback" id="m2Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 3 ══════ -->
+<p class="section-title">Modul 3 – Förenkla uttrycket</p>
+
+<div class="card">
+    <p class="task-label">Samla ihop till ett uttryck.</p>
+    <div style="text-align:center"><span class="level-badge" id="m3LevelLabel">Nivå 1</span></div>
+    <p class="expr" id="m3Expr"></p>
+    <div class="choice-row" id="m3Choices"></div>
+    <div class="btn-row"><button class="btn-secondary" id="m3Next">Ny uppgift →</button></div>
+    <p class="streak" id="m3Streak"></p>
+    <div class="feedback" id="m3Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 4 ══════ -->
+<p class="section-title">Modul 4 – Lös ekvationen</p>
+
+<div class="card">
+    <p class="task-label">Vågen är i balans – lika mycket på båda sidor. Vad är x?</p>
+    <div style="text-align:center"><span class="level-badge" id="m4LevelLabel">Nivå 1</span></div>
+    <div class="fig-wrap"><svg id="m4SVG" width="100%"></svg></div>
+    <p class="expr" id="m4Eq"></p>
+    <div class="choice-row" id="m4Choices"></div>
+    <div class="btn-row"><button class="btn-secondary" id="m4Next">Ny uppgift →</button></div>
+    <p class="streak" id="m4Streak"></p>
+    <div class="feedback" id="m4Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 5 ══════ -->
+<p class="section-title">Modul 5 – Mönster</p>
+
+<div class="card">
+    <p class="task-label" id="m5Q">Titta på mönstret. Hur många i nästa figur?</p>
+    <div style="text-align:center"><span class="level-badge" id="m5LevelLabel">Nivå 1</span></div>
+    <div class="fig-wrap"><svg id="m5SVG" width="100%"></svg></div>
+    <div class="choice-row" id="m5Choices"></div>
+    <div class="btn-row"><button class="btn-secondary" id="m5Next">Ny uppgift →</button></div>
+    <p class="streak" id="m5Streak"></p>
+    <div class="feedback" id="m5Feedback" aria-live="polite"></div>
+</div>
+
+<div id="miso-container">
+    <div id="miso-bubble"></div>
+    <img id="miso-img" src="images/miso/miso-neutral.webp" alt="Miso" width="100">
+</div>
+
+<script>
+const CAT_NAME = "Miso";
+initStatsBar();
+
+const FILL = '#F3D9B8', STROKE = '#C97B3A', AXIS = '#8A6D4F', LABEL = '#4A3728';
+
+function svgEl(tag) { return document.createElementNS('http://www.w3.org/2000/svg', tag); }
+function setBox(svg, w, h) {
+    svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.innerHTML = '';
+}
+function elLine(svg, x1, y1, x2, y2, color, w) {
+    const ln = svgEl('line');
+    ln.setAttribute('x1', x1); ln.setAttribute('y1', y1);
+    ln.setAttribute('x2', x2); ln.setAttribute('y2', y2);
+    ln.setAttribute('stroke', color); ln.setAttribute('stroke-width', w);
+    ln.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(ln);
+}
+function elText(svg, x, y, str, size, color, weight) {
+    const t = svgEl('text');
+    t.setAttribute('x', x); t.setAttribute('y', y);
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('font-size', size || 14);
+    t.setAttribute('font-family', 'Arial, sans-serif');
+    t.setAttribute('fill', color || LABEL);
+    if (weight) t.setAttribute('font-weight', weight);
+    t.textContent = str;
+    svg.appendChild(t);
+}
+function elDot(svg, cx, cy, r) {
+    const c = svgEl('circle');
+    c.setAttribute('cx', cx); c.setAttribute('cy', cy); c.setAttribute('r', r);
+    c.setAttribute('fill', STROKE); c.setAttribute('stroke', 'white'); c.setAttribute('stroke-width', 1.5);
+    svg.appendChild(c);
+}
+
+function buildChoices(rowId, raws, fmt, onPick) {
+    const shuffled = raws.slice();
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = rnd(0, i);
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    const row = document.getElementById(rowId);
+    row.innerHTML = '';
+    shuffled.forEach(raw => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = fmt(raw);
+        btn.addEventListener('click', () => onPick(raw, btn));
+        row.appendChild(btn);
+    });
+}
+
+/* Generisk rätt/fel-hantering delas av alla moduler via en liten konfig. */
+function makeModule(p) {
+    let streak = 0, level = 0, levelStreak = 0, task = null, answered = false, hadError = false;
+
+    function build() {
+        task = p.gen(level); answered = false; hadError = false;
+        p.render(task, level);
+        buildChoices(p.choices, [p.correctOf(task), ...task.distractors], p.fmt, check);
+        document.getElementById(p.badge).textContent = 'Nivå ' + (level + 1);
+        document.getElementById(p.feedback).textContent = '';
+        document.getElementById(p.next).classList.remove('btn-pulse');
+    }
+
+    function check(val, btn) {
+        if (answered) return;
+        const fb = document.getElementById(p.feedback);
+        if (val === p.correctOf(task)) {
+            answered = true;
+            btn.classList.add('ok');
+            document.querySelectorAll('#' + p.choices + ' .choice-btn').forEach(b => { b.disabled = true; });
+            if (p.onCorrect) p.onCorrect(task);
+            if (!hadError) { streak++; levelStreak++; recordCorrect(); }
+            else { streak = 0; levelStreak = 0; }
+            setStreak(p.streak, streak);
+            if (levelStreak >= 3 && level < 2) {
+                level++; levelStreak = 0;
+                document.getElementById(p.badge).textContent = 'Nivå ' + (level + 1);
+                fb.textContent = p.levelUpMsg(level);
+            } else { fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!'; }
+            showMiso('glad', p.misoOk);
+            document.getElementById(p.next).classList.add('btn-pulse');
+        } else {
+            hadError = true; levelStreak = 0;
+            btn.classList.add('err'); btn.disabled = true;
+            fb.textContent = p.hint(task);
+            showMiso('uppmuntrande', p.misoTip);
+        }
+    }
+
+    document.getElementById(p.next).addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); build(); });
+    build();
+}
+
+/* ════════ Modul 1 – Beräkna uttryckets värde ════════ */
+makeModule({
+    gen: genM1Task, correctOf: t => t.correct, fmt: v => v,
+    choices: 'm1Choices', badge: 'm1LevelLabel', next: 'm1Next', streak: 'm1Streak', feedback: 'm1Feedback',
+    misoOk: 'Rätt uträknat! Toppen!', misoTip: 'Sätt in x:s värde först!',
+    render: t => {
+        document.getElementById('m1Expr').textContent = t.exprStr;
+        document.getElementById('m1Given').textContent = 'x = ' + t.x;
+    },
+    levelUpMsg: () => 'Precis rätt! 🎉 Superbra – nu provar vi svårare uttryck!',
+    hint: t => {
+        const mul  = t.a === 1 ? ('' + t.x) : (t.a + '·' + t.x);
+        const rest = t.b === 0 ? '' : ' ' + t.op + ' ' + t.b;
+        return 'Nästan – sätt in x = ' + t.x + ': ' + mul + rest + ' = ' + t.correct + '.';
+    }
+});
+
+/* ════════ Modul 2 – Skriv uttrycket ════════ */
+makeModule({
+    gen: genM2Task, correctOf: t => t.correct, fmt: v => v,
+    choices: 'm2Choices', badge: 'm2LevelLabel', next: 'm2Next', streak: 'm2Streak', feedback: 'm2Feedback',
+    misoOk: 'Rätt uttryck! Toppen!', misoTip: 'Läs långsamt – vad händer med x?',
+    render: t => { document.getElementById('m2Text').textContent = '”' + t.text + '”'; },
+    levelUpMsg: () => 'Precis rätt! 🎉 Superbra – nu provar vi klurigare uttryck!',
+    hint: t => 'Nästan – rätt uttryck är ' + t.correct + '.'
+});
+
+/* ════════ Modul 3 – Förenkla ════════ */
+makeModule({
+    gen: genM3Task, correctOf: t => t.correctStr, fmt: v => v,
+    choices: 'm3Choices', badge: 'm3LevelLabel', next: 'm3Next', streak: 'm3Streak', feedback: 'm3Feedback',
+    misoOk: 'Rätt förenklat! Toppen!', misoTip: 'Räkna hur många x det blir totalt!',
+    render: t => { document.getElementById('m3Expr').textContent = t.exprStr; },
+    levelUpMsg: () => 'Precis rätt! 🎉 Superbra – nu provar vi fler termer!',
+    hint: t => 'Nästan – lägg ihop alla x-termerna: det blir ' + t.correctStr + '.'
+});
+
+/* ════════ Modul 4 – Lös ekvationen (med våg) ════════ */
+function drawBalance(leftText, rightText) {
+    const svg = document.getElementById('m4SVG');
+    setBox(svg, 280, 160);
+    const cx = 140, beamY = 48, beamHalf = 110, panY = 100, hangX = 70;
+    elLine(svg, cx, beamY, cx, 134, AXIS, 5);                       // stativ
+    elLine(svg, cx - 26, 134, cx + 26, 134, AXIS, 5);              // fot
+    elLine(svg, cx - beamHalf, beamY, cx + beamHalf, beamY, AXIS, 5); // balk
+    [{ s: -1, t: leftText }, { s: 1, t: rightText }].forEach(({ s, t }) => {
+        const px = cx + s * hangX;
+        elLine(svg, px, beamY, px, panY, AXIS, 2);                 // upphäng
+        const pan = svgEl('path');
+        pan.setAttribute('d', 'M ' + (px - 38) + ' ' + panY + ' A 38 15 0 0 0 ' + (px + 38) + ' ' + panY);
+        pan.setAttribute('fill', FILL); pan.setAttribute('stroke', STROKE); pan.setAttribute('stroke-width', 2);
+        svg.appendChild(pan);
+        /* värdet som en bricka som vilar i skålen, texten centrerad i brickan */
+        const w = Math.max(46, t.length * 12 + 14), h = 30, by = panY - h - 1;
+        const rect = svgEl('rect');
+        rect.setAttribute('x', px - w / 2); rect.setAttribute('y', by);
+        rect.setAttribute('width', w); rect.setAttribute('height', h); rect.setAttribute('rx', 7);
+        rect.setAttribute('fill', '#FFF8F0'); rect.setAttribute('stroke', STROKE); rect.setAttribute('stroke-width', 2);
+        svg.appendChild(rect);
+        elText(svg, px, by + h / 2 + 6, t, 18, LABEL, 'bold');
+    });
+}
+makeModule({
+    gen: genM4Task, correctOf: t => t.correct, fmt: v => v,
+    choices: 'm4Choices', badge: 'm4LevelLabel', next: 'm4Next', streak: 'm4Streak', feedback: 'm4Feedback',
+    misoOk: 'Rätt löst! Toppen!', misoTip: 'Vad måste x vara för att vågen ska väga jämnt?',
+    render: t => {
+        drawBalance(t.left, '' + t.right);
+        document.getElementById('m4Eq').textContent = t.eqStr;
+    },
+    levelUpMsg: lvl => lvl === 2
+        ? 'Precis rätt! 🎉 Superbra – nu provar vi gånger-ekvationer!'
+        : 'Precis rätt! 🎉 Superbra – nu provar vi minus!',
+    hint: t => 'Nästan – x = ' + t.correct + ', för då blir båda sidor lika (' + t.right + ').'
+});
+
+/* ════════ Modul 5 – Mönster ════════ */
+function drawPattern(figures) {
+    const svg = document.getElementById('m5SVG');
+    setBox(svg, 320, 160);
+    const colX = [55, 160, 265], r = 7, gap = 18, perRow = 3;
+    figures.forEach((count, i) => {
+        const x0 = colX[i];
+        elText(svg, x0, 22, 'Figur ' + (i + 1), 13, LABEL, 'bold');
+        for (let k = 0; k < count; k++) {
+            const rowi = Math.floor(k / perRow), coli = k % perRow;
+            const wide = Math.min(count - rowi * perRow, perRow);
+            const dx = (coli - (wide - 1) / 2) * gap;
+            elDot(svg, x0 + dx, 44 + rowi * gap, r);
+        }
+        if (i < figures.length - 1) elText(svg, (colX[i] + colX[i + 1]) / 2, 90, '→', 18, '#9A7B5A');
+    });
+}
+makeModule({
+    gen: genM5Task, correctOf: t => t.correct, fmt: v => v,
+    choices: 'm5Choices', badge: 'm5LevelLabel', next: 'm5Next', streak: 'm5Streak', feedback: 'm5Feedback',
+    misoOk: 'Rätt mönster! Toppen!', misoTip: 'Hur mycket ökar det varje gång?',
+    render: t => {
+        drawPattern(t.figures);
+        document.getElementById('m5Q').textContent = 'Mönstret fortsätter likadant. Hur många i Figur ' + t.askIndex + '?';
+    },
+    levelUpMsg: () => 'Precis rätt! 🎉 Superbra – nu provar vi ett snabbare mönster!',
+    hint: t => 'Nästan – det ökar med ' + t.step + ' varje gång, så Figur ' + t.askIndex + ' har ' + t.correct + '.'
+});
+</script>
+</body>
+</html>

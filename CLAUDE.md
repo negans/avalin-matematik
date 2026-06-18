@@ -37,10 +37,10 @@ avalin-matematik/
 ├── multiplikation.html (✅ klar — Modul 1–5 inkl. division med rest, ×/÷ med 10/100/1000, decimaltal)
 ├── koordinat.html      (✅ klar — Modul 1–4: läs av, hitta, plotta punkter, fyra kvadranter)
 ├── geometri.html       (✅ klar — Modul 1–5: vinklar, former, symmetri, omkrets, area)
-├── algebra.html        (⬜ ej skapad — Fas 3, steg 9)
+├── algebra.html        (✅ klar — Modul 1–5: uttryck, variabler, förenkla, ekvationer, mönster)
 ├── statistik.html      (⬜ ej skapad — Fas 3, steg 10)
 ├── template.html       (✅ klar — extraherad ur koordinat.html; skelett för nya modulsidor)
-├── logic/              (✅ delad ren logik: shared, decimaltal, brak, taluppfattning, klockan, multiplikation, koordinat, geometri)
+├── logic/              (✅ delad ren logik: shared, decimaltal, brak, taluppfattning, klockan, multiplikation, koordinat, geometri, algebra)
 ├── tests/              (✅ test.js — beroendefri svit, körs med "node tests/test.js")
 ├── CLAUDE.md
 └── README.md
@@ -68,7 +68,9 @@ avalin-matematik/
 8. ✅ geometri.html — vinklar, former, symmetri, omkrets, area (SINGMA 5B kap 4–5)
    → Modul 1 vinklar (typ) · 2 former (känna igen) · 3 symmetri (antal linjer + avslöjar dem) · 4 omkrets · 5 area
    → NÄSTA STEG är steg 9 (algebra.html)
-9. algebra.html — uttryck, variabler, enkla ekvationer (SINGMA 5B kap 1)
+9. ✅ algebra.html — uttryck, variabler, enkla ekvationer (SINGMA 5B kap 1)
+   → Modul 1 beräkna uttryck · 2 skriv uttryck · 3 förenkla (samla termer) · 4 lös ekvation (våg) · 5 mönster
+   → NÄSTA STEG är steg 10 (statistik.html) — sista i Fas 3
 10. statistik.html — diagram, medelvärde, sannolikhet, kombinatorik (SINGMA 5B kap 6)
 
 ## TEKNISKA STANDARDER
