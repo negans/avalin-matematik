@@ -84,6 +84,67 @@ eq(dec.fmtOp(200), '2,0',  'fmtOp 200');
     eq(t.correctStr, expected, 'M5 nivå'+lvl+': facit matchar omvandlingen ('+t.smallInt+' '+t.smallUnit+')');
 }));
 
+/* ═══════════ multiplikation ═══════════ */
+const mul = require('../logic/multiplikation.js');
+
+/* — fmtH / fmtT: exakta värden — */
+eq(mul.fmtH(250),  '2,5',  'fmtH 250');
+eq(mul.fmtH(2500), '25',   'fmtH 2500');
+eq(mul.fmtH(25),   '0,25', 'fmtH 25');
+eq(mul.fmtH(300),  '3',    'fmtH 300');
+eq(mul.fmtT(6),    '0,6',  'fmtT 6');
+eq(mul.fmtT(42),   '4,2',  'fmtT 42');
+eq(mul.fmtT(20),   '2',    'fmtT 20');
+
+/* — M1: array-produkt — */
+[0,1,2].forEach(lvl => forEachRun(mul.genM1Task, lvl, RUNS, t => {
+    ok(t.correct === t.rows * t.cols, 'Mul M1 nivå'+lvl+': facit = rows·cols');
+    ok(t.distractors.length === 3, 'Mul M1 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correct, ...t.distractors]), 'Mul M1 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Mul M1 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Mul M1 nivå'+lvl+': positiva heltal');
+}));
+
+/* — M2: produkt med hela tal — */
+[0,1,2].forEach(lvl => forEachRun(mul.genM2Task, lvl, RUNS, t => {
+    ok(t.correct === t.a * t.b, 'Mul M2 nivå'+lvl+': facit = a·b');
+    ok(t.distractors.length === 3, 'Mul M2 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correct, ...t.distractors]), 'Mul M2 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Mul M2 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Mul M2 nivå'+lvl+': positiva heltal');
+}));
+
+/* — M3: division (kvot, samt rest på nivå 3) — */
+[0,1,2].forEach(lvl => forEachRun(mul.genM3Task, lvl, RUNS, t => {
+    ok(t.distractors.length === 3, 'Mul M3 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correctStr, ...t.distractors]), 'Mul M3 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correctStr), 'Mul M3 nivå'+lvl+': facit ej bland distraktorer');
+    if (!t.hasRest) {
+        ok(t.a === t.b * Number(t.correctStr), 'Mul M3 nivå'+lvl+': a = b·kvot (jämnt)');
+    } else {
+        const parts = t.correctStr.split(' ');   // "q rest r"
+        const q = Number(parts[0]), r = Number(parts[2]);
+        ok(t.a === t.b * q + r, 'Mul M3 nivå'+lvl+': a = b·q + r');
+        ok(r >= 1 && r < t.b, 'Mul M3 nivå'+lvl+': 1 <= rest < b');
+    }
+}));
+
+/* — M4: ×/÷ med 10,100,1000 — */
+[0,1,2].forEach(lvl => forEachRun(mul.genM4Task, lvl, RUNS, t => {
+    ok(t.distractors.length === 3, 'Mul M4 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correctStr, ...t.distractors]), 'Mul M4 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correctStr), 'Mul M4 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.label.includes('=') , 'Mul M4 nivå'+lvl+': etikett innehåller =');
+}));
+
+/* — M5: ×/÷ med decimaltal — */
+[0,1,2].forEach(lvl => forEachRun(mul.genM5Task, lvl, RUNS, t => {
+    ok(t.distractors.length === 3, 'Mul M5 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correctStr, ...t.distractors]), 'Mul M5 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correctStr), 'Mul M5 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.label.includes('=') , 'Mul M5 nivå'+lvl+': etikett innehåller =');
+}));
+
 /* ═══════════ brak ═══════════ */
 const brak = require('../logic/brak.js');
 const APX = '≈ ';

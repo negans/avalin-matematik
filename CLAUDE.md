@@ -34,13 +34,13 @@ avalin-matematik/
 ├── brak.html           (✅ klar — Modul 1–10 inkl. procent + tre former)
 ├── taluppfattning.html (✅ klar — Modul 1–8 inkl. negativa tal)
 ├── decimaltal.html     (✅ klar — Modul 1–5 inkl. enhetsbyten)
-├── multiplikation.html (⬜ ej skapad — Fas 2, steg 6)
+├── multiplikation.html (✅ klar — Modul 1–5 inkl. division med rest, ×/÷ med 10/100/1000, decimaltal)
 ├── koordinat.html      (⬜ ej skapad — Fas 3, steg 7)
 ├── geometri.html       (⬜ ej skapad — Fas 3, steg 8)
 ├── algebra.html        (⬜ ej skapad — Fas 3, steg 9)
 ├── statistik.html      (⬜ ej skapad — Fas 3, steg 10)
 ├── template.html       (⬜ skapas EFTER koordinat.html är klar — inte innan)
-├── logic/              (✅ delad ren logik: shared, decimaltal, brak, taluppfattning, klockan)
+├── logic/              (✅ delad ren logik: shared, decimaltal, brak, taluppfattning, klockan, multiplikation)
 ├── tests/              (✅ test.js — beroendefri svit, körs med "node tests/test.js")
 ├── CLAUDE.md
 └── README.md
@@ -56,8 +56,9 @@ avalin-matematik/
 ### Fas 2 — Komplettera åk 5 (befintliga filer + ny multiplikation.html)
 4. ✅ Procent ↔ bråk ↔ decimal — sambandet explicit (brak.html, Modul 10)
 5. ✅ Decimaltal i mätsammanhang — enhetsbyten cm↔m, ml↔l, g↔kg (decimaltal.html, Modul 5)
-6. ⬜ multiplikation.html — multiplikation och division med hela tal och decimaltal (SINGMA 5A kap 2)
-   → NÄSTA STEG. Täcker gap i läroplanen: inget i kodbasen tränar detta som räknesätt
+6. ✅ multiplikation.html — multiplikation och division med hela tal och decimaltal (SINGMA 5A kap 2)
+   → Modul 1 grupper/array · 2 hela tal · 3 division (rest på nivå 3) · 4 ×/÷ med 10/100/1000 · 5 decimaltal
+   → NÄSTA STEG är steg 7 (koordinat.html, Fas 3)
 
 ### Fas 3 — Nya filer åk 5–6 (shell-first: bygg ett, extrahera template, repetera)
 7. koordinat.html — koordinatsystem, plotta punkter (SINGMA 5A kap 6)
