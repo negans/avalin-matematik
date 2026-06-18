@@ -22,7 +22,7 @@ Följer SINGMA-strukturen: 5A och 5B är referens för innehåll och ordning.
 
 ## ARBETSFLÖDE
 - Claude Code CLI: kör `claude` i VS Code-terminalen med auto mode (auto-accept edits) — INTE --dangerously-skip-permissions
-- PowerShell för git: add → commit → push (semikolon som separator, inte &&)
+- Git: Claude sköter add → commit → push via sina verktyg (Mats behöver inte köra git själv). Pusha bara efter Mats godkännande — pushen publicerar till live-sidan.
 - Auto Save aktiverat i VS Code
 - npx serve . i separat PowerShell-terminal för lokal testning
 
