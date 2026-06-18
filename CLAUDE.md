@@ -35,12 +35,12 @@ avalin-matematik/
 ├── taluppfattning.html (✅ klar — Modul 1–8 inkl. negativa tal)
 ├── decimaltal.html     (✅ klar — Modul 1–5 inkl. enhetsbyten)
 ├── multiplikation.html (✅ klar — Modul 1–5 inkl. division med rest, ×/÷ med 10/100/1000, decimaltal)
-├── koordinat.html      (⬜ ej skapad — Fas 3, steg 7)
+├── koordinat.html      (✅ klar — Modul 1–4: läs av, hitta, plotta punkter, fyra kvadranter)
 ├── geometri.html       (⬜ ej skapad — Fas 3, steg 8)
 ├── algebra.html        (⬜ ej skapad — Fas 3, steg 9)
 ├── statistik.html      (⬜ ej skapad — Fas 3, steg 10)
-├── template.html       (⬜ skapas EFTER koordinat.html är klar — inte innan)
-├── logic/              (✅ delad ren logik: shared, decimaltal, brak, taluppfattning, klockan, multiplikation)
+├── template.html       (✅ klar — extraherad ur koordinat.html; skelett för nya modulsidor)
+├── logic/              (✅ delad ren logik: shared, decimaltal, brak, taluppfattning, klockan, multiplikation, koordinat)
 ├── tests/              (✅ test.js — beroendefri svit, körs med "node tests/test.js")
 ├── CLAUDE.md
 └── README.md
@@ -61,8 +61,10 @@ avalin-matematik/
    → NÄSTA STEG är steg 7 (koordinat.html, Fas 3)
 
 ### Fas 3 — Nya filer åk 5–6 (shell-first: bygg ett, extrahera template, repetera)
-7. koordinat.html — koordinatsystem, plotta punkter (SINGMA 5A kap 6)
-   → Efter denna: extrahera template.html från det som byggts
+7. ✅ koordinat.html — koordinatsystem, plotta punkter (SINGMA 5A kap 6)
+   → Modul 1 läs av · 2 hitta punkt (A–D) · 3 plotta (klick) · 4 fyra kvadranter (negativa tal)
+   → ✅ template.html extraherad från det som byggts (skelett för kommande modulsidor)
+   → NÄSTA STEG är steg 8 (geometri.html)
 8. geometri.html — vinklar, former, symmetri, omkrets, area (SINGMA 5B kap 4–5)
 9. algebra.html — uttryck, variabler, enkla ekvationer (SINGMA 5B kap 1)
 10. statistik.html — diagram, medelvärde, sannolikhet, kombinatorik (SINGMA 5B kap 6)
@@ -85,6 +87,6 @@ avalin-matematik/
 - Ren logik hör hemma i logic/*.js (testbar) — kör node tests/test.js efter ändring
 - Lägg inte till navigeringsknappar eller extra features utan att Mats bett om det
 - Stoppa design-tangenter innan funktionen är klar
-- Abstrahera inte för tidigt — bygg koordinat.html färdigt innan template.html skapas
+- Abstrahera inte för tidigt — template.html finns nu, men håll den som ett skelett; bygg klart en riktig modul innan mönster bryts ut på nytt
 - Miso DOM-placering: container måste ligga omedelbart före </script>-taggen
 - Bygg aldrig mer än ett steg åt gången utan Mats godkännande

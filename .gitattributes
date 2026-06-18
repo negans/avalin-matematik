@@ -1,0 +1,11 @@
+# Normalisera radslut explicit så Git inte gissar per maskin.
+# Alla textfiler lagras med LF i repot OCH checkas ut med LF i arbetskopian.
+# Detta tystar varningen "LF will be replaced by CRLF" på Windows.
+* text=auto eol=lf
+
+# Binärfiler ska aldrig radslutskonverteras.
+*.webp binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.ico  binary
