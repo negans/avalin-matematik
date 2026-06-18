@@ -145,6 +145,53 @@ eq(mul.fmtT(20),   '2',    'fmtT 20');
     ok(t.label.includes('=') , 'Mul M5 nivå'+lvl+': etikett innehåller =');
 }));
 
+/* ═══════════ koordinat ═══════════ */
+const koord = require('../logic/koordinat.js');
+
+/* — fmtPt: exakt format — */
+eq(koord.fmtPt(3, 2),   '(3, 2)',   'fmtPt (3,2)');
+eq(koord.fmtPt(0, 0),   '(0, 0)',   'fmtPt origo');
+eq(koord.fmtPt(-4, 5),  '(-4, 5)',  'fmtPt negativ x');
+
+/* — M1: läs av punkt (första kvadranten) — */
+[0,1,2].forEach(lvl => forEachRun(koord.genM1Task, lvl, RUNS, t => {
+    ok(t.x >= 0 && t.x <= t.gridMax, 'Koord M1 nivå'+lvl+': x inom [0,gridMax]');
+    ok(t.y >= 0 && t.y <= t.gridMax, 'Koord M1 nivå'+lvl+': y inom [0,gridMax]');
+    ok(t.correctStr === koord.fmtPt(t.x, t.y), 'Koord M1 nivå'+lvl+': facit = fmtPt(x,y)');
+    ok(t.distractors.length === 3, 'Koord M1 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correctStr, ...t.distractors]), 'Koord M1 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correctStr), 'Koord M1 nivå'+lvl+': facit ej bland distraktorer');
+}));
+
+/* — M2: hitta rätt punkt (A–D) — */
+[0,1,2].forEach(lvl => forEachRun(koord.genM2Task, lvl, RUNS, t => {
+    ok(t.points.length === 4, 'Koord M2 nivå'+lvl+': 4 punkter');
+    ok(distinct(t.points.map(p => p.x + ',' + p.y)), 'Koord M2 nivå'+lvl+': distinkta punkter');
+    ok(distinct(t.points.map(p => p.label)), 'Koord M2 nivå'+lvl+': distinkta etiketter');
+    ok(t.points.every(p => p.x >= 0 && p.x <= t.gridMax && p.y >= 0 && p.y <= t.gridMax),
+        'Koord M2 nivå'+lvl+': punkter inom rutnätet');
+    const tgt = t.points.find(p => p.label === t.targetLabel);
+    ok(tgt && tgt.x === t.x && tgt.y === t.y, 'Koord M2 nivå'+lvl+': targetLabel pekar på (x,y)');
+}));
+
+/* — M3: plotta punkt — */
+[0,1,2].forEach(lvl => forEachRun(koord.genM3Task, lvl, RUNS, t => {
+    ok(t.x >= 0 && t.x <= t.gridMax, 'Koord M3 nivå'+lvl+': x inom rutnätet');
+    ok(t.y >= 0 && t.y <= t.gridMax, 'Koord M3 nivå'+lvl+': y inom rutnätet');
+    ok(t.label === koord.fmtPt(t.x, t.y), 'Koord M3 nivå'+lvl+': label = fmtPt(x,y)');
+}));
+
+/* — M4: negativa koordinater (fyra kvadranter) — */
+[0,1,2].forEach(lvl => forEachRun(koord.genM4Task, lvl, RUNS, t => {
+    ok(t.x >= t.gridMin && t.x <= t.gridMax, 'Koord M4 nivå'+lvl+': x inom intervall');
+    ok(t.y >= t.gridMin && t.y <= t.gridMax, 'Koord M4 nivå'+lvl+': y inom intervall');
+    ok(t.x < 0 || t.y < 0, 'Koord M4 nivå'+lvl+': minst en koordinat negativ');
+    ok(t.correctStr === koord.fmtPt(t.x, t.y), 'Koord M4 nivå'+lvl+': facit = fmtPt(x,y)');
+    ok(t.distractors.length === 3, 'Koord M4 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correctStr, ...t.distractors]), 'Koord M4 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correctStr), 'Koord M4 nivå'+lvl+': facit ej bland distraktorer');
+}));
+
 /* ═══════════ brak ═══════════ */
 const brak = require('../logic/brak.js');
 const APX = '≈ ';

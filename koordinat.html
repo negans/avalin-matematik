@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koordinatsystem – Avalins Matematikverkstad</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="storage.js"></script>
+    <script src="ui.js"></script>
+    <script src="logic/shared.js"></script>
+    <script src="logic/koordinat.js"></script>
+    <style>
+        /* Rubrik i heading-färg istället för style.css primary */
+        .section-title { color: var(--color-heading); }
+
+        /* Badge: ljus text mot #C8A882-bakgrund */
+        .level-badge { color: #FFF8F0; }
+
+        /* Svarsalternativ: explicit yta och tunn kantlinje */
+        .choice-btn { background: var(--color-surface); border: 1.5px solid var(--color-border); }
+
+        /* Rutnät */
+        .grid-wrap { width: 100%; max-width: 360px; margin: 6px auto 14px; }
+        #m1SVG, #m2SVG, #m3SVG, #m4SVG { display: block; overflow: visible; }
+        /* Klickbara skärningspunkter i Modul 3 */
+        .plot-hit { cursor: pointer; }
+
+        #miso-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1000;
+        }
+        #miso-img { width: clamp(100px, 12vw, 140px); display: block; }
+        #miso-bubble {
+            display: none;
+            background: rgba(255,248,240,0.88);
+            border: 2px solid var(--color-border);
+            border-radius: 16px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            font-size: 0.85em;
+            max-width: 160px;
+            text-align: center;
+            color: var(--color-text);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+    </style>
+</head>
+<body>
+
+<nav class="top-nav">
+    <a href="index.html">← Avalins Matematikverkstad</a>
+</nav>
+
+<h1>📍 Koordinatsystem</h1>
+
+<!-- ══════ Modul 1 ══════ -->
+<p class="section-title">Modul 1 – Läs av punktens koordinater</p>
+
+<div class="card">
+    <p class="task-label">Vilka koordinater har den orange punkten?</p>
+
+    <div style="text-align:center">
+        <span class="level-badge" id="m1LevelLabel">Nivå 1</span>
+    </div>
+
+    <div class="grid-wrap">
+        <svg id="m1SVG" width="100%"></svg>
+    </div>
+
+    <div class="choice-row" id="m1Choices"></div>
+
+    <div class="btn-row">
+        <button class="btn-secondary" id="m1Next">Ny uppgift →</button>
+    </div>
+
+    <p class="streak" id="m1Streak"></p>
+    <div class="feedback" id="m1Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 2 ══════ -->
+<p class="section-title">Modul 2 – Hitta rätt punkt</p>
+
+<div class="card">
+    <p class="task-label" id="m2Question">Vilken punkt ligger på koordinaten?</p>
+
+    <div style="text-align:center">
+        <span class="level-badge" id="m2LevelLabel">Nivå 1</span>
+    </div>
+
+    <div class="grid-wrap">
+        <svg id="m2SVG" width="100%"></svg>
+    </div>
+
+    <div class="choice-row" id="m2Choices"></div>
+
+    <div class="btn-row">
+        <button class="btn-secondary" id="m2Next">Ny uppgift →</button>
+    </div>
+
+    <p class="streak" id="m2Streak"></p>
+    <div class="feedback" id="m2Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 3 ══════ -->
+<p class="section-title">Modul 3 – Plotta punkten</p>
+
+<div class="card">
+    <p class="task-label" id="m3Question">Klicka på rätt punkt i rutnätet.</p>
+
+    <div style="text-align:center">
+        <span class="level-badge" id="m3LevelLabel">Nivå 1</span>
+    </div>
+
+    <div class="grid-wrap">
+        <svg id="m3SVG" width="100%"></svg>
+    </div>
+
+    <div class="btn-row">
+        <button class="btn-secondary" id="m3Next">Ny uppgift →</button>
+    </div>
+
+    <p class="streak" id="m3Streak"></p>
+    <div class="feedback" id="m3Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 4 ══════ -->
+<p class="section-title">Modul 4 – Koordinatsystem med negativa tal</p>
+
+<div class="card">
+    <p class="task-label">Vilka koordinater har den orange punkten?</p>
+
+    <div style="text-align:center">
+        <span class="level-badge" id="m4LevelLabel">Nivå 1</span>
+    </div>
+
+    <div class="grid-wrap">
+        <svg id="m4SVG" width="100%"></svg>
+    </div>
+
+    <div class="choice-row" id="m4Choices"></div>
+
+    <div class="btn-row">
+        <button class="btn-secondary" id="m4Next">Ny uppgift →</button>
+    </div>
+
+    <p class="streak" id="m4Streak"></p>
+    <div class="feedback" id="m4Feedback" aria-live="polite"></div>
+</div>
+
+<div id="miso-container">
+    <div id="miso-bubble"></div>
+    <img id="miso-img" src="images/miso/miso-neutral.webp" alt="Miso" width="100">
+</div>
+
+<script>
+const CAT_NAME = "Miso";
+initStatsBar();
+
+function svgEl(tag) {
+    return document.createElementNS('http://www.w3.org/2000/svg', tag);
+}
+
+/* Ritar ett koordinatsystem i angiven SVG för intervallet [min, max] på båda
+   axlarna (kvadratiskt). Returnerar { toPx, cell } där toPx(x,y) -> {px, py}.
+   Används av alla fyra modulerna. */
+function drawCoordGrid(svgId, min, max) {
+    const svg   = document.getElementById(svgId);
+    const units = max - min;
+    const cell  = Math.min(60, Math.round(300 / units));
+    const plot  = cell * units;
+    const m     = 30;                       // marginal för siffror/axelnamn
+    const W = plot + m * 2, H = plot + m * 2;
+
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.innerHTML = '';
+
+    const toPx = (x, y) => ({ px: m + (x - min) * cell, py: m + (max - y) * cell });
+
+    function line(x1, y1, x2, y2, color, w) {
+        const ln = svgEl('line');
+        ln.setAttribute('x1', x1); ln.setAttribute('y1', y1);
+        ln.setAttribute('x2', x2); ln.setAttribute('y2', y2);
+        ln.setAttribute('stroke', color); ln.setAttribute('stroke-width', w);
+        svg.appendChild(ln);
+    }
+    function text(x, y, str, anchor) {
+        const t = svgEl('text');
+        t.setAttribute('x', x); t.setAttribute('y', y);
+        t.setAttribute('text-anchor', anchor);
+        t.setAttribute('font-size', '11');
+        t.setAttribute('font-family', 'Arial, sans-serif');
+        t.setAttribute('fill', '#7A5C42');
+        t.textContent = str;
+        svg.appendChild(t);
+    }
+
+    /* rutnät */
+    for (let i = min; i <= max; i++) {
+        const v0 = toPx(i, max), v1 = toPx(i, min);
+        line(v0.px, v0.py, v1.px, v1.py, '#E6D6BE', 1);
+        const h0 = toPx(min, i), h1 = toPx(max, i);
+        line(h0.px, h0.py, h1.px, h1.py, '#E6D6BE', 1);
+    }
+
+    /* axlar (x=0, y=0) */
+    const xL = toPx(min, 0), xR = toPx(max, 0);
+    line(xL.px, xL.py, xR.px, xR.py, '#8A6D4F', 2.5);
+    const yB = toPx(0, min), yT = toPx(0, max);
+    line(yB.px, yB.py, yT.px, yT.py, '#8A6D4F', 2.5);
+
+    /* axelnamn */
+    text(xR.px + 12, xR.py + 4, 'x', 'middle');
+    text(yT.px,      yT.py - 10, 'y', 'middle');
+
+    /* siffror längs axlarna (0 sätts en gång vid origo) */
+    const o = toPx(0, 0);
+    for (let i = min; i <= max; i++) {
+        if (i === 0) continue;
+        const px = toPx(i, 0), py = toPx(0, i);
+        text(px.px, o.py + 15, i, 'middle');   // x-axelns siffror under axeln
+        text(o.px - 8, py.py + 4, i, 'end');   // y-axelns siffror vänster om axeln
+    }
+    text(o.px - 6, o.py + 15, '0', 'end');
+
+    return { toPx, cell };
+}
+
+/* Ritar en ifylld punkt i datakoordinat (x,y). */
+function drawDot(svgId, grid, x, y, color, r) {
+    const p = grid.toPx(x, y);
+    const dot = svgEl('circle');
+    dot.setAttribute('cx', p.px); dot.setAttribute('cy', p.py);
+    dot.setAttribute('r', r || (grid.cell * 0.28));
+    dot.setAttribute('fill', color);
+    dot.setAttribute('stroke', 'white');
+    dot.setAttribute('stroke-width', '2');
+    document.getElementById(svgId).appendChild(dot);
+    return dot;
+}
+
+/* Skapar svarsknappar i en rad. onPick(value, btn) anropas vid klick. */
+function buildChoices(rowId, choices, onPick) {
+    const shuffled = choices.slice();
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = rnd(0, i);
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    const row = document.getElementById(rowId);
+    row.innerHTML = '';
+    shuffled.forEach(val => {
+        const btn = document.createElement('button');
+        btn.className   = 'choice-btn';
+        btn.textContent = val;
+        btn.addEventListener('click', () => onPick(val, btn));
+        row.appendChild(btn);
+    });
+}
+
+/* ════════════════════════════════
+   Modul 1 – Läs av punktens koordinater
+════════════════════════════════ */
+
+let m1Streak = 0, m1Task = null, m1Answered = false, m1HadError = false;
+let m1Level = 0, m1LevelStreak = 0;
+
+function buildM1() {
+    m1Task = genM1Task(m1Level); m1Answered = false; m1HadError = false;
+
+    const grid = drawCoordGrid('m1SVG', 0, m1Task.gridMax);
+    drawDot('m1SVG', grid, m1Task.x, m1Task.y, '#D97B3A');
+
+    buildChoices('m1Choices', [m1Task.correctStr, ...m1Task.distractors], m1Check);
+
+    document.getElementById('m1LevelLabel').textContent = 'Nivå ' + (m1Level + 1);
+    document.getElementById('m1Feedback').textContent   = '';
+    document.getElementById('m1Next').classList.remove('btn-pulse');
+}
+
+function m1Check(val, btn) {
+    if (m1Answered) return;
+    const fb = document.getElementById('m1Feedback');
+
+    if (val === m1Task.correctStr) {
+        m1Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m1Choices .choice-btn').forEach(b => { b.disabled = true; });
+
+        if (!m1HadError) { m1Streak++; m1LevelStreak++; recordCorrect(); }
+        else             { m1Streak = 0; m1LevelStreak = 0; }
+        setStreak('m1Streak', m1Streak);
+
+        if (m1LevelStreak >= 3 && m1Level < 2) {
+            m1Level++;
+            m1LevelStreak = 0;
+            document.getElementById('m1LevelLabel').textContent = 'Nivå ' + (m1Level + 1);
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi ett större rutnät!';
+        } else {
+            fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
+        }
+        showMiso('glad', 'Rätt avläst! Toppen!');
+        document.getElementById('m1Next').classList.add('btn-pulse');
+    } else {
+        m1HadError    = true;
+        m1LevelStreak = 0;
+        btn.classList.add('err');
+        btn.disabled = true;
+        fb.textContent = 'Nästan – gå ' + m1Task.x + ' steg åt höger och ' + m1Task.y +
+                         ' steg uppåt. Punkten är ' + m1Task.correctStr + '.';
+        showMiso('uppmuntrande', 'Först åt höger, sedan uppåt!');
+    }
+}
+
+document.getElementById('m1Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildM1(); });
+buildM1();
+
+/* ════════════════════════════════
+   Modul 2 – Hitta rätt punkt
+════════════════════════════════ */
+
+let m2Streak = 0, m2Task = null, m2Answered = false, m2HadError = false;
+let m2Level = 0, m2LevelStreak = 0;
+
+function buildM2() {
+    m2Task = genM2Task(m2Level); m2Answered = false; m2HadError = false;
+
+    const grid = drawCoordGrid('m2SVG', 0, m2Task.gridMax);
+    m2Task.points.forEach(pt => {
+        drawDot('m2SVG', grid, pt.x, pt.y, '#6B9E6B');
+        const p = grid.toPx(pt.x, pt.y);
+        const t = svgEl('text');
+        t.setAttribute('x', p.px + grid.cell * 0.32 + 4);
+        t.setAttribute('y', p.py - grid.cell * 0.32);
+        t.setAttribute('font-size', '14');
+        t.setAttribute('font-weight', 'bold');
+        t.setAttribute('font-family', 'Arial, sans-serif');
+        t.setAttribute('fill', '#4A3728');
+        t.textContent = pt.label;
+        document.getElementById('m2SVG').appendChild(t);
+    });
+
+    document.getElementById('m2Question').textContent =
+        'Vilken punkt ligger på ' + m2Task.label + '?';
+    buildChoices('m2Choices', m2Task.points.map(p => p.label), m2Check);
+
+    document.getElementById('m2LevelLabel').textContent = 'Nivå ' + (m2Level + 1);
+    document.getElementById('m2Feedback').textContent   = '';
+    document.getElementById('m2Next').classList.remove('btn-pulse');
+}
+
+function m2Check(val, btn) {
+    if (m2Answered) return;
+    const fb = document.getElementById('m2Feedback');
+
+    if (val === m2Task.targetLabel) {
+        m2Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m2Choices .choice-btn').forEach(b => { b.disabled = true; });
+
+        if (!m2HadError) { m2Streak++; m2LevelStreak++; recordCorrect(); }
+        else             { m2Streak = 0; m2LevelStreak = 0; }
+        setStreak('m2Streak', m2Streak);
+
+        if (m2LevelStreak >= 3 && m2Level < 2) {
+            m2Level++;
+            m2LevelStreak = 0;
+            document.getElementById('m2LevelLabel').textContent = 'Nivå ' + (m2Level + 1);
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi ett större rutnät!';
+        } else {
+            fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
+        }
+        showMiso('glad', 'Rätt punkt! Toppen!');
+        document.getElementById('m2Next').classList.add('btn-pulse');
+    } else {
+        m2HadError    = true;
+        m2LevelStreak = 0;
+        btn.classList.add('err');
+        btn.disabled = true;
+        fb.textContent = 'Nästan – leta punkten ' + m2Task.x + ' steg åt höger och ' +
+                         m2Task.y + ' steg uppåt. Rätt punkt är ' + m2Task.targetLabel + '.';
+        showMiso('uppmuntrande', 'Räkna höger, sedan uppåt!');
+    }
+}
+
+document.getElementById('m2Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildM2(); });
+buildM2();
+
+/* ════════════════════════════════
+   Modul 3 – Plotta punkten (klicka på rätt skärningspunkt)
+════════════════════════════════ */
+
+let m3Streak = 0, m3Task = null, m3Answered = false, m3HadError = false;
+let m3Level = 0, m3LevelStreak = 0;
+
+function buildM3() {
+    m3Task = genM3Task(m3Level); m3Answered = false; m3HadError = false;
+
+    const grid = drawCoordGrid('m3SVG', 0, m3Task.gridMax);
+    const svg  = document.getElementById('m3SVG');
+
+    /* Skärningspunkter: en liten diskret markör (det man ser) + en osynlig
+       större träffyta ovanpå (det man klickar på). Håller rutnätet luftigt
+       även på nivå 3 (11×11) men behåller en generös klickyta. */
+    const markR = Math.max(3, Math.min(grid.cell * 0.14, 6));
+    const hitR  = Math.min(grid.cell * 0.42, 16);
+    for (let gx = 0; gx <= m3Task.gridMax; gx++) {
+        for (let gy = 0; gy <= m3Task.gridMax; gy++) {
+            const p = grid.toPx(gx, gy);
+
+            const marker = svgEl('circle');
+            marker.setAttribute('cx', p.px); marker.setAttribute('cy', p.py);
+            marker.setAttribute('r', markR);
+            marker.setAttribute('fill', '#C8A882');
+            marker.setAttribute('fill-opacity', '0.45');
+            svg.appendChild(marker);
+
+            const hit = svgEl('circle');
+            hit.setAttribute('cx', p.px); hit.setAttribute('cy', p.py);
+            hit.setAttribute('r', hitR);
+            hit.setAttribute('fill', 'transparent');
+            hit.setAttribute('class', 'plot-hit');
+            hit._marker = marker;
+            hit.addEventListener('click', () => m3Check(gx, gy, hit));
+            svg.appendChild(hit);
+        }
+    }
+
+    document.getElementById('m3Question').textContent =
+        'Klicka på punkten ' + m3Task.label + ' i rutnätet.';
+    document.getElementById('m3LevelLabel').textContent = 'Nivå ' + (m3Level + 1);
+    document.getElementById('m3Feedback').textContent   = '';
+    document.getElementById('m3Next').classList.remove('btn-pulse');
+}
+
+function m3Check(gx, gy, hit) {
+    if (m3Answered) return;
+    const fb = document.getElementById('m3Feedback');
+
+    if (gx === m3Task.x && gy === m3Task.y) {
+        m3Answered = true;
+        const mk = hit._marker;
+        mk.setAttribute('fill', '#6B9E6B');
+        mk.setAttribute('fill-opacity', '1');
+        mk.setAttribute('stroke', 'white');
+        mk.setAttribute('stroke-width', '2');
+        mk.setAttribute('r', parseFloat(mk.getAttribute('r')) * 2.4);
+        document.querySelectorAll('#m3SVG .plot-hit').forEach(h => {
+            h.style.pointerEvents = 'none';
+        });
+
+        if (!m3HadError) { m3Streak++; m3LevelStreak++; recordCorrect(); }
+        else             { m3Streak = 0; m3LevelStreak = 0; }
+        setStreak('m3Streak', m3Streak);
+
+        if (m3LevelStreak >= 3 && m3Level < 2) {
+            m3Level++;
+            m3LevelStreak = 0;
+            document.getElementById('m3LevelLabel').textContent = 'Nivå ' + (m3Level + 1);
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi ett större rutnät!';
+        } else {
+            fb.textContent = 'Precis rätt! 🎉 Du plottade ' + m3Task.label + '!';
+        }
+        showMiso('glad', 'Rätt plottat! Toppen!');
+        document.getElementById('m3Next').classList.add('btn-pulse');
+    } else {
+        m3HadError    = true;
+        m3LevelStreak = 0;
+        const mk = hit._marker;
+        mk.setAttribute('fill', '#C0614A');
+        mk.setAttribute('fill-opacity', '0.9');
+        mk.setAttribute('r', parseFloat(mk.getAttribute('r')) * 1.9);
+        hit.style.pointerEvents = 'none';
+        fb.textContent = 'Nästan – gå ' + m3Task.x + ' steg åt höger och ' + m3Task.y +
+                         ' steg uppåt. Försök igen!';
+        showMiso('uppmuntrande', 'Först åt höger, sedan uppåt!');
+    }
+}
+
+document.getElementById('m3Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – du fixar det!'); buildM3(); });
+buildM3();
+
+/* ════════════════════════════════
+   Modul 4 – Koordinatsystem med negativa tal (fyra kvadranter)
+════════════════════════════════ */
+
+let m4Streak = 0, m4Task = null, m4Answered = false, m4HadError = false;
+let m4Level = 0, m4LevelStreak = 0;
+
+function buildM4() {
+    m4Task = genM4Task(m4Level); m4Answered = false; m4HadError = false;
+
+    const grid = drawCoordGrid('m4SVG', m4Task.gridMin, m4Task.gridMax);
+    drawDot('m4SVG', grid, m4Task.x, m4Task.y, '#D97B3A');
+
+    buildChoices('m4Choices', [m4Task.correctStr, ...m4Task.distractors], m4Check);
+
+    document.getElementById('m4LevelLabel').textContent = 'Nivå ' + (m4Level + 1);
+    document.getElementById('m4Feedback').textContent   = '';
+    document.getElementById('m4Next').classList.remove('btn-pulse');
+}
+
+function m4Check(val, btn) {
+    if (m4Answered) return;
+    const fb = document.getElementById('m4Feedback');
+
+    if (val === m4Task.correctStr) {
+        m4Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m4Choices .choice-btn').forEach(b => { b.disabled = true; });
+
+        if (!m4HadError) { m4Streak++; m4LevelStreak++; recordCorrect(); }
+        else             { m4Streak = 0; m4LevelStreak = 0; }
+        setStreak('m4Streak', m4Streak);
+
+        if (m4LevelStreak >= 3 && m4Level < 2) {
+            m4Level++;
+            m4LevelStreak = 0;
+            document.getElementById('m4LevelLabel').textContent = 'Nivå ' + (m4Level + 1);
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi ett större rutnät!';
+        } else {
+            fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
+        }
+        showMiso('glad', 'Rätt avläst! Toppen!');
+        document.getElementById('m4Next').classList.add('btn-pulse');
+    } else {
+        m4HadError    = true;
+        m4LevelStreak = 0;
+        btn.classList.add('err');
+        btn.disabled = true;
+        fb.textContent = 'Nästan – minus betyder åt vänster (x) eller nedåt (y). ' +
+                         'Punkten är ' + m4Task.correctStr + '.';
+        showMiso('uppmuntrande', 'Minus = vänster eller nedåt!');
+    }
+}
+
+document.getElementById('m4Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildM4(); });
+buildM4();
+</script>
+</body>
+</html>
