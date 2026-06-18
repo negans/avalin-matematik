@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geometri – Avalins Matematikverkstad</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="storage.js"></script>
+    <script src="ui.js"></script>
+    <script src="logic/shared.js"></script>
+    <script src="logic/geometri.js"></script>
+    <style>
+        /* Rubrik i heading-färg istället för style.css primary */
+        .section-title { color: var(--color-heading); }
+
+        /* Badge: ljus text mot #C8A882-bakgrund */
+        .level-badge { color: #FFF8F0; }
+
+        /* Svarsalternativ: explicit yta och tunn kantlinje */
+        .choice-btn { background: var(--color-surface); border: 1.5px solid var(--color-border); }
+
+        /* Figurytan */
+        .fig-wrap { width: 100%; max-width: 320px; margin: 6px auto 14px; }
+        #m1SVG, #m2SVG, #m3SVG, #m4SVG, #m5SVG { display: block; overflow: visible; }
+
+        #miso-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1000;
+        }
+        #miso-img { width: clamp(100px, 12vw, 140px); display: block; }
+        #miso-bubble {
+            display: none;
+            background: rgba(255,248,240,0.88);
+            border: 2px solid var(--color-border);
+            border-radius: 16px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            font-size: 0.85em;
+            max-width: 160px;
+            text-align: center;
+            color: var(--color-text);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+    </style>
+</head>
+<body>
+
+<nav class="top-nav">
+    <a href="index.html">← Avalins Matematikverkstad</a>
+</nav>
+
+<h1>📐 Geometri</h1>
+
+<!-- ══════ Modul 1 ══════ -->
+<p class="section-title">Modul 1 – Vinklar</p>
+
+<div class="card">
+    <p class="task-label">Vilken sorts vinkel är detta?</p>
+    <div style="text-align:center"><span class="level-badge" id="m1LevelLabel">Nivå 1</span></div>
+    <div class="fig-wrap"><svg id="m1SVG" width="100%"></svg></div>
+    <div class="choice-row" id="m1Choices"></div>
+    <div class="btn-row"><button class="btn-secondary" id="m1Next">Ny uppgift →</button></div>
+    <p class="streak" id="m1Streak"></p>
+    <div class="feedback" id="m1Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 2 ══════ -->
+<p class="section-title">Modul 2 – Geometriska former</p>
+
+<div class="card">
+    <p class="task-label">Vilken form är detta?</p>
+    <div style="text-align:center"><span class="level-badge" id="m2LevelLabel">Nivå 1</span></div>
+    <div class="fig-wrap"><svg id="m2SVG" width="100%"></svg></div>
+    <div class="choice-row" id="m2Choices"></div>
+    <div class="btn-row"><button class="btn-secondary" id="m2Next">Ny uppgift →</button></div>
+    <p class="streak" id="m2Streak"></p>
+    <div class="feedback" id="m2Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 3 ══════ -->
+<p class="section-title">Modul 3 – Symmetri</p>
+
+<div class="card">
+    <p class="task-label" id="m3Question">Hur många symmetrilinjer har formen?</p>
+    <div style="text-align:center"><span class="level-badge" id="m3LevelLabel">Nivå 1</span></div>
+    <div class="fig-wrap"><svg id="m3SVG" width="100%"></svg></div>
+    <div class="choice-row" id="m3Choices"></div>
+    <div class="btn-row"><button class="btn-secondary" id="m3Next">Ny uppgift →</button></div>
+    <p class="streak" id="m3Streak"></p>
+    <div class="feedback" id="m3Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 4 ══════ -->
+<p class="section-title">Modul 4 – Omkrets</p>
+
+<div class="card">
+    <p class="task-label" id="m4Question">Vad är omkretsen?</p>
+    <div style="text-align:center"><span class="level-badge" id="m4LevelLabel">Nivå 1</span></div>
+    <div class="fig-wrap"><svg id="m4SVG" width="100%"></svg></div>
+    <div class="choice-row" id="m4Choices"></div>
+    <div class="btn-row"><button class="btn-secondary" id="m4Next">Ny uppgift →</button></div>
+    <p class="streak" id="m4Streak"></p>
+    <div class="feedback" id="m4Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 5 ══════ -->
+<p class="section-title">Modul 5 – Area</p>
+
+<div class="card">
+    <p class="task-label" id="m5Question">Vad är arean?</p>
+    <div style="text-align:center"><span class="level-badge" id="m5LevelLabel">Nivå 1</span></div>
+    <div class="fig-wrap"><svg id="m5SVG" width="100%"></svg></div>
+    <div class="choice-row" id="m5Choices"></div>
+    <div class="btn-row"><button class="btn-secondary" id="m5Next">Ny uppgift →</button></div>
+    <p class="streak" id="m5Streak"></p>
+    <div class="feedback" id="m5Feedback" aria-live="polite"></div>
+</div>
+
+<div id="miso-container">
+    <div id="miso-bubble"></div>
+    <img id="miso-img" src="images/miso/miso-neutral.webp" alt="Miso" width="100">
+</div>
+
+<script>
+const CAT_NAME = "Miso";
+initStatsBar();
+
+const FILL = '#F3D9B8', STROKE = '#C97B3A', AXIS = '#8A6D4F', LABEL = '#4A3728';
+
+function svgEl(tag) { return document.createElementNS('http://www.w3.org/2000/svg', tag); }
+
+function setBox(svg, w, h) {
+    svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.innerHTML = '';
+}
+function elLine(svg, x1, y1, x2, y2, color, w, dash) {
+    const ln = svgEl('line');
+    ln.setAttribute('x1', x1); ln.setAttribute('y1', y1);
+    ln.setAttribute('x2', x2); ln.setAttribute('y2', y2);
+    ln.setAttribute('stroke', color); ln.setAttribute('stroke-width', w);
+    if (dash) ln.setAttribute('stroke-dasharray', dash);
+    svg.appendChild(ln);
+}
+function elText(svg, x, y, str, size, color, anchor) {
+    const t = svgEl('text');
+    t.setAttribute('x', x); t.setAttribute('y', y);
+    t.setAttribute('text-anchor', anchor || 'middle');
+    t.setAttribute('font-size', size || 13);
+    t.setAttribute('font-family', 'Arial, sans-serif');
+    t.setAttribute('fill', color || LABEL);
+    t.textContent = str;
+    svg.appendChild(t);
+}
+function elPoly(svg, pts) {
+    const p = svgEl('polygon');
+    p.setAttribute('points', pts.map(q => q[0] + ',' + q[1]).join(' '));
+    p.setAttribute('fill', FILL); p.setAttribute('stroke', STROKE); p.setAttribute('stroke-width', 2.5);
+    p.setAttribute('stroke-linejoin', 'round');
+    svg.appendChild(p);
+}
+/* Regelbunden n-hörning, första hörnet uppåt (startDeg = -90). */
+function regPoly(cx, cy, R, n, startDeg) {
+    const pts = [];
+    for (let k = 0; k < n; k++) {
+        const a = (startDeg + k * 360 / n) * Math.PI / 180;
+        pts.push([cx + R * Math.cos(a), cy + R * Math.sin(a)]);
+    }
+    return pts;
+}
+
+/* Skapar svarsknappar. raws = råvärden, fmt(raw) -> etikett, onPick(raw, btn). */
+function buildChoices(rowId, raws, fmt, onPick) {
+    const shuffled = raws.slice();
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = rnd(0, i);
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    const row = document.getElementById(rowId);
+    row.innerHTML = '';
+    shuffled.forEach(raw => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = fmt(raw);
+        btn.addEventListener('click', () => onPick(raw, btn));
+        row.appendChild(btn);
+    });
+}
+
+/* ════════════════════════════════ Modul 1 – Vinklar ════════════════════════════════ */
+
+let m1Streak = 0, m1Task = null, m1Answered = false, m1HadError = false;
+let m1Level = 0, m1LevelStreak = 0;
+
+function drawAngle(deg) {
+    const svg = document.getElementById('m1SVG');
+    setBox(svg, 220, 150);
+    const V = { x: 45, y: 125 }, L = 120, ar = 32;
+    const rad = deg * Math.PI / 180;
+    const end = { x: V.x + L * Math.cos(rad), y: V.y - L * Math.sin(rad) };
+    /* bågmarkör vid vinkelns spets */
+    const a0 = { x: V.x + ar, y: V.y };
+    const a1 = { x: V.x + ar * Math.cos(rad), y: V.y - ar * Math.sin(rad) };
+    const arc = svgEl('path');
+    const large = deg > 180 ? 1 : 0;
+    arc.setAttribute('d', 'M ' + a0.x + ' ' + a0.y + ' A ' + ar + ' ' + ar + ' 0 ' + large + ' 0 ' + a1.x + ' ' + a1.y);
+    arc.setAttribute('fill', 'none'); arc.setAttribute('stroke', STROKE); arc.setAttribute('stroke-width', 2);
+    svg.appendChild(arc);
+    elLine(svg, V.x, V.y, a0.x + (L - ar), V.y, AXIS, 4);   // horisontell stråle
+    elLine(svg, V.x, V.y, end.x, end.y, AXIS, 4);           // sned stråle
+    const dot = svgEl('circle');
+    dot.setAttribute('cx', V.x); dot.setAttribute('cy', V.y); dot.setAttribute('r', 4); dot.setAttribute('fill', AXIS);
+    svg.appendChild(dot);
+}
+
+function buildM1() {
+    m1Task = genM1Task(m1Level); m1Answered = false; m1HadError = false;
+    drawAngle(m1Task.deg);
+    buildChoices('m1Choices', m1Task.choices, x => x, m1Check);
+    document.getElementById('m1LevelLabel').textContent = 'Nivå ' + (m1Level + 1);
+    document.getElementById('m1Feedback').textContent = '';
+    document.getElementById('m1Next').classList.remove('btn-pulse');
+}
+
+function m1Check(val, btn) {
+    if (m1Answered) return;
+    const fb = document.getElementById('m1Feedback');
+    if (val === m1Task.correct) {
+        m1Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m1Choices .choice-btn').forEach(b => { b.disabled = true; });
+        if (!m1HadError) { m1Streak++; m1LevelStreak++; recordCorrect(); }
+        else { m1Streak = 0; m1LevelStreak = 0; }
+        setStreak('m1Streak', m1Streak);
+        if (m1LevelStreak >= 3 && m1Level < 2) {
+            m1Level++; m1LevelStreak = 0;
+            document.getElementById('m1LevelLabel').textContent = 'Nivå ' + (m1Level + 1);
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi fler sorters vinklar!';
+        } else { fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!'; }
+        showMiso('glad', 'Rätt vinkel! Toppen!');
+        document.getElementById('m1Next').classList.add('btn-pulse');
+    } else {
+        m1HadError = true; m1LevelStreak = 0;
+        btn.classList.add('err'); btn.disabled = true;
+        const hint = { 'Spetsig': 'mindre än en rät vinkel (under 90°)',
+                       'Rät': 'precis 90°, som hörnet i ett L',
+                       'Trubbig': 'större än en rät vinkel men mindre än rak (mellan 90° och 180°)',
+                       'Rak': 'helt rak, en rät linje (180°)' }[m1Task.correct];
+        fb.textContent = 'Nästan – den är ' + m1Task.correct.toLowerCase() + ': ' + hint + '.';
+        showMiso('uppmuntrande', 'Titta på öppningen mellan strålarna!');
+    }
+}
+document.getElementById('m1Next').addEventListener('click', () => { showMiso('neutral', 'Ny vinkel – kör på!'); buildM1(); });
+buildM1();
+
+/* ════════════════════════════════ Modul 2 – Former ════════════════════════════════ */
+
+let m2Streak = 0, m2Task = null, m2Answered = false, m2HadError = false;
+let m2Level = 0, m2LevelStreak = 0;
+
+function drawShape(svgId, key) {
+    const svg = document.getElementById(svgId);
+    setBox(svg, 220, 170);
+    const cx = 110, cy = 88, R = 60;
+    if (key === 'cirkel') {
+        const c = svgEl('circle');
+        c.setAttribute('cx', cx); c.setAttribute('cy', cy); c.setAttribute('r', R);
+        c.setAttribute('fill', FILL); c.setAttribute('stroke', STROKE); c.setAttribute('stroke-width', 2.5);
+        svg.appendChild(c);
+    } else if (key === 'kvadrat') {
+        const h = 56; elPoly(svg, [[cx-h,cy-h],[cx+h,cy-h],[cx+h,cy+h],[cx-h,cy+h]]);
+    } else if (key === 'rektangel') {
+        const w = 72, h = 46; elPoly(svg, [[cx-w,cy-h],[cx+w,cy-h],[cx+w,cy+h],[cx-w,cy+h]]);
+    } else if (key === 'triangel' || key === 'liksidigTriangel') {
+        elPoly(svg, regPoly(cx, cy, R, 3, -90));
+    } else if (key === 'likbentTriangel') {
+        elPoly(svg, [[cx, cy-R],[cx+42, cy+R*0.8],[cx-42, cy+R*0.8]]);
+    } else if (key === 'femhorning') {
+        elPoly(svg, regPoly(cx, cy, R, 5, -90));
+    } else if (key === 'sexhorning') {
+        elPoly(svg, regPoly(cx, cy, R, 6, -90));
+    }
+    return { cx, cy, R };
+}
+
+function buildM2() {
+    m2Task = genM2Task(m2Level); m2Answered = false; m2HadError = false;
+    drawShape('m2SVG', m2Task.shape);
+    buildChoices('m2Choices', [m2Task.correct, ...m2Task.distractors], x => x, m2Check);
+    document.getElementById('m2LevelLabel').textContent = 'Nivå ' + (m2Level + 1);
+    document.getElementById('m2Feedback').textContent = '';
+    document.getElementById('m2Next').classList.remove('btn-pulse');
+}
+
+function m2Check(val, btn) {
+    if (m2Answered) return;
+    const fb = document.getElementById('m2Feedback');
+    if (val === m2Task.correct) {
+        m2Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m2Choices .choice-btn').forEach(b => { b.disabled = true; });
+        if (!m2HadError) { m2Streak++; m2LevelStreak++; recordCorrect(); }
+        else { m2Streak = 0; m2LevelStreak = 0; }
+        setStreak('m2Streak', m2Streak);
+        if (m2LevelStreak >= 3 && m2Level < 2) {
+            m2Level++; m2LevelStreak = 0;
+            document.getElementById('m2LevelLabel').textContent = 'Nivå ' + (m2Level + 1);
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi fler former!';
+        } else { fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!'; }
+        showMiso('glad', 'Rätt form! Toppen!');
+        document.getElementById('m2Next').classList.add('btn-pulse');
+    } else {
+        m2HadError = true; m2LevelStreak = 0;
+        btn.classList.add('err'); btn.disabled = true;
+        const s = m2Task.sides;
+        const hint = s === 0 ? 'den är rund och har inga hörn' : 'räkna hörnen – den har ' + s + ' hörn';
+        fb.textContent = 'Nästan – det är en ' + m2Task.correct.toLowerCase() + ' (' + hint + ').';
+        showMiso('uppmuntrande', 'Räkna hörnen och sidorna!');
+    }
+}
+document.getElementById('m2Next').addEventListener('click', () => { showMiso('neutral', 'Ny form – kör på!'); buildM2(); });
+buildM2();
+
+/* ════════════════════════════════ Modul 3 – Symmetri ════════════════════════════════ */
+
+let m3Streak = 0, m3Task = null, m3Answered = false, m3HadError = false;
+let m3Level = 0, m3LevelStreak = 0;
+
+/* Symmetriaxlar för en figur, som linjesegment (diametrar genom mitten). */
+function symAxes(key, cx, cy, R) {
+    const lines = [];
+    const diam = (deg, L) => {
+        const a = deg * Math.PI / 180;
+        return [cx - L*Math.cos(a), cy - L*Math.sin(a), cx + L*Math.cos(a), cy + L*Math.sin(a)];
+    };
+    if (key === 'rektangel') {
+        const w = 72, h = 46;
+        lines.push([cx, cy-h-12, cx, cy+h+12]);
+        lines.push([cx-w-12, cy, cx+w+12, cy]);
+    } else if (key === 'kvadrat') {
+        const h = 56, p = 12;
+        lines.push([cx, cy-h-p, cx, cy+h+p]);
+        lines.push([cx-h-p, cy, cx+h+p, cy]);
+        lines.push([cx-h-p, cy-h-p, cx+h+p, cy+h+p]);
+        lines.push([cx-h-p, cy+h+p, cx+h+p, cy-h-p]);
+    } else if (key === 'likbentTriangel') {
+        lines.push([cx, cy-R-10, cx, cy+R*0.8+10]);
+    } else {
+        const n = key === 'liksidigTriangel' ? 3 : key === 'femhorning' ? 5 : 6;
+        for (let k = 0; k < n; k++) lines.push(diam(-90 + k * 180 / n, R + 12));
+    }
+    return lines;
+}
+
+function buildM3() {
+    m3Task = genM3Task(m3Level); m3Answered = false; m3HadError = false;
+    drawShape('m3SVG', m3Task.shape);
+    buildChoices('m3Choices', [m3Task.correct, ...m3Task.distractors], x => x, m3Check);
+    document.getElementById('m3LevelLabel').textContent = 'Nivå ' + (m3Level + 1);
+    document.getElementById('m3Feedback').textContent = '';
+    document.getElementById('m3Next').classList.remove('btn-pulse');
+}
+
+function revealAxes() {
+    const svg = document.getElementById('m3SVG');
+    symAxes(m3Task.shape, 110, 88, 60).forEach(l => elLine(svg, l[0], l[1], l[2], l[3], '#6B9E6B', 2, '6 4'));
+}
+
+function m3Check(val, btn) {
+    if (m3Answered) return;
+    const fb = document.getElementById('m3Feedback');
+    if (val === m3Task.correct) {
+        m3Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m3Choices .choice-btn').forEach(b => { b.disabled = true; });
+        revealAxes();
+        if (!m3HadError) { m3Streak++; m3LevelStreak++; recordCorrect(); }
+        else { m3Streak = 0; m3LevelStreak = 0; }
+        setStreak('m3Streak', m3Streak);
+        if (m3LevelStreak >= 3 && m3Level < 2) {
+            m3Level++; m3LevelStreak = 0;
+            document.getElementById('m3LevelLabel').textContent = 'Nivå ' + (m3Level + 1);
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi fler former! Se de gröna linjerna.';
+        } else { fb.textContent = 'Precis rätt! 🎉 Se de gröna symmetrilinjerna!'; }
+        showMiso('glad', 'Rätt antal! Toppen!');
+        document.getElementById('m3Next').classList.add('btn-pulse');
+    } else {
+        m3HadError = true; m3LevelStreak = 0;
+        btn.classList.add('err'); btn.disabled = true;
+        fb.textContent = 'Nästan – en ' + m3Task.name.toLowerCase() + ' har ' + m3Task.correct +
+                         ' symmetrilinje' + (m3Task.correct === 1 ? '' : 'r') + '. Tänk: var kan man vika så halvorna passar?';
+        showMiso('uppmuntrande', 'Var kan du vika figuren mitt itu?');
+    }
+}
+document.getElementById('m3Next').addEventListener('click', () => { showMiso('neutral', 'Ny form – kör på!'); buildM3(); });
+buildM3();
+
+/* ════════════════════════════════ Modul 4 – Omkrets ════════════════════════════════ */
+
+let m4Streak = 0, m4Task = null, m4Answered = false, m4HadError = false;
+let m4Level = 0, m4LevelStreak = 0;
+
+function drawM4() {
+    const svg = document.getElementById('m4SVG');
+    const t = m4Task;
+    if (t.shape === 'triangel') {
+        setBox(svg, 240, 180);
+        const P = [[120, 30], [30, 150], [210, 150]];
+        elPoly(svg, P);
+        elText(svg, 120, 168, t.a + ' cm', 13, LABEL);                 // botten
+        elText(svg, 60, 90, t.b + ' cm', 13, LABEL, 'end');            // vänster
+        elText(svg, 180, 90, t.c + ' cm', 13, LABEL, 'start');         // höger
+        elText(svg, 120, 14, '(ej skalenlig)', 10, '#9A7B5A');
+    } else {
+        const maxSide = Math.max(t.a, t.b);
+        const cell = Math.min(150 / maxSide, 28);
+        const w = t.a * cell, h = t.b * cell;
+        setBox(svg, w + 80, h + 70);
+        const x0 = 40, y0 = 28;
+        elPoly(svg, [[x0, y0], [x0 + w, y0], [x0 + w, y0 + h], [x0, y0 + h]]);
+        elText(svg, x0 + w / 2, y0 + h + 22, t.a + ' cm', 13, LABEL);            // botten
+        elText(svg, x0 - 10, y0 + h / 2 + 4, t.b + ' cm', 13, LABEL, 'end');     // vänster
+    }
+}
+
+function buildM4() {
+    m4Task = genM4Task(m4Level); m4Answered = false; m4HadError = false;
+    drawM4();
+    buildChoices('m4Choices', [m4Task.correct, ...m4Task.distractors], v => v + ' ' + m4Task.unit, m4Check);
+    document.getElementById('m4LevelLabel').textContent = 'Nivå ' + (m4Level + 1);
+    document.getElementById('m4Feedback').textContent = '';
+    document.getElementById('m4Next').classList.remove('btn-pulse');
+}
+
+function m4Check(val, btn) {
+    if (m4Answered) return;
+    const fb = document.getElementById('m4Feedback');
+    const t = m4Task;
+    if (val === t.correct) {
+        m4Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m4Choices .choice-btn').forEach(b => { b.disabled = true; });
+        if (!m4HadError) { m4Streak++; m4LevelStreak++; recordCorrect(); }
+        else { m4Streak = 0; m4LevelStreak = 0; }
+        setStreak('m4Streak', m4Streak);
+        if (m4LevelStreak >= 3 && m4Level < 2) {
+            m4Level++; m4LevelStreak = 0;
+            document.getElementById('m4LevelLabel').textContent = 'Nivå ' + (m4Level + 1);
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi en ny figur!';
+        } else { fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!'; }
+        showMiso('glad', 'Rätt omkrets! Toppen!');
+        document.getElementById('m4Next').classList.add('btn-pulse');
+    } else {
+        m4HadError = true; m4LevelStreak = 0;
+        btn.classList.add('err'); btn.disabled = true;
+        const how = t.shape === 'kvadrat' ? '4 × ' + t.a
+                  : t.shape === 'rektangel' ? t.a + ' + ' + t.b + ' + ' + t.a + ' + ' + t.b
+                  : t.a + ' + ' + t.b + ' + ' + t.c;
+        fb.textContent = 'Nästan – omkretsen är runt om: ' + how + ' = ' + t.correct + ' ' + t.unit + '.';
+        showMiso('uppmuntrande', 'Lägg ihop alla sidorna runt om!');
+    }
+}
+document.getElementById('m4Next').addEventListener('click', () => { showMiso('neutral', 'Ny figur – kör på!'); buildM4(); });
+buildM4();
+
+/* ════════════════════════════════ Modul 5 – Area ════════════════════════════════ */
+
+let m5Streak = 0, m5Task = null, m5Answered = false, m5HadError = false;
+let m5Level = 0, m5LevelStreak = 0;
+
+function drawM5() {
+    const svg = document.getElementById('m5SVG');
+    const t = m5Task;
+    const maxSide = Math.max(t.a, t.b);
+    const cell = Math.min(t.grid ? 34 : 150 / maxSide, t.grid ? 34 : 28);
+    const w = t.a * cell, h = t.b * cell;
+    setBox(svg, w + 80, h + 70);
+    const x0 = 40, y0 = 28;
+    elPoly(svg, [[x0, y0], [x0 + w, y0], [x0 + w, y0 + h], [x0, y0 + h]]);
+    if (t.grid) {
+        for (let i = 1; i < t.a; i++) elLine(svg, x0 + i * cell, y0, x0 + i * cell, y0 + h, STROKE, 1);
+        for (let j = 1; j < t.b; j++) elLine(svg, x0, y0 + j * cell, x0 + w, y0 + j * cell, STROKE, 1);
+    }
+    elText(svg, x0 + w / 2, y0 + h + 22, t.a + ' cm', 13, LABEL);
+    elText(svg, x0 - 10, y0 + h / 2 + 4, t.b + ' cm', 13, LABEL, 'end');
+}
+
+function buildM5() {
+    m5Task = genM5Task(m5Level); m5Answered = false; m5HadError = false;
+    drawM5();
+    buildChoices('m5Choices', [m5Task.correct, ...m5Task.distractors], v => v + ' ' + m5Task.unit, m5Check);
+    document.getElementById('m5LevelLabel').textContent = 'Nivå ' + (m5Level + 1);
+    document.getElementById('m5Feedback').textContent = '';
+    document.getElementById('m5Next').classList.remove('btn-pulse');
+}
+
+function m5Check(val, btn) {
+    if (m5Answered) return;
+    const fb = document.getElementById('m5Feedback');
+    const t = m5Task;
+    if (val === t.correct) {
+        m5Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m5Choices .choice-btn').forEach(b => { b.disabled = true; });
+        if (!m5HadError) { m5Streak++; m5LevelStreak++; recordCorrect(); }
+        else { m5Streak = 0; m5LevelStreak = 0; }
+        setStreak('m5Streak', m5Streak);
+        if (m5LevelStreak >= 3 && m5Level < 2) {
+            m5Level++; m5LevelStreak = 0;
+            document.getElementById('m5LevelLabel').textContent = 'Nivå ' + (m5Level + 1);
+            const msg = m5Level === 2
+                ? 'Precis rätt! 🎉 Superbra – nu räknar vi utan rutnät!'
+                : 'Precis rätt! 🎉 Superbra – nu provar vi rektanglar!';
+            fb.textContent = msg;
+        } else { fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!'; }
+        showMiso('glad', 'Rätt area! Toppen!');
+        document.getElementById('m5Next').classList.add('btn-pulse');
+    } else {
+        m5HadError = true; m5LevelStreak = 0;
+        btn.classList.add('err'); btn.disabled = true;
+        fb.textContent = 'Nästan – arean är rutorna inuti: ' + t.a + ' × ' + t.b + ' = ' + t.correct + ' ' + t.unit + '.';
+        showMiso('uppmuntrande', 'Räkna rutorna: bredd × höjd!');
+    }
+}
+document.getElementById('m5Next').addEventListener('click', () => { showMiso('neutral', 'Ny figur – kör på!'); buildM5(); });
+buildM5();
+</script>
+</body>
+</html>

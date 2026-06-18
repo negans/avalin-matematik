@@ -192,6 +192,65 @@ eq(koord.fmtPt(-4, 5),  '(-4, 5)',  'fmtPt negativ x');
     ok(!t.distractors.includes(t.correctStr), 'Koord M4 nivå'+lvl+': facit ej bland distraktorer');
 }));
 
+/* ═══════════ geometri ═══════════ */
+const geo = require('../logic/geometri.js');
+
+/* — classifyAngle: exakta gränser — */
+eq(geo.classifyAngle(45),  'Spetsig', 'classifyAngle 45');
+eq(geo.classifyAngle(89),  'Spetsig', 'classifyAngle 89');
+eq(geo.classifyAngle(90),  'Rät',     'classifyAngle 90');
+eq(geo.classifyAngle(120), 'Trubbig', 'classifyAngle 120');
+eq(geo.classifyAngle(179), 'Trubbig', 'classifyAngle 179');
+eq(geo.classifyAngle(180), 'Rak',     'classifyAngle 180');
+
+/* — M1: vinkeltyp matchar gradtalet — */
+[0,1,2].forEach(lvl => forEachRun(geo.genM1Task, lvl, RUNS, t => {
+    ok(t.choices.length === 4, 'Geo M1 nivå'+lvl+': 4 alternativ');
+    ok(distinct(t.choices), 'Geo M1 nivå'+lvl+': distinkta alternativ');
+    ok(t.choices.includes(t.correct), 'Geo M1 nivå'+lvl+': facit finns bland alternativen');
+    ok(geo.classifyAngle(t.deg) === t.correct, 'Geo M1 nivå'+lvl+': typ stämmer med gradtal ('+t.deg+'°)');
+    ok(t.deg > 0 && t.deg <= 180, 'Geo M1 nivå'+lvl+': gradtal i (0,180]');
+    if (lvl === 0) ok(t.correct !== 'Rak', 'Geo M1 nivå0: ingen rak vinkel');
+}));
+
+/* — M2: former — */
+[0,1,2].forEach(lvl => forEachRun(geo.genM2Task, lvl, RUNS, t => {
+    ok(t.distractors.length === 3, 'Geo M2 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correct, ...t.distractors]), 'Geo M2 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Geo M2 nivå'+lvl+': facit ej bland distraktorer');
+    ok(geo.SHAPES[t.shape].name === t.correct, 'Geo M2 nivå'+lvl+': facit = formens namn');
+}));
+
+/* — M3: symmetrilinjer — */
+[0,1,2].forEach(lvl => forEachRun(geo.genM3Task, lvl, RUNS, t => {
+    ok(t.distractors.length === 3, 'Geo M3 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correct, ...t.distractors]), 'Geo M3 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Geo M3 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v >= 0 && Number.isInteger(v)), 'Geo M3 nivå'+lvl+': icke-negativa heltal');
+    ok(geo.SYM[t.shape].axes === t.correct, 'Geo M3 nivå'+lvl+': facit = formens antal axlar');
+}));
+
+/* — M4: omkrets (matematisk korrekthet) — */
+[0,1,2].forEach(lvl => forEachRun(geo.genM4Task, lvl, RUNS, t => {
+    ok(t.distractors.length === 3, 'Geo M4 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correct, ...t.distractors]), 'Geo M4 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Geo M4 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0), 'Geo M4 nivå'+lvl+': positiva distraktorer');
+    const exp = t.shape === 'kvadrat' ? 4 * t.a
+              : t.shape === 'rektangel' ? 2 * (t.a + t.b)
+              : t.a + t.b + t.c;
+    ok(t.correct === exp, 'Geo M4 nivå'+lvl+': facit = omkrets ('+t.shape+')');
+}));
+
+/* — M5: area (matematisk korrekthet) — */
+[0,1,2].forEach(lvl => forEachRun(geo.genM5Task, lvl, RUNS, t => {
+    ok(t.distractors.length === 3, 'Geo M5 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correct, ...t.distractors]), 'Geo M5 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Geo M5 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0), 'Geo M5 nivå'+lvl+': positiva distraktorer');
+    ok(t.correct === t.a * t.b, 'Geo M5 nivå'+lvl+': facit = a·b');
+}));
+
 /* ═══════════ brak ═══════════ */
 const brak = require('../logic/brak.js');
 const APX = '≈ ';
