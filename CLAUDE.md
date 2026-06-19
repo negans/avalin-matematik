@@ -38,9 +38,9 @@ avalin-matematik/
 ├── koordinat.html      (✅ klar — Modul 1–4: läs av, hitta, plotta punkter, fyra kvadranter)
 ├── geometri.html       (✅ klar — Modul 1–5: vinklar, former, symmetri, omkrets, area)
 ├── algebra.html        (✅ klar — Modul 1–5: uttryck, variabler, förenkla, ekvationer, mönster)
-├── statistik.html      (⬜ ej skapad — Fas 3, steg 10)
+├── statistik.html      (✅ klar — Modul 1–5: diagram, medelvärde, sannolikhet, kombinatorik, typvärde)
 ├── template.html       (✅ klar — extraherad ur koordinat.html; skelett för nya modulsidor)
-├── logic/              (✅ delad ren logik: shared, decimaltal, brak, taluppfattning, klockan, multiplikation, koordinat, geometri, algebra)
+├── logic/              (✅ delad ren logik: shared, decimaltal, brak, taluppfattning, klockan, multiplikation, koordinat, geometri, algebra, statistik)
 ├── tests/              (✅ test.js — beroendefri svit, körs med "node tests/test.js")
 ├── CLAUDE.md
 └── README.md
@@ -71,7 +71,9 @@ avalin-matematik/
 9. ✅ algebra.html — uttryck, variabler, enkla ekvationer (SINGMA 5B kap 1)
    → Modul 1 beräkna uttryck · 2 skriv uttryck · 3 förenkla (samla termer) · 4 lös ekvation (våg) · 5 mönster
    → NÄSTA STEG är steg 10 (statistik.html) — sista i Fas 3
-10. statistik.html — diagram, medelvärde, sannolikhet, kombinatorik (SINGMA 5B kap 6)
+10. ✅ statistik.html — diagram, medelvärde, sannolikhet, kombinatorik (SINGMA 5B kap 6)
+    → Modul 1 läsa stapeldiagram · 2 medelvärde · 3 sannolikhet (kulor) · 4 kombinatorik (rutnät) · 5 typvärde
+    → 🎉 FAS 3 KLAR — hela den planerade roadmapen är i mål
 
 ## TEKNISKA STANDARDER
 - answered-flagga blockerar dubbelklick

@@ -305,6 +305,66 @@ const alg = require('../logic/algebra.js');
     ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Alg M5 nivå'+lvl+': positiva heltal');
 }));
 
+/* ═══════════ statistik ═══════════ */
+const stat = require('../logic/statistik.js');
+
+/* — uniqueMode: exakta fall — */
+eq(stat.uniqueMode([1,2,2,3]), 2, 'uniqueMode entydig');
+ok(stat.uniqueMode([1,1,2,2]) === null, 'uniqueMode oavgjort → null');
+
+/* — M1: läsa diagram — */
+[0,1,2].forEach(lvl => forEachRun(stat.genM1Task, lvl, RUNS, t => {
+    ok(t.names.length === 4 && t.values.length === 4, 'Stat M1 nivå'+lvl+': 4 staplar');
+    ok(t.values.every(v => v >= 1 && v <= 10), 'Stat M1 nivå'+lvl+': värden 1–10');
+    ok(t.distractors.length === 3, 'Stat M1 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correct, ...t.distractors]), 'Stat M1 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Stat M1 nivå'+lvl+': facit ej bland distraktorer');
+    if (lvl === 0) ok(t.values.includes(t.correct), 'Stat M1 nivå0: facit = någon stapels värde');
+    if (lvl === 1) ok(t.names.includes(t.correct), 'Stat M1 nivå1: facit = ett djurnamn');
+    if (lvl === 2) ok(t.correct === Math.max(...t.values) - Math.min(...t.values) && t.correct > 0,
+        'Stat M1 nivå2: facit = max - min > 0');
+}));
+
+/* — M2: medelvärde — */
+[0,1,2].forEach(lvl => forEachRun(stat.genM2Task, lvl, RUNS, t => {
+    ok(t.correct === t.sum / t.n && Number.isInteger(t.correct), 'Stat M2 nivå'+lvl+': facit = sum/n (heltal)');
+    ok(t.nums.length === t.n && t.nums.reduce((a,b)=>a+b,0) === t.sum, 'Stat M2 nivå'+lvl+': sum stämmer');
+    ok(t.distractors.length === 3, 'Stat M2 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correct, ...t.distractors]), 'Stat M2 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Stat M2 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Stat M2 nivå'+lvl+': positiva heltal');
+}));
+
+/* — M3: sannolikhet — */
+[0,1,2].forEach(lvl => forEachRun(stat.genM3Task, lvl, RUNS, t => {
+    const sum = t.colors.reduce((a,c)=>a+c.count,0);
+    ok(sum === t.total, 'Stat M3 nivå'+lvl+': total = summa av kulor');
+    ok(t.correct === t.k + ' av ' + t.total, 'Stat M3 nivå'+lvl+': facit = k av total');
+    ok(t.distractors.length === 3, 'Stat M3 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correct, ...t.distractors]), 'Stat M3 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Stat M3 nivå'+lvl+': facit ej bland distraktorer');
+}));
+
+/* — M4: kombinatorik — */
+[0,1,2].forEach(lvl => forEachRun(stat.genM4Task, lvl, RUNS, t => {
+    const exp = t.c == null ? t.a * t.b : t.a * t.b * t.c;
+    ok(t.correct === exp, 'Stat M4 nivå'+lvl+': facit = produkten');
+    ok(t.distractors.length === 3, 'Stat M4 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correct, ...t.distractors]), 'Stat M4 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Stat M4 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Stat M4 nivå'+lvl+': positiva heltal');
+}));
+
+/* — M5: typvärde — */
+[0,1,2].forEach(lvl => forEachRun(stat.genM5Task, lvl, RUNS, t => {
+    ok(t.correct === stat.uniqueMode(t.data), 'Stat M5 nivå'+lvl+': facit = entydigt typvärde');
+    ok(t.data.includes(t.correct), 'Stat M5 nivå'+lvl+': typvärdet finns i datan');
+    ok(t.distractors.length === 3, 'Stat M5 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correct, ...t.distractors]), 'Stat M5 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Stat M5 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Stat M5 nivå'+lvl+': positiva heltal');
+}));
+
 /* ═══════════ brak ═══════════ */
 const brak = require('../logic/brak.js');
 const APX = '≈ ';

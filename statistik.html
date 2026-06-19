@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistik – Avalins Matematikverkstad</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="storage.js"></script>
+    <script src="ui.js"></script>
+    <script src="logic/shared.js"></script>
+    <script src="logic/statistik.js"></script>
+    <style>
+        .section-title { color: var(--color-heading); }
+        .level-badge { color: #FFF8F0; }
+        .choice-btn { background: var(--color-surface); border: 1.5px solid var(--color-border); }
+
+        .numlist {
+            text-align: center; font-size: 1.7em; font-weight: bold;
+            color: var(--color-text); margin: 12px 0 16px; letter-spacing: 0.04em;
+        }
+        .fig-wrap { width: 100%; max-width: 320px; margin: 6px auto 12px; }
+        #m1SVG, #m3SVG, #m4SVG { display: block; overflow: visible; }
+
+        #miso-container {
+            position: fixed; bottom: 20px; right: 20px;
+            display: flex; flex-direction: column; align-items: center; z-index: 1000;
+        }
+        #miso-img { width: clamp(100px, 12vw, 140px); display: block; }
+        #miso-bubble {
+            display: none; background: rgba(255,248,240,0.88);
+            border: 2px solid var(--color-border); border-radius: 16px;
+            padding: 8px 12px; margin-bottom: 8px; font-size: 0.85em;
+            max-width: 160px; text-align: center; color: var(--color-text);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+    </style>
+</head>
+<body>
+
+<nav class="top-nav">
+    <a href="index.html">← Avalins Matematikverkstad</a>
+</nav>
+
+<h1>📊 Statistik</h1>
+
+<!-- ══════ Modul 1 ══════ -->
+<p class="section-title">Modul 1 – Läsa diagram</p>
+<div class="card">
+    <p class="task-label" id="m1Q">Läs av stapeldiagrammet.</p>
+    <div style="text-align:center"><span class="level-badge" id="m1LevelLabel">Nivå 1</span></div>
+    <div class="fig-wrap"><svg id="m1SVG" width="100%"></svg></div>
+    <div class="choice-row" id="m1Choices"></div>
+    <div class="btn-row"><button class="btn-secondary" id="m1Next">Ny uppgift →</button></div>
+    <p class="streak" id="m1Streak"></p>
+    <div class="feedback" id="m1Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 2 ══════ -->
+<p class="section-title">Modul 2 – Medelvärde</p>
+<div class="card">
+    <p class="task-label">Räkna ut medelvärdet: lägg ihop och dela med antalet.</p>
+    <div style="text-align:center"><span class="level-badge" id="m2LevelLabel">Nivå 1</span></div>
+    <p class="numlist" id="m2Nums"></p>
+    <div class="choice-row" id="m2Choices"></div>
+    <div class="btn-row"><button class="btn-secondary" id="m2Next">Ny uppgift →</button></div>
+    <p class="streak" id="m2Streak"></p>
+    <div class="feedback" id="m2Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 3 ══════ -->
+<p class="section-title">Modul 3 – Sannolikhet</p>
+<div class="card">
+    <p class="task-label" id="m3Q">Hur stor är chansen?</p>
+    <div style="text-align:center"><span class="level-badge" id="m3LevelLabel">Nivå 1</span></div>
+    <div class="fig-wrap"><svg id="m3SVG" width="100%"></svg></div>
+    <div class="choice-row" id="m3Choices"></div>
+    <div class="btn-row"><button class="btn-secondary" id="m3Next">Ny uppgift →</button></div>
+    <p class="streak" id="m3Streak"></p>
+    <div class="feedback" id="m3Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 4 ══════ -->
+<p class="section-title">Modul 4 – Kombinationer</p>
+<div class="card">
+    <p class="task-label" id="m4Q">Hur många olika kombinationer?</p>
+    <div style="text-align:center"><span class="level-badge" id="m4LevelLabel">Nivå 1</span></div>
+    <div class="fig-wrap"><svg id="m4SVG" width="100%"></svg></div>
+    <div class="choice-row" id="m4Choices"></div>
+    <div class="btn-row"><button class="btn-secondary" id="m4Next">Ny uppgift →</button></div>
+    <p class="streak" id="m4Streak"></p>
+    <div class="feedback" id="m4Feedback" aria-live="polite"></div>
+</div>
+
+<!-- ══════ Modul 5 ══════ -->
+<p class="section-title">Modul 5 – Typvärde</p>
+<div class="card">
+    <p class="task-label">Vilket värde är vanligast? (typvärdet)</p>
+    <div style="text-align:center"><span class="level-badge" id="m5LevelLabel">Nivå 1</span></div>
+    <p class="numlist" id="m5Nums"></p>
+    <div class="choice-row" id="m5Choices"></div>
+    <div class="btn-row"><button class="btn-secondary" id="m5Next">Ny uppgift →</button></div>
+    <p class="streak" id="m5Streak"></p>
+    <div class="feedback" id="m5Feedback" aria-live="polite"></div>
+</div>
+
+<div id="miso-container">
+    <div id="miso-bubble"></div>
+    <img id="miso-img" src="images/miso/miso-neutral.webp" alt="Miso" width="100">
+</div>
+
+<script>
+const CAT_NAME = "Miso";
+initStatsBar();
+
+const FILL = '#F3D9B8', STROKE = '#C97B3A', AXIS = '#8A6D4F', LABEL = '#4A3728';
+
+function svgEl(tag) { return document.createElementNS('http://www.w3.org/2000/svg', tag); }
+function setBox(svg, w, h) {
+    svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.innerHTML = '';
+}
+function elLine(svg, x1, y1, x2, y2, color, w) {
+    const ln = svgEl('line');
+    ln.setAttribute('x1', x1); ln.setAttribute('y1', y1);
+    ln.setAttribute('x2', x2); ln.setAttribute('y2', y2);
+    ln.setAttribute('stroke', color); ln.setAttribute('stroke-width', w);
+    svg.appendChild(ln);
+}
+function elText(svg, x, y, str, size, color, weight) {
+    const t = svgEl('text');
+    t.setAttribute('x', x); t.setAttribute('y', y);
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('font-size', size || 13);
+    t.setAttribute('font-family', 'Arial, sans-serif');
+    t.setAttribute('fill', color || LABEL);
+    if (weight) t.setAttribute('font-weight', weight);
+    t.textContent = str;
+    svg.appendChild(t);
+}
+
+function buildChoices(rowId, raws, fmt, onPick) {
+    const shuffled = raws.slice();
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = rnd(0, i);
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    const row = document.getElementById(rowId);
+    row.innerHTML = '';
+    shuffled.forEach(raw => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = fmt(raw);
+        btn.addEventListener('click', () => onPick(raw, btn));
+        row.appendChild(btn);
+    });
+}
+
+/* Generisk modul-fabrik (samma mönster som algebra.html). */
+function makeModule(p) {
+    let streak = 0, level = 0, levelStreak = 0, task = null, answered = false, hadError = false;
+
+    function build() {
+        task = p.gen(level); answered = false; hadError = false;
+        p.render(task, level);
+        buildChoices(p.choices, [p.correctOf(task), ...task.distractors], p.fmt, check);
+        document.getElementById(p.badge).textContent = 'Nivå ' + (level + 1);
+        document.getElementById(p.feedback).textContent = '';
+        document.getElementById(p.next).classList.remove('btn-pulse');
+    }
+
+    function check(val, btn) {
+        if (answered) return;
+        const fb = document.getElementById(p.feedback);
+        if (val === p.correctOf(task)) {
+            answered = true;
+            btn.classList.add('ok');
+            document.querySelectorAll('#' + p.choices + ' .choice-btn').forEach(b => { b.disabled = true; });
+            if (!hadError) { streak++; levelStreak++; recordCorrect(); }
+            else { streak = 0; levelStreak = 0; }
+            setStreak(p.streak, streak);
+            if (levelStreak >= 3 && level < 2) {
+                level++; levelStreak = 0;
+                document.getElementById(p.badge).textContent = 'Nivå ' + (level + 1);
+                fb.textContent = p.levelUpMsg(level);
+            } else { fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!'; }
+            showMiso('glad', p.misoOk);
+            document.getElementById(p.next).classList.add('btn-pulse');
+        } else {
+            hadError = true; levelStreak = 0;
+            btn.classList.add('err'); btn.disabled = true;
+            fb.textContent = p.hint(task);
+            showMiso('uppmuntrande', p.misoTip);
+        }
+    }
+
+    document.getElementById(p.next).addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); build(); });
+    build();
+}
+
+/* ════════ Modul 1 – Stapeldiagram ════════ */
+function drawBars(names, values) {
+    const svg = document.getElementById('m1SVG');
+    const W = 300, H = 200; setBox(svg, W, H);
+    const n = values.length, maxV = Math.max(...values);
+    const padL = 16, padR = 10, padB = 34, padT = 22;
+    const plotH = H - padT - padB, gap = (W - padL - padR) / n, bw = gap * 0.6;
+    elLine(svg, padL, H - padB, W - padR, H - padB, AXIS, 2);
+    values.forEach((v, i) => {
+        const x = padL + gap * i + (gap - bw) / 2;
+        const h = plotH * (v / maxV), y = H - padB - h;
+        const r = svgEl('rect');
+        r.setAttribute('x', x); r.setAttribute('y', y);
+        r.setAttribute('width', bw); r.setAttribute('height', h); r.setAttribute('rx', 4);
+        r.setAttribute('fill', FILL); r.setAttribute('stroke', STROKE); r.setAttribute('stroke-width', 2);
+        svg.appendChild(r);
+        elText(svg, x + bw / 2, y - 6, v, 13, LABEL, 'bold');
+        elText(svg, x + bw / 2, H - padB + 16, names[i], 11, LABEL);
+    });
+}
+makeModule({
+    gen: genM1Task, correctOf: t => t.correct, fmt: v => v,
+    choices: 'm1Choices', badge: 'm1LevelLabel', next: 'm1Next', streak: 'm1Streak', feedback: 'm1Feedback',
+    misoOk: 'Rätt avläst! Toppen!', misoTip: 'Titta på hur hög stapeln är!',
+    render: t => { drawBars(t.names, t.values); document.getElementById('m1Q').textContent = t.question; },
+    levelUpMsg: () => 'Precis rätt! 🎉 Superbra – nu kommer en klurigare fråga!',
+    hint: t => 'Nästan – rätt svar är ' + t.correct + '. Läs av stapelns höjd noga.'
+});
+
+/* ════════ Modul 2 – Medelvärde ════════ */
+makeModule({
+    gen: genM2Task, correctOf: t => t.correct, fmt: v => v,
+    choices: 'm2Choices', badge: 'm2LevelLabel', next: 'm2Next', streak: 'm2Streak', feedback: 'm2Feedback',
+    misoOk: 'Rätt medelvärde! Toppen!', misoTip: 'Lägg ihop allt – dela sedan med antalet!',
+    render: t => { document.getElementById('m2Nums').textContent = t.nums.join(',  '); },
+    levelUpMsg: () => 'Precis rätt! 🎉 Superbra – nu provar vi fler tal!',
+    hint: t => 'Nästan – ' + t.nums.join(' + ') + ' = ' + t.sum + ', delat med ' + t.n + ' = ' + t.correct + '.'
+});
+
+/* ════════ Modul 3 – Sannolikhet ════════ */
+function drawMarbles(colors) {
+    const svg = document.getElementById('m3SVG');
+    setBox(svg, 300, 150);
+    const r = 13, gap = 32, perRow = 8;
+    let x = 22, y = 26, count = 0;
+    colors.forEach(c => {
+        for (let i = 0; i < c.count; i++) {
+            const dot = svgEl('circle');
+            dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.setAttribute('r', r);
+            dot.setAttribute('fill', c.hex); dot.setAttribute('stroke', 'white'); dot.setAttribute('stroke-width', 2);
+            svg.appendChild(dot);
+            count++; x += gap;
+            if (count % perRow === 0) { x = 22; y += gap; }
+        }
+    });
+}
+makeModule({
+    gen: genM3Task, correctOf: t => t.correct, fmt: v => v,
+    choices: 'm3Choices', badge: 'm3LevelLabel', next: 'm3Next', streak: 'm3Streak', feedback: 'm3Feedback',
+    misoOk: 'Rätt chans! Toppen!', misoTip: 'Räkna hur många av den färgen, av alla.',
+    render: t => {
+        drawMarbles(t.colors);
+        document.getElementById('m3Q').textContent =
+            'Du drar en kula utan att titta. Hur stor är chansen att den är ' + t.askName + '?';
+    },
+    levelUpMsg: () => 'Precis rätt! 🎉 Superbra – nu provar vi fler färger!',
+    hint: t => 'Nästan – det finns ' + t.k + ' ' + t.askName + ' av ' + t.total + ' kulor, alltså ' + t.correct + '.'
+});
+
+/* ════════ Modul 4 – Kombinationer ════════ */
+function drawGrid(a, b) {
+    const svg = document.getElementById('m4SVG');
+    setBox(svg, 300, 180);
+    const cell = Math.min(40, Math.floor(240 / Math.max(a, b)));
+    const w = b * cell, h = a * cell, x0 = (300 - w) / 2, y0 = (180 - h) / 2;
+    for (let i = 0; i < a; i++) for (let j = 0; j < b; j++) {
+        const sq = svgEl('rect');
+        sq.setAttribute('x', x0 + j * cell + 4); sq.setAttribute('y', y0 + i * cell + 4);
+        sq.setAttribute('width', cell - 8); sq.setAttribute('height', cell - 8); sq.setAttribute('rx', 5);
+        sq.setAttribute('fill', FILL); sq.setAttribute('stroke', STROKE); sq.setAttribute('stroke-width', 2);
+        svg.appendChild(sq);
+    }
+}
+makeModule({
+    gen: genM4Task, correctOf: t => t.correct, fmt: v => v,
+    choices: 'm4Choices', badge: 'm4LevelLabel', next: 'm4Next', streak: 'm4Streak', feedback: 'm4Feedback',
+    misoOk: 'Rätt antal! Toppen!', misoTip: 'Gångra antalet av varje sort!',
+    render: t => {
+        const q = document.getElementById('m4Q');
+        if (t.c == null) {
+            drawGrid(t.a, t.b);
+            q.textContent = 'Du har ' + t.a + ' sorters ' + t.items[0] + ' och ' + t.b + ' sorters ' +
+                            t.items[1] + '. Hur många olika kombinationer kan du göra?';
+        } else {
+            setBox(document.getElementById('m4SVG'), 300, 80);
+            elText(document.getElementById('m4SVG'), 150, 50, t.a + ' × ' + t.b + ' × ' + t.c, 28, LABEL, 'bold');
+            q.textContent = 'Du har ' + t.a + ' ' + t.items[0] + ', ' + t.b + ' ' + t.items[1] + ' och ' +
+                            t.c + ' ' + t.items[2] + '. Hur många olika kombinationer?';
+        }
+    },
+    levelUpMsg: lvl => lvl === 2
+        ? 'Precis rätt! 🎉 Superbra – nu provar vi tre sorter!'
+        : 'Precis rätt! 🎉 Superbra – nu provar vi fler sorter!',
+    hint: t => t.c == null
+        ? 'Nästan – ' + t.a + ' × ' + t.b + ' = ' + t.correct + ' kombinationer.'
+        : 'Nästan – ' + t.a + ' × ' + t.b + ' × ' + t.c + ' = ' + t.correct + ' kombinationer.'
+});
+
+/* ════════ Modul 5 – Typvärde ════════ */
+makeModule({
+    gen: genM5Task, correctOf: t => t.correct, fmt: v => v,
+    choices: 'm5Choices', badge: 'm5LevelLabel', next: 'm5Next', streak: 'm5Streak', feedback: 'm5Feedback',
+    misoOk: 'Rätt typvärde! Toppen!', misoTip: 'Vilket tal syns flest gånger?',
+    render: t => { document.getElementById('m5Nums').textContent = t.data.join(',  '); },
+    levelUpMsg: () => 'Precis rätt! 🎉 Superbra – nu provar vi en längre lista!',
+    hint: t => 'Nästan – ' + t.correct + ' förekommer flest gånger, så det är typvärdet.'
+});
+</script>
+</body>
+</html>
