@@ -191,12 +191,100 @@
         return { label, correctStr, distractors: pickDistractors(correctStr, cand) };
     }
 
+    /* ════════ Mönster v2, lager 11a + 11c ════════
+       workedSteps(mod, task): 3 stegrader (löst exempel).
+       whyQuestion(mod, task): "Varför stämmer det?" + 1 korrekt + 2 distraktorer
+       enligt distraktor-doktrinen. Ren text, testas som vanligt. */
+
+    function workedSteps(mod, t) {
+        switch (mod) {
+            case 1:
+                return [
+                    t.rows + ' × ' + t.cols + ' betyder ' + t.rows + ' rader med ' + t.cols + ' i varje.',
+                    'Räkna alla prickar: ' + t.rows + ' grupper om ' + t.cols + '.',
+                    t.rows + ' × ' + t.cols + ' = ' + t.correct + '.'
+                ];
+            case 2:
+                return [
+                    'Multiplikation är upprepad addition: ' + t.a + ' taget ' + t.b + ' gånger.',
+                    'Dela upp det större talet om det blir lättare att räkna.',
+                    t.a + ' × ' + t.b + ' = ' + t.correct + '.'
+                ];
+            case 3:
+                return [
+                    'Dela upp ' + t.a + ' i lika stora grupper om ' + t.b + '.',
+                    t.hasRest
+                        ? 'Det blir några hela grupper och en rest som blir över.'
+                        : 'Räkna hur många hela grupper det blir.',
+                    t.a + ' ÷ ' + t.b + ' = ' + t.correctStr + '.'
+                ];
+            case 4:
+                return [
+                    'Räkna ' + t.label.replace(' = ?', '') + '.',
+                    'Vid × flyttar kommat åt höger, vid ÷ åt vänster — lika många steg som nollor.',
+                    'Svaret är ' + t.correctStr + '.'
+                ];
+            case 5:
+                return [
+                    'Räkna ' + t.label.replace(' = ?', '') + '.',
+                    'Räkna som med heltal först, sätt sedan tillbaka kommat.',
+                    'Svaret är ' + t.correctStr + '.'
+                ];
+            default:
+                return [];
+        }
+    }
+
+    const WHY = {
+        1: {
+            correct: 'Multiplikation är rader gånger antal i varje rad.',
+            distractors: [
+                'Man lägger ihop raderna och kolumnerna.',         // adderar i stället (rows+cols)
+                'Man räknar bara en rad.'                          // delberäkning
+            ]
+        },
+        2: {
+            correct: 'Multiplikation är upprepad addition — talet taget flera gånger.',
+            distractors: [
+                'Man adderar de två talen.',                       // fel räknesätt (a+b)
+                'Man räknar bara det större talet.'                // delberäkning
+            ]
+        },
+        3: {
+            correct: 'Division delar upp talet i lika stora grupper.',
+            distractors: [
+                'Division är samma som att lägga ihop talen.',     // fel räknesätt
+                'Resten kan vara större än talet man delar med.'   // ogiltig rest
+            ]
+        },
+        4: {
+            correct: 'Kommat flyttar lika många steg som det finns nollor.',
+            distractors: [
+                'Man lägger bara till nollor i slutet.',           // funkar ej för decimaltal
+                'Kommat flyttar alltid åt höger.'                  // omvänd riktning vid ÷
+            ]
+        },
+        5: {
+            correct: 'Räkna som med heltal och sätt sedan tillbaka kommat.',
+            distractors: [
+                'Man räknar heltalen och struntar i kommat i svaret.', // tappar kommat
+                'Man multiplicerar bara siffran före kommat.'          // delberäkning
+            ]
+        }
+    };
+
+    function whyQuestion(mod, t) {
+        const w = WHY[mod];
+        return { prompt: 'Varför stämmer det?', correct: w.correct, distractors: w.distractors.slice() };
+    }
+
     return {
         pickDistractors,
         genM1Task,
         genM2Task,
         genM3Task,
         fmtH, genM4Task,
-        fmtT, genM5Task
+        fmtT, genM5Task,
+        workedSteps, whyQuestion
     };
 }));
