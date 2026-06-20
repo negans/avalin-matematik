@@ -42,7 +42,7 @@ Dyskalkyli:
 Autism / förutsägbarhet:
 - Layout identisk mellan sidor: samma knappplaceringar, samma plats för feedback, samma färgbetydelser. Hon ska aldrig behöva lära om gränssnittet.
 - Inga överraskningar: inga timers, ingen nedräkning, ingen plötslig rörelse. Miso firar lugnt, aldrig mitt i en uppgift.
-- Mjuka animationer. Ljud/uppläsning bara på begäran (toggle), aldrig påtvingat.
+- Mjuka animationer. Ingen uppläsning/ljud alls (Mats beslut 2026-06-20: hela uppläsningsfunktionen borttagen, se Fas 4 / lager 11b).
 
 Trygghet / mående (E är golvet):
 - Tid mäts inte och visas inte. Långsamhet bestraffas aldrig.
@@ -60,7 +60,7 @@ avalin-matematik/
 ├── index.html          (startsida, alla modulknappar live)
 ├── style.css           (✅ klar — gemensam stilmall)
 ├── storage.js          (✅ localStorage: poäng, streak, stjärnor, inställningar)
-├── ui.js               (✅ delade UI-globaler: showMiso(), setStreak() — speak() läggs här i Fas 4)
+├── ui.js               (✅ delade UI-globaler: showMiso(), setStreak())
 ├── klockan.html        (✅ klar)
 ├── brak.html           (✅ klar — Modul 1–10 inkl. procent + tre former)
 ├── taluppfattning.html (✅ klar — Modul 1–8 inkl. negativa tal)
@@ -119,19 +119,17 @@ backlog sist (lägst beroenderisk) → slutpass. Så rörs ingen fil två gånge
 Mönster v2 läggs FÖRST så att nya filer (Fas 5) föds färdiga och inget retrofittas två gånger.
 11. Mönster v2 i template.html — uppgradera skelettet med tre lager. Specat för Claude Code:
 
-    11a. Worked example (löst exempel) före nivåstart
+    11a. ✅ Worked example (löst exempel) före nivåstart — KLAR på piloten (koordinat.html). Logik: workedSteps() i logic/koordinat.js (testad). UI: "Visa mig"-knapp + auto-visning första gången per nivå (sparas i storage), rent rutnät med streckad väg.
         - Visas FÖRSTA gången Avalin går in på en nivå (per modul, per nivå). Därefter nåbar via "Visa mig"-knapp — aldrig påtvingad igen.
         - Innehåll: exakt samma uppgiftstyp hon ska göra härnäst, fullständigt löst, ETT steg per rad, med samma visuella representation som uppgiften.
         - Konkret → symbolisk: exemplet visar bilden först, sedan symbolerna/uträkningen.
         - Datakälla: genereras av samma genMxTask-logik, så exempel och uppgift alltid matchar nivån. Ingen hårdkodad text.
 
-    11b. Uppläsning av instruktion (Web Speech API)
-        - Delad utility speak(text) i ui.js (bredvid showMiso/setStreak): SpeechSynthesisUtterance, lang 'sv-SE', rate ~0.9.
-        - Högtalarknapp 🔊 intill instruktionen; tap läser den korta instruktionsraden (inte hela sidan).
-        - Auto-läsning vid ny uppgift: toggle, DEFAULT AV (förutsägbarhet). Val sparas via storage.js.
-        - Graceful fallback: saknas sv-röst, dölj knappen tyst (ingen krasch, ingen felruta).
+    11b. Uppläsning av instruktion — BORTTAGEN (Mats beslut 2026-06-20)
+        - Ursprungligen: Web Speech API, 🔊-knapp + "Läs upp nya uppgifter"-toggle.
+        - Mats vill inte ha någon inläsning någonstans. All uppläsningskod är borttagen ur ui.js, koordinat.html och template.html (speak/svVoice/initSpeak/🔊-knappar). Återinför INTE utan nytt beslut.
 
-    11c. Resonemangslager (C/D) — "varför?"
+    11c. ✅ Resonemangslager (C/D) — "varför?" — KLAR på piloten (koordinat.html). Logik: whyQuestion() i logic/koordinat.js (testad). UI: panel efter rätt svar, BARA nivå 2, ~var tredje; fel påverkar aldrig streak/progression.
         - Efter RÄTT svar, ibland en följdfråga "Varför stämmer det?" med 2–3 korta flervalsmotiveringar (multiple choice, ALDRIG textinput).
         - Frekvens: endast nivå 2 (abstrakt) och inte varje gång (~var tredje). Aldrig nivå 0–1 — där bär den konkreta förståelsen.
         - Motiveringar: en korrekt resonemangsrad + 1–2 rimligt-felaktiga, byggda enligt distraktor-doktrinen.
@@ -139,8 +137,8 @@ Mönster v2 läggs FÖRST så att nya filer (Fas 5) föds färdiga och inget ret
         - Ren logik: motiveringar + deras distraktorer genereras i logic/*.js och testas.
 
 12. Pilot FÖRST, sedan utrullning — bryt inte ut mönstret blint till nio filer.
-    - Implementera 11a–c i template.html, applicera på ETT pilotmodul (förslag: koordinat.html, som template kom ur). Verifiera i webbläsare + node tests/test.js. Checkpoint med Mats.
-    - Först därefter rulla ut EN fil i taget: klockan · taluppfattning · brak · decimaltal · multiplikation · geometri · algebra · statistik.
+    - ✅ Piloten koordinat.html KLAR: 11a + 11c byggda och verifierade (logiklager grönt, ockulärt i Brave). template.html har 11b-resterna borttagna men 11a/11c är ÄNNU INTE inlagda i skelettet — gör det som en del av första utrullningen.
+    - NÄSTA STEG: rulla ut EN fil i taget: klockan · taluppfattning · brak · decimaltal · multiplikation · geometri · algebra · statistik.
     - Per fil måste Definition of Done passeras (se nedan).
 13. Innehållsluckor i befintliga filer (görs i samma pass som filen ändå öppnas):
     - geometri.html M5: triangelarea (b×h/2) + sammansatta figurer (+ cirkelbegrepp: radie, diameter, medelpunkt)
@@ -203,11 +201,11 @@ LOGIKLAGER — automatiserat (Claude Code i terminalen)
 - All ren logik i logic/*.js ska ha assertions i tests/test.js: exakta värden + invarianter per nivå, property-based (generatorn körs många varv).
 - Ny logik = nya tester i SAMMA commit. Gäller även nya lager, t.ex. "varför"-motiveringarnas generator. Inget läggs till otestat.
 - Bakåt: testsviten utökas löpande om en lucka upptäcks i redan byggd logik. STATUS NU: alla nio moduler har egen testblock — ingen känd lucka.
-- speak()/Web Speech och annat webbläsar-API kan INTE testas i Node — verifieras i visuella lagret i stället.
+- Webbläsar-API (t.ex. SVG-rendering) kan INTE testas i Node — verifieras i visuella lagret i stället.
 
 VISUELLT / OCKULÄRT LAGER — kräver browser-verktyg (terminalen ser INTE renderingen)
 - Verifieras i Brave mot npx serve-URL:en via Claude-extensionen (eller skärmdumpar). Claude Code i terminalen kan INTE göra detta själv — det måste ske genom browser-verktyget.
-- Checklista per sida: instruktionen visas en mening i taget · uppläsning 🔊 fungerar · worked example visas första gången på en nivå · rätt/fel signaleras med ikon + text (inte bara färg) · Miso renderas och firar utan att störa · ingen timer/nedräkning · layout matchar övriga sidor · inga konsolfel.
+- Checklista per sida: instruktionen visas en mening i taget · worked example visas första gången på en nivå · rätt/fel signaleras med ikon + text (inte bara färg) · Miso renderas och firar utan att störa · ingen timer/nedräkning · layout matchar övriga sidor · inga konsolfel.
 - Körs efter VARJE modul, och som helhetspass över alla sidor i Fas 8.
 
 ## DEFINITION OF DONE (varje modul måste passera)
@@ -215,7 +213,7 @@ VISUELLT / OCKULÄRT LAGER — kräver browser-verktyg (terminalen ser INTE rend
 - [ ] 3 nivåer, konkret → abstrakt
 - [ ] Distraktorer enligt distraktor-doktrinen
 - [ ] Tester i tests/test.js: exakta värden + invarianter per nivå (facit korrekt, 3 distinkta, facit ej bland distraktorer, inga ogiltiga värden)
-- [ ] Instruktion = en kort mening; uppläsning 🔊 inkopplad
+- [ ] Instruktion = en kort mening
 - [ ] Worked example per nivå
 - [ ] Färg aldrig enda signalen (ikon/text också)
 - [ ] Miso-container omedelbart före </script>

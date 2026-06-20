@@ -93,6 +93,68 @@
         return { x, y, gridMax, label: fmtPt(x, y) };
     }
 
+    /* ════════ Mönster v2, lager 11a – löst exempel (steg för steg) ════════
+       Ren stegtext för en uppgift. Samma riktningsspråk i alla moduler:
+       höger/vänster för x, uppåt/nedåt för y, ett steg per rad. Konkret →
+       symbolisk: HTML ritar rutnätet (bilden), dessa rader bär uträkningen. */
+
+    function stepX(x) {
+        if (x > 0) return 'Gå ' + x + ' steg åt höger. Nu är x = ' + x + '.';
+        if (x < 0) return 'Gå ' + (-x) + ' steg åt vänster. Nu är x = ' + x + '.';
+        return 'Stå kvar i sidled. x = 0.';
+    }
+    function stepY(y) {
+        if (y > 0) return 'Gå ' + y + ' steg uppåt. Nu är y = ' + y + '.';
+        if (y < 0) return 'Gå ' + (-y) + ' steg nedåt. Nu är y = ' + y + '.';
+        return 'Stå kvar i höjd. y = 0.';
+    }
+
+    /* Returnerar exakt 4 stegrader för en uppgift i modul mod (1–4). */
+    function workedSteps(mod, task) {
+        const start = 'Börja vid 0, där linjerna möts.';
+        if (mod === 2) {
+            return ['Vi letar koordinaten ' + task.label + '.',
+                    stepX(task.x), stepY(task.y),
+                    'Där ligger punkt ' + task.targetLabel + '.'];
+        }
+        if (mod === 3) {
+            return ['Vi ska plotta ' + task.label + '.',
+                    stepX(task.x), stepY(task.y),
+                    'Klicka på den punkten.'];
+        }
+        /* mod 1 och 4: läs av och namnge punkten */
+        return [start, stepX(task.x), stepY(task.y),
+                'Punkten är ' + task.correctStr + '.'];
+    }
+
+    /* ════════ Mönster v2, lager 11c – resonemang ("Varför stämmer det?") ════════
+       Efter rätt svar (bara nivå 2, ibland) en kort flervalsfråga om VARFÖR.
+       En korrekt resonemangsrad + 2 rimligt-felaktiga enligt distraktor-doktrinen.
+       Stoppar aldrig progression — ren text, testas som vanlig logik. */
+
+    function whyQuestion(mod, task) {
+        if (mod === 4) {
+            /* Negativa tal: poängen är vad minustecknet betyder för riktningen. */
+            return {
+                prompt: 'Varför stämmer det?',
+                correct: 'Minus betyder åt vänster (x) eller nedåt (y).',
+                distractors: [
+                    'Minus betyder åt höger (x) eller uppåt (y).',   // omvänd riktning
+                    'Minus gäller bara andra talet (y), aldrig x.'   // delberäkning
+                ]
+            };
+        }
+        /* M1–M3: poängen är ordningen — första talet i sidled, andra i höjd. */
+        return {
+            prompt: 'Varför stämmer det?',
+            correct: 'Första talet är steg åt höger, andra talet är steg uppåt.',
+            distractors: [
+                'Första talet är steg uppåt, andra talet är steg åt höger.', // x/y omkastade
+                'Man börjar räkna rutorna vid 1, inte vid 0.'                // off-by-one
+            ]
+        };
+    }
+
     /* ════════ Modul 4 – Koordinatsystem med negativa tal (fyra kvadranter) ════════ */
 
     function genM4Task(level) {
@@ -115,6 +177,10 @@
         genM1Task,
         genM2Task,
         genM3Task,
-        genM4Task
+        genM4Task,
+        stepX,
+        stepY,
+        workedSteps,
+        whyQuestion
     };
 }));

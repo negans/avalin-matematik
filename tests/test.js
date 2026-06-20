@@ -192,6 +192,48 @@ eq(koord.fmtPt(-4, 5),  '(-4, 5)',  'fmtPt negativ x');
     ok(!t.distractors.includes(t.correctStr), 'Koord M4 nivå'+lvl+': facit ej bland distraktorer');
 }));
 
+/* — Mönster v2, lager 11a: löst exempel (workedSteps) — */
+[1,2,3,4].forEach(mod => {
+    const gen = mod === 1 ? koord.genM1Task : mod === 2 ? koord.genM2Task
+              : mod === 3 ? koord.genM3Task : koord.genM4Task;
+    [0,1,2].forEach(lvl => forEachRun(gen, lvl, RUNS, t => {
+        const steps = koord.workedSteps(mod, t);
+        ok(steps.length === 4, 'Koord WE mod'+mod+' nivå'+lvl+': exakt 4 steg');
+        ok(steps.every(s => typeof s === 'string' && s.length > 0),
+            'Koord WE mod'+mod+' nivå'+lvl+': alla steg ifyllda');
+        /* x-steget speglar tecknet (höger/vänster/stå kvar) */
+        const sx = steps[1];
+        if (t.x > 0)      ok(sx.includes('höger'),   'Koord WE mod'+mod+' nivå'+lvl+': x>0 → höger');
+        else if (t.x < 0) ok(sx.includes('vänster'), 'Koord WE mod'+mod+' nivå'+lvl+': x<0 → vänster');
+        else              ok(sx.includes('Stå kvar'),'Koord WE mod'+mod+' nivå'+lvl+': x=0 → stå kvar');
+        /* y-steget speglar tecknet (uppåt/nedåt/stå kvar) */
+        const sy = steps[2];
+        if (t.y > 0)      ok(sy.includes('uppåt'),   'Koord WE mod'+mod+' nivå'+lvl+': y>0 → uppåt');
+        else if (t.y < 0) ok(sy.includes('nedåt'),   'Koord WE mod'+mod+' nivå'+lvl+': y<0 → nedåt');
+        else              ok(sy.includes('Stå kvar'),'Koord WE mod'+mod+' nivå'+lvl+': y=0 → stå kvar');
+        /* sista steget bär facit/uppmaningen */
+        const last = steps[3];
+        if (mod === 2)      ok(last.includes(t.targetLabel), 'Koord WE mod2: sista steget nämner rätt punkt');
+        else if (mod === 3) ok(last.includes('Klicka'),      'Koord WE mod3: sista steget uppmanar klick');
+        else                ok(last.includes(t.correctStr),  'Koord WE mod'+mod+': sista steget bär facit');
+    }));
+});
+
+/* — Mönster v2, lager 11c: resonemang (whyQuestion) — */
+[1,2,3,4].forEach(mod => {
+    const gen = mod === 1 ? koord.genM1Task : mod === 2 ? koord.genM2Task
+              : mod === 3 ? koord.genM3Task : koord.genM4Task;
+    [0,1,2].forEach(lvl => forEachRun(gen, lvl, 200, t => {
+        const q = koord.whyQuestion(mod, t);
+        ok(typeof q.prompt === 'string' && q.prompt.length > 0, 'Koord WHY mod'+mod+': prompt ifylld');
+        ok(typeof q.correct === 'string' && q.correct.length > 0, 'Koord WHY mod'+mod+': korrekt rad ifylld');
+        ok(q.distractors.length === 2, 'Koord WHY mod'+mod+': exakt 2 distraktorer');
+        ok(distinct([q.correct, ...q.distractors]), 'Koord WHY mod'+mod+': 3 distinkta alternativ');
+        ok(!q.distractors.includes(q.correct), 'Koord WHY mod'+mod+': facit ej bland distraktorer');
+        ok(q.distractors.every(d => typeof d === 'string' && d.length > 0), 'Koord WHY mod'+mod+': distraktorer ifyllda');
+    }));
+});
+
 /* ═══════════ geometri ═══════════ */
 const geo = require('../logic/geometri.js');
 
