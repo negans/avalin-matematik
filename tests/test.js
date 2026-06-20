@@ -565,6 +565,34 @@ eq(tal.numToSv(2025), 'tvåtusentjugofem',    'numToSv 2025');
     ok(t.numbers.includes(t.correct), 'M8 nivå'+lvl+': facit finns bland talen');
 }));
 
+/* — Mönster v2, lager 11a + 11c: workedSteps + whyQuestion (M1–M8) — */
+const TAL_GEN = {
+    1: () => tal.genM1Task(),  2: () => tal.genM2Task(),
+    3: (l) => tal.genM3Task(l), 4: (l) => tal.genM4Task(l),
+    5: (l) => tal.genM5Task(l), 6: (l) => tal.genM6Task(l),
+    7: (l) => tal.genM7Task(l), 8: (l) => tal.genM8Task(l)
+};
+[1,2,3,4,5,6,7,8].forEach(mod => {
+    for (let r = 0; r < 400; r++) {
+        const lvl = mod <= 2 ? undefined : (r % 3);
+        const t = TAL_GEN[mod](lvl);
+        const steps = tal.workedSteps(mod, t);
+        ok(steps.length === 3, 'Tal WE mod'+mod+': exakt 3 steg');
+        ok(steps.every(s => typeof s === 'string' && s.length > 0), 'Tal WE mod'+mod+': alla steg ifyllda');
+        /* sista steget bär facit/uppmaningen */
+        if (mod === 5)      ok(steps[2].includes(t.word),                'Tal WE mod5: sista steget bär ordet');
+        else if (mod === 7) ok(steps[2].includes('Punkt ' + t.correctPt),'Tal WE mod7: sista steget bär punkten');
+        else                ok(steps[2].includes(String(t.correct)),     'Tal WE mod'+mod+': sista steget bär facit');
+
+        const q = tal.whyQuestion(mod, t);
+        ok(typeof q.prompt === 'string' && q.prompt.length > 0, 'Tal WHY mod'+mod+': prompt ifylld');
+        ok(typeof q.correct === 'string' && q.correct.length > 0, 'Tal WHY mod'+mod+': korrekt rad ifylld');
+        ok(q.distractors.length === 2, 'Tal WHY mod'+mod+': exakt 2 distraktorer');
+        ok(distinct([q.correct, ...q.distractors]), 'Tal WHY mod'+mod+': 3 distinkta alternativ');
+        ok(!q.distractors.includes(q.correct), 'Tal WHY mod'+mod+': facit ej bland distraktorer');
+    }
+});
+
 /* ═══════════ klockan ═══════════ */
 const klock = require('../logic/klockan.js');
 

@@ -331,6 +331,126 @@
         return { numbers, correct };
     }
 
+    /* ════════ Mönster v2, lager 11a + 11c – delad logik per modul ════════
+       workedSteps(mod, task): exakt 3 stegrader (löst exempel).
+       whyQuestion(mod, task): "Varför stämmer det?" + 1 korrekt + 2 distraktorer
+       enligt distraktor-doktrinen. Ren text, testas som vanligt. */
+
+    const PLACE_NAME = {
+        1: 'entalsplatsen', 10: 'tiotalsplatsen', 100: 'hundratalsplatsen',
+        1000: 'tusentalsplatsen', 10000: 'tiotusentalsplatsen', 100000: 'hundratusentalsplatsen'
+    };
+
+    function workedSteps(mod, t) {
+        switch (mod) {
+            case 1:
+            case 2:
+                return [
+                    'Siffran ' + t.digitVal + ' står på ' + PLACE_NAME[t.posValue] + '.',
+                    'Där är varje siffra värd ' + t.posValue + '.',
+                    t.digitVal + ' × ' + t.posValue + ' = ' + t.correct + '.'
+                ];
+            case 3:
+                return [
+                    'Talen ändras lika mycket varje steg: ' + t.step + '.',
+                    'Vid luckan lägger du till (eller drar bort) ' + t.step + '.',
+                    'Det saknade talet är ' + t.correct + '.'
+                ];
+            case 4:
+                return [
+                    'Jämför talen siffra för siffra från vänster.',
+                    'Det tal som har en större siffra först är störst.',
+                    t.correct + ' är störst.'
+                ];
+            case 5:
+                return [
+                    'Dela upp talet i tusental, hundratal, tiotal och ental.',
+                    'Säg varje del och sätt ihop dem till ett ord.',
+                    t.n + ' uttalas "' + t.word + '".'
+                ];
+            case 6:
+                return [
+                    'Du ska avrunda ' + t.n + ' till ' + t.cfg.label + '.',
+                    'Är resten minst halva steget (' + (t.cfg.step / 2) + ')? Avrunda uppåt, annars nedåt.',
+                    t.n + ' avrundas till ' + t.correct + '.'
+                ];
+            case 7:
+                return [
+                    'Börja vid 0 på tallinjen.',
+                    t.target < 0
+                        ? 'Gå ' + (-t.target) + ' steg åt vänster (minus).'
+                        : (t.target > 0 ? 'Gå ' + t.target + ' steg åt höger.' : 'Stå kvar på 0.'),
+                    'Talet ' + t.target + ' ligger på Punkt ' + t.correctPt + '.'
+                ];
+            case 8:
+                return [
+                    'Tänk på tallinjen: längre åt höger = större.',
+                    'Positiva tal är störst; av två negativa är den närmast 0 störst.',
+                    t.correct + ' är störst.'
+                ];
+            default:
+                return [];
+        }
+    }
+
+    const WHY = {
+        1: {
+            correct: 'Siffrans värde = siffran gånger platsens värde.',
+            distractors: [
+                'Siffrans värde är samma som siffran själv.',          // ignorerar positionen
+                'Man räknar platsernas värde från vänster med 1.'      // fel riktning
+            ]
+        },
+        3: {
+            correct: 'Skillnaden mellan talen är lika stor hela tiden.',
+            distractors: [
+                'Man lägger till en siffra varje gång.',               // förväxlar steg med siffra
+                'Talen ökar olika mycket i varje steg.'                // missar mönstret
+            ]
+        },
+        4: {
+            correct: 'Talet med en större siffra först (från vänster) är störst.',
+            distractors: [
+                'Talet med störst sista siffra är störst.',            // fel position
+                'Det tal som har färst siffror är störst.'             // omvänd riktning
+            ]
+        },
+        5: {
+            correct: 'Man läser talet i grupper: tusental, hundratal, tiotal, ental.',
+            distractors: [
+                'Man läser bara den första siffran.',                  // delberäkning
+                'Siffrornas ordning spelar ingen roll.'                // ignorerar position
+            ]
+        },
+        6: {
+            correct: 'Är resten minst halva steget avrundar man uppåt, annars nedåt.',
+            distractors: [
+                'Man avrundar alltid uppåt.',                          // glömt regeln
+                'Man tittar på första siffran i talet.'                // fel siffra
+            ]
+        },
+        7: {
+            correct: 'Minus betyder steg åt vänster om 0, plus åt höger.',
+            distractors: [
+                'Minus betyder steg åt höger om 0.',                   // omvänd riktning
+                'Talet ligger lika långt åt höger oavsett tecken.'     // ignorerar minus
+            ]
+        },
+        8: {
+            correct: 'Ju längre åt höger på tallinjen, desto större tal.',
+            distractors: [
+                'Ju större siffra (utan tecken), desto större tal.',   // ignorerar minustecknet
+                'Negativa tal är alltid större än positiva.'           // omvänd riktning
+            ]
+        }
+    };
+    WHY[2] = WHY[1];   // M2 = samma positionsresonemang som M1
+
+    function whyQuestion(mod, t) {
+        const w = WHY[mod];
+        return { prompt: 'Varför stämmer det?', correct: w.correct, distractors: w.distractors.slice() };
+    }
+
     return {
         makeDistractors, genM1Task, genM2Task,
         M3_LEVELS, genM3Task,
@@ -338,6 +458,7 @@
         M5_LEVELS, SV_ONES, SV_TENS, numToSv, genM5Task,
         M6_LEVELS, genM6Task,
         M7_LEVELS, genM7Distractors, genM7Task,
-        genM8Task
+        genM8Task,
+        PLACE_NAME, workedSteps, whyQuestion
     };
 }));
