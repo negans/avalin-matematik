@@ -307,12 +307,101 @@
         return { smallUnit, smallInt, fromVal, fromUnit, toUnit, correctStr, distractors };
     }
 
+    /* ════════ Mönster v2, lager 11a + 11c ════════
+       workedSteps(mod, task): 3 stegrader (löst exempel).
+       whyQuestion(mod, task): "Varför stämmer det?" + 1 korrekt + 2 distraktorer
+       enligt distraktor-doktrinen. Ren text, testas som vanligt. */
+
+    function workedSteps(mod, t) {
+        switch (mod) {
+            case 1:
+                return [
+                    'Titta på talet ' + t.display + '.',
+                    'Före kommat är hela tal, efter kommat är tiondelar och hundradelar.',
+                    t.display + ' betyder "' + t.correct + '".'
+                ];
+            case 2:
+                return [
+                    'Jämför ' + t.optA + ' och ' + t.optB + '.',
+                    'Titta på tiondelarna först, sedan hundradelarna.',
+                    t.correctDisp + ' är störst.'
+                ];
+            case 3:
+                return [
+                    'Sträckan går från ' + t.leftLabel + ' till ' + t.rightLabel + '.',
+                    'Den är delad i 10 lika steg – varje steg är en tiondel.',
+                    'Punkten är på ' + t.correct + '.'
+                ];
+            case 4:
+                return [
+                    'Räkna ' + t.label.replace(' = ?', '') + '.',
+                    'Ställ upp talen så att kommatecknen står rakt under varandra.',
+                    'Svaret är ' + fmtOp(t.result) + '.'
+                ];
+            case 5: {
+                const fac = M5_FACTOR[t.smallUnit];
+                const big = M5_BIG[t.smallUnit];
+                return [
+                    'Du ska göra om ' + t.fromVal + ' ' + t.fromUnit + ' till ' + t.toUnit + '.',
+                    '1 ' + big + ' = ' + fac + ' ' + t.smallUnit + '.',
+                    'Svaret är ' + t.correctStr + ' ' + t.toUnit + '.'
+                ];
+            }
+            default:
+                return [];
+        }
+    }
+
+    const WHY = {
+        1: {
+            correct: 'Siffrorna efter kommat visar tiondelar och hundradelar.',
+            distractors: [
+                'Siffrorna efter kommat är vanliga hela tal.',     // missar positionsvärdet
+                'Kommat betyder gånger tio.'                       // felaktig regel
+            ]
+        },
+        2: {
+            correct: 'Man jämför tiondelarna först, sedan hundradelarna.',
+            distractors: [
+                'Det tal som har flest siffror är störst.',        // 0,25 > 0,5-missuppfattningen
+                'Man jämför bara den sista siffran.'               // fel position
+            ]
+        },
+        3: {
+            correct: 'Sträckan mellan två heltal är delad i tio lika tiondelar.',
+            distractors: [
+                'Sträckan är delad i hundra steg.',                // fel antal delar
+                'Varje steg är ett helt tal.'                      // ignorerar tiondelar
+            ]
+        },
+        4: {
+            correct: 'Man håller kommatecknen rakt under varandra och räknar som vanligt.',
+            distractors: [
+                'Man räknar siffrorna utan att bry sig om kommat.', // ignorerar positionen
+                'Man flyttar kommat ett steg i svaret.'             // felaktig regel
+            ]
+        },
+        5: {
+            correct: '1 m = 100 cm och 1 kg = 1000 g och 1 l = 1000 ml.',
+            distractors: [
+                'Alla enheter byts alltid med 10.',                // fel faktor
+                'Man byter enhet utan att ändra talet.'            // ingen omräkning
+            ]
+        }
+    };
+
+    function whyQuestion(mod, t) {
+        const w = WHY[mod];
+        return { prompt: 'Varför stämmer det?', correct: w.correct, distractors: w.distractors.slice() };
+    }
+
     return {
         decWord, makeDesc, genM1Task,
         genM2Task,
         genM3Task,
         fmtOp, genM4Task,
         m5FmtAny, genM5Task,
-        M5_FACTOR, M5_BIG, M5_UNITS, M5_POOLS
+        M5_FACTOR, M5_BIG, M5_UNITS, M5_POOLS,
+        workedSteps, whyQuestion
     };
 }));

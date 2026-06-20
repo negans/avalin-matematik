@@ -84,6 +84,27 @@ eq(dec.fmtOp(200), '2,0',  'fmtOp 200');
     eq(t.correctStr, expected, 'M5 nivå'+lvl+': facit matchar omvandlingen ('+t.smallInt+' '+t.smallUnit+')');
 }));
 
+/* — Mönster v2, lager 11a + 11c: workedSteps + whyQuestion (M1–M5) — */
+{
+    const DEC_GEN = { 1: dec.genM1Task, 2: dec.genM2Task, 3: dec.genM3Task, 4: dec.genM4Task, 5: dec.genM5Task };
+    [1,2,3,4,5].forEach(mod => [0,1,2].forEach(lvl => forEachRun(DEC_GEN[mod], lvl, 300, t => {
+        const steps = dec.workedSteps(mod, t);
+        ok(steps.length === 3, 'Dec WE mod'+mod+' nivå'+lvl+': exakt 3 steg');
+        ok(steps.every(s => typeof s === 'string' && s.length > 0), 'Dec WE mod'+mod+' nivå'+lvl+': alla steg ifyllda');
+        /* sista steget bär facit */
+        if (mod === 2)      ok(steps[2].includes(t.correctDisp), 'Dec WE mod2: sista steget bär facit');
+        else if (mod === 3) ok(steps[2].includes(t.correct),     'Dec WE mod3: sista steget bär facit');
+        else if (mod === 5) ok(steps[2].includes(t.correctStr),  'Dec WE mod5: sista steget bär facit');
+
+        const q = dec.whyQuestion(mod, t);
+        ok(typeof q.prompt === 'string' && q.prompt.length > 0, 'Dec WHY mod'+mod+': prompt ifylld');
+        ok(typeof q.correct === 'string' && q.correct.length > 0, 'Dec WHY mod'+mod+': korrekt rad ifylld');
+        ok(q.distractors.length === 2, 'Dec WHY mod'+mod+': exakt 2 distraktorer');
+        ok(distinct([q.correct, ...q.distractors]), 'Dec WHY mod'+mod+': 3 distinkta alternativ');
+        ok(!q.distractors.includes(q.correct), 'Dec WHY mod'+mod+': facit ej bland distraktorer');
+    })));
+}
+
 /* ═══════════ multiplikation ═══════════ */
 const mul = require('../logic/multiplikation.js');
 

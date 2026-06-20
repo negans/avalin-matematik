@@ -140,7 +140,8 @@ Mönster v2 läggs FÖRST så att nya filer (Fas 5) föds färdiga och inget ret
     - ✅ Piloten koordinat.html KLAR: 11a + 11c byggda och verifierade (logiklager grönt, ockulärt i Brave). template.html har 11b-resterna borttagna men 11a/11c är ÄNNU INTE inlagda i skelettet — gör det som en del av första utrullningen.
     - ✅ klockan.html KLAR (specialfall, anpassat): klockan saknar nivåer/flerval/genMxTask. Anpassning: 11a = löst klocka via "Visa mig" + auto första besöket (logic/klockan.js: workedSteps); 11c = "Varför?" ~var tredje HELT rätt svar (ingen nivå-2-gate eftersom nivåer saknas), logic/klockan.js: whyQuestion. Båda testade + ockulärt verifierade. Bonus: solved-flagga hindrar dubbelräkning av streak vid om-koll.
     - ✅ taluppfattning.html KLAR (8 moduler M1–M8): workedSteps + whyQuestion i logic/taluppfattning.js; per modul exempel-panel (egen visual: markerad siffra/talföljd/jämförelse/tallinje) + "Varför?". M1/M2 saknar nivåer → exempel första besöket, "Varför?" var tredje; M3–M8 → exempel per nivå, "Varför?" bara nivå 2. Tester + ockulärt verifierat.
-    - NÄSTA STEG: rulla ut EN fil i taget (standardmönster): brak · decimaltal · multiplikation · geometri · algebra · statistik.
+    - ✅ decimaltal.html KLAR (5 moduler, standardmönster): workedSteps + whyQuestion i logic/decimaltal.js; exempel per nivå + "Varför?" nivå 3 var tredje. Tester + ockulärt verifierat.
+    - NÄSTA STEG: rulla ut EN fil i taget (standardmönster): multiplikation · geometri · algebra · statistik. (brak = specialfall, 10 moduler, tas sist.)
     - Per fil måste Definition of Done passeras (se nedan).
 13. Innehållsluckor i befintliga filer (görs i samma pass som filen ändå öppnas):
     - geometri.html M5: triangelarea (b×h/2) + sammansatta figurer (+ cirkelbegrepp: radie, diameter, medelpunkt)
