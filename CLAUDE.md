@@ -60,7 +60,7 @@ avalin-matematik/
 ├── index.html          (startsida, alla modulknappar live)
 ├── style.css           (✅ klar — gemensam stilmall)
 ├── storage.js          (✅ localStorage: poäng, streak, stjärnor, inställningar)
-├── ui.js               (✅ delade UI-globaler: showMiso(), setStreak())
+├── ui.js               (✅ delade UI-globaler: showMiso(), setStreak() + mönster v2-helpers: renderExampleSteps(), toggleExample(), renderWhyPanel(), hideWhyPanel())
 ├── klockan.html        (✅ klar)
 ├── brak.html           (✅ klar — Modul 1–10 inkl. procent + tre former)
 ├── taluppfattning.html (✅ klar — Modul 1–8 inkl. negativa tal)

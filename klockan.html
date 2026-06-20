@@ -455,19 +455,11 @@
             const exH = Math.floor(Math.random() * 12) + 1;          // 1–12
             const exM = (Math.floor(Math.random() * 11) + 1) * 5;    // 5–55 (aldrig 0 i exemplet)
             buildClock(document.getElementById('exampleClock'), exH, exM);
-            const ol = document.getElementById('exampleSteps');
-            ol.innerHTML = '';
-            workedSteps(exH, exM).forEach(s => {
-                const li = document.createElement('li');
-                li.textContent = s;
-                ol.appendChild(li);
-            });
-            document.getElementById('examplePanel').hidden = false;
-            document.getElementById('liveArea').hidden = true;
+            renderExampleSteps('exampleSteps', workedSteps(exH, exM));
+            toggleExample('examplePanel', 'liveArea', true);
         }
         function closeExample() {
-            document.getElementById('examplePanel').hidden = true;
-            document.getElementById('liveArea').hidden = false;
+            toggleExample('examplePanel', 'liveArea', false);
         }
         /* Visar exemplet automatiskt bara första besöket. */
         function maybeFirstExample() {
@@ -482,42 +474,14 @@
             showWhy();
         }
         function showWhy() {
-            const q = whyQuestion(h, m);
-            document.getElementById('whyQ').textContent = q.prompt;
-            const fb = document.getElementById('whyFb');
-            fb.textContent = '';
-            const row = document.getElementById('whyChoices');
-            row.innerHTML = '';
-            const choices = [q.correct, ...q.distractors];
-            for (let i = choices.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [choices[i], choices[j]] = [choices[j], choices[i]];
-            }
-            let answered = false;
-            choices.forEach(val => {
-                const btn = document.createElement('button');
-                btn.className = 'choice-btn-text';
-                btn.textContent = val;
-                btn.addEventListener('click', () => {
-                    if (answered) return;
-                    answered = true;
-                    if (val === q.correct) {
-                        btn.classList.add('ok');
-                        fb.textContent = 'Ja, precis! 🎉 Bra tänkt.';
-                        setMiso('miso-glad.webp', 'Bra resonerat!');
-                    } else {
-                        btn.classList.add('err');
-                        [...row.children].forEach(b => { if (b.textContent === q.correct) b.classList.add('ok'); });
-                        fb.textContent = 'Inte riktigt – det gröna är rätt tanke. Och det är helt okej!';
-                        setMiso('miso-uppmuntrande.webp', 'Bra att du funderar!');
-                    }
-                    [...row.children].forEach(b => { b.disabled = true; });
-                });
-                row.appendChild(btn);
+            renderWhyPanel(whyQuestion(h, m), {
+                panel: 'whyPanel', q: 'whyQ', choices: 'whyChoices', fb: 'whyFb'
+            }, {
+                onCorrect: () => setMiso('miso-glad.webp', 'Bra resonerat!'),
+                onWrong:   () => setMiso('miso-uppmuntrande.webp', 'Bra att du funderar!')
             });
-            document.getElementById('whyPanel').hidden = false;
         }
-        function hideWhy() { document.getElementById('whyPanel').hidden = true; }
+        function hideWhy() { hideWhyPanel('whyPanel'); }
 
         /* ── Händelser ── */
         document.getElementById('checkBtn').addEventListener('click', check);

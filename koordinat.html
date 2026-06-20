@@ -437,19 +437,11 @@ function renderExampleGrid(mod, svgId, t) {
 function showExample(mod, level) {
     const t = niceExample(mod, level);
     renderExampleGrid(mod, 'm' + mod + 'ExampleSVG', t);
-    const ol = document.getElementById('m' + mod + 'ExampleSteps');
-    ol.innerHTML = '';
-    workedSteps(mod, t).forEach(s => {
-        const li = document.createElement('li');
-        li.textContent = s;
-        ol.appendChild(li);
-    });
-    document.getElementById('m' + mod + 'Example').hidden = false;
-    document.getElementById('m' + mod + 'Live').hidden = true;
+    renderExampleSteps('m' + mod + 'ExampleSteps', workedSteps(mod, t));
+    toggleExample('m' + mod + 'Example', 'm' + mod + 'Live', true);
 }
 function closeExample(mod) {
-    document.getElementById('m' + mod + 'Example').hidden = true;
-    document.getElementById('m' + mod + 'Live').hidden = false;
+    toggleExample('m' + mod + 'Example', 'm' + mod + 'Live', false);
 }
 /* Visar exemplet automatiskt bara första gången på nivån.
    getLevel() läser modulens aktuella nivå vid klick (stängs in per modul nedan). */
@@ -479,46 +471,16 @@ function maybeWhy(mod, level, task) {
 }
 
 function showWhy(mod, task) {
-    const q = whyQuestion(mod, task);
-    document.getElementById('m' + mod + 'WhyQ').textContent = q.prompt;
-    const fb = document.getElementById('m' + mod + 'WhyFb');
-    fb.textContent = '';
-    const row = document.getElementById('m' + mod + 'WhyChoices');
-    row.innerHTML = '';
-
-    const choices = [q.correct, ...q.distractors];
-    for (let i = choices.length - 1; i > 0; i--) {
-        const j = rnd(0, i);
-        [choices[i], choices[j]] = [choices[j], choices[i]];
-    }
-
-    let answered = false;
-    choices.forEach(val => {
-        const btn = document.createElement('button');
-        btn.className = 'choice-btn-text';
-        btn.textContent = val;
-        btn.addEventListener('click', () => {
-            if (answered) return;
-            answered = true;
-            if (val === q.correct) {
-                btn.classList.add('ok');
-                fb.textContent = 'Ja, precis! 🎉 Bra tänkt.';
-                showMiso('glad', 'Bra resonerat!');
-            } else {
-                btn.classList.add('err');
-                [...row.children].forEach(b => { if (b.textContent === q.correct) b.classList.add('ok'); });
-                fb.textContent = 'Inte riktigt – det gröna är rätt tanke. Och det är helt okej!';
-                showMiso('uppmuntrande', 'Bra att du funderar!');
-            }
-            [...row.children].forEach(b => { b.disabled = true; });
-        });
-        row.appendChild(btn);
+    renderWhyPanel(whyQuestion(mod, task), {
+        panel: 'm' + mod + 'Why', q: 'm' + mod + 'WhyQ',
+        choices: 'm' + mod + 'WhyChoices', fb: 'm' + mod + 'WhyFb'
+    }, {
+        onCorrect: () => showMiso('glad', 'Bra resonerat!'),
+        onWrong:   () => showMiso('uppmuntrande', 'Bra att du funderar!')
     });
-
-    document.getElementById('m' + mod + 'Why').hidden = false;
 }
 
-function hideWhy(mod) { document.getElementById('m' + mod + 'Why').hidden = true; }
+function hideWhy(mod) { hideWhyPanel('m' + mod + 'Why'); }
 
 /* ════════════════════════════════
    Modul 1 – Läs av punktens koordinater
