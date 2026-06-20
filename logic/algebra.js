@@ -146,8 +146,97 @@
         return { start, step, askIndex, figures, correct, distractors: pickDistractors(correct, cand, 3) };
     }
 
+    /* ════════ Mönster v2, lager 11a + 11c ════════
+       workedSteps(mod, task): 3 stegrader (löst exempel).
+       whyQuestion(mod, task): "Varför stämmer det?" + 1 korrekt + 2 distraktorer
+       enligt distraktor-doktrinen. Ren text, testas som vanligt. */
+
+    function workedSteps(mod, t) {
+        switch (mod) {
+            case 1: {
+                const head = t.a === 1 ? '' + t.x : t.a + ' × ' + t.x;
+                const tail = t.b !== 0 ? ' ' + t.op + ' ' + t.b : '';
+                return [
+                    'Sätt in x = ' + t.x + ' i uttrycket ' + t.exprStr + '.',
+                    'Räkna ' + head + tail + ' = ' + t.correct + '.',
+                    'Uttryckets värde är ' + t.correct + '.'
+                ];
+            }
+            case 2:
+                return [
+                    'Läs meningen: "' + t.text + '".',
+                    'Översätt orden till matematik, ett steg i taget.',
+                    'Uttrycket är ' + t.correct + '.'
+                ];
+            case 3:
+                return [
+                    'Du har uttrycket ' + t.exprStr + '.',
+                    'Alla termer har x — räkna ihop hur många x det blir.',
+                    'Förenklat: ' + t.correctStr + '.'
+                ];
+            case 4:
+                return [
+                    'Ekvationen är ' + t.eqStr + '.',
+                    'Gör samma sak på båda sidor tills x står ensamt.',
+                    'x = ' + t.correct + '.'
+                ];
+            case 5:
+                return [
+                    'Mönstret börjar ' + t.figures.join(', ') + ' …',
+                    'Det ökar med ' + t.step + ' varje gång.',
+                    'Figur ' + t.askIndex + ' har ' + t.correct + '.'
+                ];
+            default:
+                return [];
+        }
+    }
+
+    const WHY = {
+        1: {
+            correct: 'Man sätter in talet för x och räknar ut värdet.',
+            distractors: [
+                'Man adderar talet framför x och x.',     // a + x i stället för a·x
+                'Man hoppar över konstanten.'             // tappar termen
+            ]
+        },
+        2: {
+            correct: 'Man översätter orden till matematik i rätt ordning.',
+            distractors: [
+                '"Gånger" betyder att man adderar.',      // fel räknesätt
+                'Ordningen på talen spelar ingen roll.'   // ignorerar struktur
+            ]
+        },
+        3: {
+            correct: 'Termer med samma variabel kan läggas ihop.',
+            distractors: [
+                'Variabeln x försvinner när man förenklar.', // tappar variabeln
+                'Man multiplicerar talen framför x.'         // fel räknesätt
+            ]
+        },
+        4: {
+            correct: 'Man gör samma sak på båda sidor tills x står ensamt.',
+            distractors: [
+                'Man räknar åt samma håll som tecknet visar.', // omvänd riktning
+                'Man tar bara bort x.'                          // delberäkning
+            ]
+        },
+        5: {
+            correct: 'Mönstret ökar lika mycket varje steg.',
+            distractors: [
+                'Mönstret dubblas i varje steg.',          // fel regel
+                'Varje figur har lika många.'              // ignorerar steget
+            ]
+        }
+    };
+
+    function whyQuestion(mod, t) {
+        const w = WHY[mod];
+        return { prompt: 'Varför stämmer det?', correct: w.correct, distractors: w.distractors.slice() };
+    }
+
     return {
         pickDistractors,
-        genM1Task, genM2Task, genM3Task, genM4Task, genM5Task
+        genM1Task, genM2Task, genM3Task, genM4Task, genM5Task,
+        workedSteps, whyQuestion
     };
 }));

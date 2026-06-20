@@ -24,6 +24,29 @@
             margin: 12px auto 16px; max-width: 380px; line-height: 1.5;
         }
         .fig-wrap { width: 100%; max-width: 320px; margin: 6px auto 12px; }
+
+        /* ── Mönster v2, lager 11a: "Visa mig" + löst exempel ── */
+        .we-btn {
+            background: var(--color-surface); color: var(--color-primary);
+            border: 1.5px solid var(--color-primary); border-radius: 12px;
+            cursor: pointer; font-size: 0.8em; padding: 2px 10px;
+            margin-left: 8px; vertical-align: middle;
+        }
+        .we-btn:hover { background: var(--color-surface-alt); }
+        .worked-example {
+            background: var(--color-surface-alt);
+            border: 2px dashed var(--color-badge); border-radius: 16px;
+            padding: 12px 16px 16px; margin: 6px 0 14px;
+        }
+        .we-head { text-align: center; font-weight: bold; color: var(--color-heading); margin-bottom: 6px; }
+        .we-steps { margin: 10px auto 14px; padding-left: 1.4em; max-width: 360px; color: var(--color-text); }
+        .we-steps li { margin: 6px 0; line-height: 1.4; }
+
+        /* ── Mönster v2, lager 11c: resonemang "Varför?" ── */
+        .why { margin-top: 16px; padding: 14px 16px; background: var(--color-surface-alt); border: 1.5px solid var(--color-border); border-radius: 14px; }
+        .why-q { text-align: center; font-weight: bold; color: var(--color-heading); margin-bottom: 10px; }
+        .why-choices { display: flex; flex-direction: column; gap: 8px; }
+        .why-fb { text-align: center; margin-top: 10px; color: var(--color-text); min-height: 1.2em; }
         #m4SVG, #m5SVG { display: block; overflow: visible; }
 
         #miso-container {
@@ -52,67 +75,152 @@
 <p class="section-title">Modul 1 – Räkna ut uttryckets värde</p>
 
 <div class="card">
-    <p class="task-label">Sätt in värdet på x och räkna ut.</p>
+    <p class="task-label">Sätt in värdet på x och räkna ut.
+        <button type="button" class="we-btn" id="m1Show">Visa mig</button></p>
     <div style="text-align:center"><span class="level-badge" id="m1LevelLabel">Nivå 1</span></div>
-    <p class="expr" id="m1Expr"></p>
-    <p class="given" id="m1Given"></p>
-    <div class="choice-row" id="m1Choices"></div>
-    <div class="btn-row"><button class="btn-secondary" id="m1Next">Ny uppgift →</button></div>
-    <p class="streak" id="m1Streak"></p>
-    <div class="feedback" id="m1Feedback" aria-live="polite"></div>
+
+    <div class="worked-example" id="m1Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="m1ExampleVisual"></div>
+        <ol class="we-steps" id="m1ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="m1ExampleClose">Jag förstår – min tur →</button></div>
+    </div>
+
+    <div id="m1Live">
+        <p class="expr" id="m1Expr"></p>
+        <p class="given" id="m1Given"></p>
+        <div class="choice-row" id="m1Choices"></div>
+        <div class="btn-row"><button class="btn-secondary" id="m1Next">Ny uppgift →</button></div>
+        <p class="streak" id="m1Streak"></p>
+        <div class="feedback" id="m1Feedback" aria-live="polite"></div>
+
+        <div class="why" id="m1Why" hidden>
+            <p class="why-q" id="m1WhyQ"></p>
+            <div class="why-choices" id="m1WhyChoices"></div>
+            <div class="why-fb" id="m1WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
 </div>
 
 <!-- ══════ Modul 2 ══════ -->
 <p class="section-title">Modul 2 – Skriv uttrycket</p>
 
 <div class="card">
-    <p class="task-label">Vilket uttryck stämmer? (x är talet)</p>
+    <p class="task-label">Vilket uttryck stämmer? (x är talet)
+        <button type="button" class="we-btn" id="m2Show">Visa mig</button></p>
     <div style="text-align:center"><span class="level-badge" id="m2LevelLabel">Nivå 1</span></div>
-    <p class="phrase" id="m2Text"></p>
-    <div class="choice-row" id="m2Choices"></div>
-    <div class="btn-row"><button class="btn-secondary" id="m2Next">Ny uppgift →</button></div>
-    <p class="streak" id="m2Streak"></p>
-    <div class="feedback" id="m2Feedback" aria-live="polite"></div>
+
+    <div class="worked-example" id="m2Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="m2ExampleVisual"></div>
+        <ol class="we-steps" id="m2ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="m2ExampleClose">Jag förstår – min tur →</button></div>
+    </div>
+
+    <div id="m2Live">
+        <p class="phrase" id="m2Text"></p>
+        <div class="choice-row" id="m2Choices"></div>
+        <div class="btn-row"><button class="btn-secondary" id="m2Next">Ny uppgift →</button></div>
+        <p class="streak" id="m2Streak"></p>
+        <div class="feedback" id="m2Feedback" aria-live="polite"></div>
+
+        <div class="why" id="m2Why" hidden>
+            <p class="why-q" id="m2WhyQ"></p>
+            <div class="why-choices" id="m2WhyChoices"></div>
+            <div class="why-fb" id="m2WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
 </div>
 
 <!-- ══════ Modul 3 ══════ -->
 <p class="section-title">Modul 3 – Förenkla uttrycket</p>
 
 <div class="card">
-    <p class="task-label">Samla ihop till ett uttryck.</p>
+    <p class="task-label">Samla ihop till ett uttryck.
+        <button type="button" class="we-btn" id="m3Show">Visa mig</button></p>
     <div style="text-align:center"><span class="level-badge" id="m3LevelLabel">Nivå 1</span></div>
-    <p class="expr" id="m3Expr"></p>
-    <div class="choice-row" id="m3Choices"></div>
-    <div class="btn-row"><button class="btn-secondary" id="m3Next">Ny uppgift →</button></div>
-    <p class="streak" id="m3Streak"></p>
-    <div class="feedback" id="m3Feedback" aria-live="polite"></div>
+
+    <div class="worked-example" id="m3Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="m3ExampleVisual"></div>
+        <ol class="we-steps" id="m3ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="m3ExampleClose">Jag förstår – min tur →</button></div>
+    </div>
+
+    <div id="m3Live">
+        <p class="expr" id="m3Expr"></p>
+        <div class="choice-row" id="m3Choices"></div>
+        <div class="btn-row"><button class="btn-secondary" id="m3Next">Ny uppgift →</button></div>
+        <p class="streak" id="m3Streak"></p>
+        <div class="feedback" id="m3Feedback" aria-live="polite"></div>
+
+        <div class="why" id="m3Why" hidden>
+            <p class="why-q" id="m3WhyQ"></p>
+            <div class="why-choices" id="m3WhyChoices"></div>
+            <div class="why-fb" id="m3WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
 </div>
 
 <!-- ══════ Modul 4 ══════ -->
 <p class="section-title">Modul 4 – Lös ekvationen</p>
 
 <div class="card">
-    <p class="task-label">Vågen är i balans – lika mycket på båda sidor. Vad är x?</p>
+    <p class="task-label">Vågen är i balans – lika mycket på båda sidor. Vad är x?
+        <button type="button" class="we-btn" id="m4Show">Visa mig</button></p>
     <div style="text-align:center"><span class="level-badge" id="m4LevelLabel">Nivå 1</span></div>
-    <div class="fig-wrap"><svg id="m4SVG" width="100%"></svg></div>
-    <p class="expr" id="m4Eq"></p>
-    <div class="choice-row" id="m4Choices"></div>
-    <div class="btn-row"><button class="btn-secondary" id="m4Next">Ny uppgift →</button></div>
-    <p class="streak" id="m4Streak"></p>
-    <div class="feedback" id="m4Feedback" aria-live="polite"></div>
+
+    <div class="worked-example" id="m4Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="m4ExampleVisual"></div>
+        <ol class="we-steps" id="m4ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="m4ExampleClose">Jag förstår – min tur →</button></div>
+    </div>
+
+    <div id="m4Live">
+        <div class="fig-wrap"><svg id="m4SVG" width="100%"></svg></div>
+        <p class="expr" id="m4Eq"></p>
+        <div class="choice-row" id="m4Choices"></div>
+        <div class="btn-row"><button class="btn-secondary" id="m4Next">Ny uppgift →</button></div>
+        <p class="streak" id="m4Streak"></p>
+        <div class="feedback" id="m4Feedback" aria-live="polite"></div>
+
+        <div class="why" id="m4Why" hidden>
+            <p class="why-q" id="m4WhyQ"></p>
+            <div class="why-choices" id="m4WhyChoices"></div>
+            <div class="why-fb" id="m4WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
 </div>
 
 <!-- ══════ Modul 5 ══════ -->
 <p class="section-title">Modul 5 – Mönster</p>
 
 <div class="card">
-    <p class="task-label" id="m5Q">Titta på mönstret. Hur många i nästa figur?</p>
+    <p class="task-label" id="m5Q">Titta på mönstret. Hur många i nästa figur?
+        <button type="button" class="we-btn" id="m5Show">Visa mig</button></p>
     <div style="text-align:center"><span class="level-badge" id="m5LevelLabel">Nivå 1</span></div>
-    <div class="fig-wrap"><svg id="m5SVG" width="100%"></svg></div>
-    <div class="choice-row" id="m5Choices"></div>
-    <div class="btn-row"><button class="btn-secondary" id="m5Next">Ny uppgift →</button></div>
-    <p class="streak" id="m5Streak"></p>
-    <div class="feedback" id="m5Feedback" aria-live="polite"></div>
+
+    <div class="worked-example" id="m5Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="m5ExampleVisual"></div>
+        <ol class="we-steps" id="m5ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="m5ExampleClose">Jag förstår – min tur →</button></div>
+    </div>
+
+    <div id="m5Live">
+        <div class="fig-wrap"><svg id="m5SVG" width="100%"></svg></div>
+        <div class="choice-row" id="m5Choices"></div>
+        <div class="btn-row"><button class="btn-secondary" id="m5Next">Ny uppgift →</button></div>
+        <p class="streak" id="m5Streak"></p>
+        <div class="feedback" id="m5Feedback" aria-live="polite"></div>
+
+        <div class="why" id="m5Why" hidden>
+            <p class="why-q" id="m5WhyQ"></p>
+            <div class="why-choices" id="m5WhyChoices"></div>
+            <div class="why-fb" id="m5WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
 </div>
 
 <div id="miso-container">
@@ -175,6 +283,57 @@ function buildChoices(rowId, raws, fmt, onPick) {
     });
 }
 
+/* ════════════════════════════════
+   Mönster v2 – löst exempel (11a) + resonemang (11c), delad inkoppling.
+   Alla 5 moduler har 3 nivåer: exempel per nivå, "Varför?" nivå 3 var tredje.
+════════════════════════════════ */
+const GENS = { 1: genM1Task, 2: genM2Task, 3: genM3Task, 4: genM4Task, 5: genM5Task };
+function niceExample(mod, level) { return GENS[mod](level); }
+
+function renderExampleVisual(mod, containerId, t) {
+    const el  = document.getElementById(containerId);
+    const big = 'text-align:center; font-weight:bold; color:var(--color-text);';
+    const ok  = s => '<span style="color:var(--color-correct)">' + s + '</span>';
+    let html;
+    if (mod === 1)      html = t.exprStr + ',&nbsp; x = ' + t.x + ' &nbsp;→&nbsp; ' + ok(t.correct);
+    else if (mod === 2) html = '”' + t.text + '” &nbsp;→&nbsp; ' + ok(t.correct);
+    else if (mod === 3) html = t.exprStr + ' = ' + ok(t.correctStr);
+    else if (mod === 4) html = t.eqStr + ' &nbsp;→&nbsp; ' + ok('x = ' + t.correct);
+    else                html = t.figures.join(', ') + ', … &nbsp;→&nbsp; figur ' + t.askIndex + ': ' + ok(t.correct);
+    el.innerHTML = '<p style="' + big + ' font-size:1.6em">' + html + '</p>';
+}
+
+function weKey(mod, level) { return 'm' + mod + '.' + level; }
+function weSeen(mod, level) { const s = getSetting('algWeSeen', {}); return !!s[weKey(mod, level)]; }
+function weMark(mod, level) { const s = getSetting('algWeSeen', {}); s[weKey(mod, level)] = true; setSetting('algWeSeen', s); }
+
+function showExample(mod, level) {
+    const t = niceExample(mod, level);
+    renderExampleVisual(mod, 'm' + mod + 'ExampleVisual', t);
+    renderExampleSteps('m' + mod + 'ExampleSteps', workedSteps(mod, t));
+    toggleExample('m' + mod + 'Example', 'm' + mod + 'Live', true);
+}
+function closeExample(mod) { toggleExample('m' + mod + 'Example', 'm' + mod + 'Live', false); }
+function maybeExample(mod, level) { if (!weSeen(mod, level)) { weMark(mod, level); showExample(mod, level); } }
+
+const whyCounts = { 1:0, 2:0, 3:0, 4:0, 5:0 };
+function maybeWhy(mod, level, task) {
+    if (level !== 2) return;                 // bara nivå 3 (abstrakt)
+    whyCounts[mod]++;
+    if (whyCounts[mod] % 3 !== 0) return;    // ~var tredje
+    showWhy(mod, task);
+}
+function showWhy(mod, task) {
+    renderWhyPanel(whyQuestion(mod, task), {
+        panel: 'm' + mod + 'Why', q: 'm' + mod + 'WhyQ',
+        choices: 'm' + mod + 'WhyChoices', fb: 'm' + mod + 'WhyFb'
+    }, {
+        onCorrect: () => showMiso('glad', 'Bra resonerat!'),
+        onWrong:   () => showMiso('uppmuntrande', 'Bra att du funderar!')
+    });
+}
+function hideWhy(mod) { hideWhyPanel('m' + mod + 'Why'); }
+
 /* Generisk rätt/fel-hantering delas av alla moduler via en liten konfig. */
 function makeModule(p) {
     let streak = 0, level = 0, levelStreak = 0, task = null, answered = false, hadError = false;
@@ -186,6 +345,7 @@ function makeModule(p) {
         document.getElementById(p.badge).textContent = 'Nivå ' + (level + 1);
         document.getElementById(p.feedback).textContent = '';
         document.getElementById(p.next).classList.remove('btn-pulse');
+        hideWhy(p.mod);
     }
 
     function check(val, btn) {
@@ -206,6 +366,7 @@ function makeModule(p) {
             } else { fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!'; }
             showMiso('glad', p.misoOk);
             document.getElementById(p.next).classList.add('btn-pulse');
+            maybeWhy(p.mod, level, task);
         } else {
             hadError = true; levelStreak = 0;
             btn.classList.add('err'); btn.disabled = true;
@@ -214,13 +375,16 @@ function makeModule(p) {
         }
     }
 
-    document.getElementById(p.next).addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); build(); });
+    document.getElementById(p.next).addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); build(); maybeExample(p.mod, level); });
+    document.getElementById('m' + p.mod + 'Show').addEventListener('click', () => showExample(p.mod, level));
+    document.getElementById('m' + p.mod + 'ExampleClose').addEventListener('click', () => closeExample(p.mod));
     build();
+    maybeExample(p.mod, level);
 }
 
 /* ════════ Modul 1 – Beräkna uttryckets värde ════════ */
 makeModule({
-    gen: genM1Task, correctOf: t => t.correct, fmt: v => v,
+    mod: 1, gen: genM1Task, correctOf: t => t.correct, fmt: v => v,
     choices: 'm1Choices', badge: 'm1LevelLabel', next: 'm1Next', streak: 'm1Streak', feedback: 'm1Feedback',
     misoOk: 'Rätt uträknat! Toppen!', misoTip: 'Sätt in x:s värde först!',
     render: t => {
@@ -237,7 +401,7 @@ makeModule({
 
 /* ════════ Modul 2 – Skriv uttrycket ════════ */
 makeModule({
-    gen: genM2Task, correctOf: t => t.correct, fmt: v => v,
+    mod: 2, gen: genM2Task, correctOf: t => t.correct, fmt: v => v,
     choices: 'm2Choices', badge: 'm2LevelLabel', next: 'm2Next', streak: 'm2Streak', feedback: 'm2Feedback',
     misoOk: 'Rätt uttryck! Toppen!', misoTip: 'Läs långsamt – vad händer med x?',
     render: t => { document.getElementById('m2Text').textContent = '”' + t.text + '”'; },
@@ -247,7 +411,7 @@ makeModule({
 
 /* ════════ Modul 3 – Förenkla ════════ */
 makeModule({
-    gen: genM3Task, correctOf: t => t.correctStr, fmt: v => v,
+    mod: 3, gen: genM3Task, correctOf: t => t.correctStr, fmt: v => v,
     choices: 'm3Choices', badge: 'm3LevelLabel', next: 'm3Next', streak: 'm3Streak', feedback: 'm3Feedback',
     misoOk: 'Rätt förenklat! Toppen!', misoTip: 'Räkna hur många x det blir totalt!',
     render: t => { document.getElementById('m3Expr').textContent = t.exprStr; },
@@ -281,7 +445,7 @@ function drawBalance(leftText, rightText) {
     });
 }
 makeModule({
-    gen: genM4Task, correctOf: t => t.correct, fmt: v => v,
+    mod: 4, gen: genM4Task, correctOf: t => t.correct, fmt: v => v,
     choices: 'm4Choices', badge: 'm4LevelLabel', next: 'm4Next', streak: 'm4Streak', feedback: 'm4Feedback',
     misoOk: 'Rätt löst! Toppen!', misoTip: 'Vad måste x vara för att vågen ska väga jämnt?',
     render: t => {
@@ -312,7 +476,7 @@ function drawPattern(figures) {
     });
 }
 makeModule({
-    gen: genM5Task, correctOf: t => t.correct, fmt: v => v,
+    mod: 5, gen: genM5Task, correctOf: t => t.correct, fmt: v => v,
     choices: 'm5Choices', badge: 'm5LevelLabel', next: 'm5Next', streak: 'm5Streak', feedback: 'm5Feedback',
     misoOk: 'Rätt mönster! Toppen!', misoTip: 'Hur mycket ökar det varje gång?',
     render: t => {
