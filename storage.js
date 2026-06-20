@@ -2,7 +2,7 @@
     var KEY = 'avalin_v1';
 
     function defaults() {
-        return { score: 0, stars: 0, dayStreak: 0, lastDate: '' };
+        return { score: 0, stars: 0, dayStreak: 0, lastDate: '', settings: {} };
     }
 
     function load() {
@@ -58,6 +58,21 @@
                 window.setMiso('miso-glad.webp', msg);
             }
         }
+    };
+
+    /* Läser en sparad inställning (t.ex. 'autoRead'); dflt om den saknas. */
+    window.getSetting = function (key, dflt) {
+        var s = load();
+        return (s.settings && Object.prototype.hasOwnProperty.call(s.settings, key))
+            ? s.settings[key] : dflt;
+    };
+
+    /* Sparar en inställning persistent. */
+    window.setSetting = function (key, val) {
+        var s = load();
+        s.settings = s.settings || {};
+        s.settings[key] = val;
+        save(s);
     };
 
     window.initStatsBar = function () {

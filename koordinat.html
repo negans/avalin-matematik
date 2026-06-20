@@ -25,6 +25,19 @@
         /* Klickbara skärningspunkter i Modul 3 */
         .plot-hit { cursor: pointer; }
 
+        /* Uppläsningsknapp intill instruktionen */
+        .speak-btn {
+            background: none; border: none; cursor: pointer;
+            font-size: 1.1em; line-height: 1; padding: 2px 4px;
+            margin-left: 6px; vertical-align: middle;
+        }
+        /* Auto-läsning-toggle under rubriken */
+        .speak-toggle {
+            text-align: center; margin: 4px 0 18px;
+            color: var(--color-text); font-size: 0.95em;
+        }
+        .speak-toggle input { margin-right: 6px; vertical-align: middle; }
+
         #miso-container {
             position: fixed;
             bottom: 20px;
@@ -58,11 +71,16 @@
 
 <h1>📍 Koordinatsystem</h1>
 
+<label class="speak-toggle">
+    <input type="checkbox" id="autoReadToggle"> 🔊 Läs upp nya uppgifter
+</label>
+
 <!-- ══════ Modul 1 ══════ -->
 <p class="section-title">Modul 1 – Läs av punktens koordinater</p>
 
 <div class="card">
-    <p class="task-label">Vilka koordinater har den orange punkten?</p>
+    <p class="task-label"><span id="m1Label">Vilka koordinater har den orange punkten?</span>
+        <button type="button" class="speak-btn" id="m1Speak" aria-label="Läs upp instruktionen">🔊</button></p>
 
     <div style="text-align:center">
         <span class="level-badge" id="m1LevelLabel">Nivå 1</span>
@@ -86,7 +104,8 @@
 <p class="section-title">Modul 2 – Hitta rätt punkt</p>
 
 <div class="card">
-    <p class="task-label" id="m2Question">Vilken punkt ligger på koordinaten?</p>
+    <p class="task-label"><span id="m2Question">Vilken punkt ligger på koordinaten?</span>
+        <button type="button" class="speak-btn" id="m2Speak" aria-label="Läs upp instruktionen">🔊</button></p>
 
     <div style="text-align:center">
         <span class="level-badge" id="m2LevelLabel">Nivå 1</span>
@@ -110,7 +129,8 @@
 <p class="section-title">Modul 3 – Plotta punkten</p>
 
 <div class="card">
-    <p class="task-label" id="m3Question">Klicka på rätt punkt i rutnätet.</p>
+    <p class="task-label"><span id="m3Question">Klicka på rätt punkt i rutnätet.</span>
+        <button type="button" class="speak-btn" id="m3Speak" aria-label="Läs upp instruktionen">🔊</button></p>
 
     <div style="text-align:center">
         <span class="level-badge" id="m3LevelLabel">Nivå 1</span>
@@ -132,7 +152,8 @@
 <p class="section-title">Modul 4 – Koordinatsystem med negativa tal</p>
 
 <div class="card">
-    <p class="task-label">Vilka koordinater har den orange punkten?</p>
+    <p class="task-label"><span id="m4Label">Vilka koordinater har den orange punkten?</span>
+        <button type="button" class="speak-btn" id="m4Speak" aria-label="Läs upp instruktionen">🔊</button></p>
 
     <div style="text-align:center">
         <span class="level-badge" id="m4LevelLabel">Nivå 1</span>
@@ -160,6 +181,24 @@
 <script>
 const CAT_NAME = "Miso";
 initStatsBar();
+
+/* ── Uppläsning: knappar + auto-läsning (Mönster v2, lager 11b) ──
+   speakEl läser textinnehållet i instruktions-spannen (inte hela sidan).
+   maybeAutoRead läser bara om toggeln är på (default av, sparas i storage). */
+function speakEl(id) { speak(document.getElementById(id).textContent); }
+function autoReadOn() { return getSetting('autoRead', false); }
+function maybeAutoRead(id) { if (autoReadOn()) speakEl(id); }
+
+(function () {
+    var cb = document.getElementById('autoReadToggle');
+    cb.checked = autoReadOn();
+    cb.addEventListener('change', function () { setSetting('autoRead', cb.checked); });
+}());
+
+document.getElementById('m1Speak').addEventListener('click', () => speakEl('m1Label'));
+document.getElementById('m2Speak').addEventListener('click', () => speakEl('m2Question'));
+document.getElementById('m3Speak').addEventListener('click', () => speakEl('m3Question'));
+document.getElementById('m4Speak').addEventListener('click', () => speakEl('m4Label'));
 
 function svgEl(tag) {
     return document.createElementNS('http://www.w3.org/2000/svg', tag);
@@ -316,7 +355,7 @@ function m1Check(val, btn) {
     }
 }
 
-document.getElementById('m1Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildM1(); });
+document.getElementById('m1Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildM1(); maybeAutoRead('m1Label'); });
 buildM1();
 
 /* ════════════════════════════════
@@ -387,7 +426,7 @@ function m2Check(val, btn) {
     }
 }
 
-document.getElementById('m2Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildM2(); });
+document.getElementById('m2Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildM2(); maybeAutoRead('m2Question'); });
 buildM2();
 
 /* ════════════════════════════════
@@ -481,7 +520,7 @@ function m3Check(gx, gy, hit) {
     }
 }
 
-document.getElementById('m3Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – du fixar det!'); buildM3(); });
+document.getElementById('m3Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – du fixar det!'); buildM3(); maybeAutoRead('m3Question'); });
 buildM3();
 
 /* ════════════════════════════════
@@ -538,8 +577,11 @@ function m4Check(val, btn) {
     }
 }
 
-document.getElementById('m4Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildM4(); });
+document.getElementById('m4Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildM4(); maybeAutoRead('m4Label'); });
 buildM4();
+
+/* Koppla in uppläsnings-UI sist (döljer knappar/toggle tyst om sv-röst saknas). */
+initSpeak();
 </script>
 </body>
 </html>
