@@ -138,7 +138,8 @@ Mönster v2 läggs FÖRST så att nya filer (Fas 5) föds färdiga och inget ret
 
 12. Pilot FÖRST, sedan utrullning — bryt inte ut mönstret blint till nio filer.
     - ✅ Piloten koordinat.html KLAR: 11a + 11c byggda och verifierade (logiklager grönt, ockulärt i Brave). template.html har 11b-resterna borttagna men 11a/11c är ÄNNU INTE inlagda i skelettet — gör det som en del av första utrullningen.
-    - NÄSTA STEG: rulla ut EN fil i taget: klockan · taluppfattning · brak · decimaltal · multiplikation · geometri · algebra · statistik.
+    - ✅ klockan.html KLAR (specialfall, anpassat): klockan saknar nivåer/flerval/genMxTask. Anpassning: 11a = löst klocka via "Visa mig" + auto första besöket (logic/klockan.js: workedSteps); 11c = "Varför?" ~var tredje HELT rätt svar (ingen nivå-2-gate eftersom nivåer saknas), logic/klockan.js: whyQuestion. Båda testade + ockulärt verifierade. Bonus: solved-flagga hindrar dubbelräkning av streak vid om-koll.
+    - NÄSTA STEG: rulla ut EN fil i taget (standardmönster): taluppfattning · brak · decimaltal · multiplikation · geometri · algebra · statistik.
     - Per fil måste Definition of Done passeras (se nedan).
 13. Innehållsluckor i befintliga filer (görs i samma pass som filen ändå öppnas):
     - geometri.html M5: triangelarea (b×h/2) + sammansatta figurer (+ cirkelbegrepp: radie, diameter, medelpunkt)

@@ -56,6 +56,28 @@
         .clock-tip { text-align: center; font-size: 0.85em; color: var(--color-text-secondary); margin-top: -18px; margin-bottom: 22px; }
 
         #feedback { max-width: 480px; margin: 18px auto 0; font-size: 1.15em; color: var(--color-text); text-align: center; line-height: 1.7; min-height: 54px; }
+
+        /* ── Mönster v2, lager 11a: "Visa mig" + löst exempel ── */
+        .we-btn {
+            background: var(--color-surface); color: var(--color-primary);
+            border: 1.5px solid var(--color-primary); border-radius: 12px;
+            cursor: pointer; font-size: 0.9em; padding: 6px 16px;
+        }
+        .we-btn:hover { background: var(--color-surface-alt); }
+        .worked-example {
+            max-width: 480px; margin: 0 auto 22px; padding: 14px 18px 18px;
+            background: var(--color-surface-alt);
+            border: 2px dashed var(--color-badge); border-radius: 16px;
+        }
+        .we-head { text-align: center; font-weight: bold; color: var(--color-heading); margin-bottom: 6px; }
+        .we-steps { margin: 10px auto 16px; padding-left: 1.4em; max-width: 380px; color: var(--color-text); font-size: 1.05em; }
+        .we-steps li { margin: 8px 0; line-height: 1.4; }
+
+        /* ── Mönster v2, lager 11c: resonemang "Varför?" ── */
+        .why { max-width: 480px; margin: 18px auto 0; padding: 14px 16px; background: var(--color-surface-alt); border: 1.5px solid var(--color-border); border-radius: 14px; }
+        .why-q { text-align: center; font-weight: bold; color: var(--color-heading); margin-bottom: 10px; }
+        .why-choices { display: flex; flex-direction: column; gap: 8px; }
+        .why-fb { text-align: center; margin-top: 10px; color: var(--color-text); min-height: 1.2em; }
     </style>
 </head>
 <body>
@@ -65,6 +87,22 @@
     </nav>
 
     <h1>🕐 Klockan</h1>
+
+    <!-- Löst exempel (Mönster v2, lager 11a) -->
+    <div class="worked-example" id="examplePanel" hidden>
+        <p class="we-head">Så här läser du klockan 👇</p>
+        <div class="clock-wrap">
+            <svg id="exampleClock" width="200" height="200" viewBox="0 0 300 300" aria-label="Exempelklocka"></svg>
+        </div>
+        <ol class="we-steps" id="exampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="exampleClose">Jag förstår – min tur →</button></div>
+    </div>
+
+    <div id="liveArea">
+
+    <div style="text-align:center; margin-bottom:16px">
+        <button type="button" class="we-btn" id="showExampleBtn">Visa mig</button>
+    </div>
 
     <div class="clock-wrap">
         <svg id="clock" width="260" height="260" viewBox="0 0 300 300" aria-label="Analog klocka">
@@ -129,10 +167,20 @@
     <p class="streak" id="streak"></p>
     <div id="feedback" aria-live="polite"></div>
 
+    <div class="why" id="whyPanel" hidden>
+        <p class="why-q" id="whyQ"></p>
+        <div class="why-choices" id="whyChoices"></div>
+        <div class="why-fb" id="whyFb" aria-live="polite"></div>
+    </div>
+
+    </div><!-- /liveArea -->
+
     <script>
         let h = 3, m = 20;
         let streak = 0;
         let hadError = false;
+        let solved = false;       // sant när aktuell tid är helt rätt (blockerar dubbelräkning)
+        let whyCount = 0;         // räknare för "Varför?" (visas ~var tredje rätt)
         const CAT_NAME = "Miso";
         initStatsBar();
 
@@ -228,6 +276,8 @@
             document.getElementById('feedback').innerHTML = '';
             document.getElementById('nextBtn').classList.remove('btn-pulse');
             hadError = false;
+            solved = false;
+            hideWhy();
         }
 
         /* ── Kolla svaret ── */
@@ -311,7 +361,11 @@
                 document.getElementById(id).classList.contains('done'));
 
             if (allDone) {
-                if (!hadError) { streak++; recordCorrect(); } else { streak = 0; } setStreak('streak', streak);
+                if (!solved) {
+                    if (!hadError) { streak++; recordCorrect(); } else { streak = 0; } setStreak('streak', streak);
+                    solved = true;
+                    maybeWhy();
+                }
                 setFb(`🐱 Jättebra, Avalin! Klockan är ${h}:${pad(m)} — du hade rätt på allt!`, 'correct');
                 document.getElementById('nextBtn').classList.add('btn-pulse');
                 return;
@@ -358,9 +412,118 @@
             }
         }
 
+        /* ════════ Löst exempel (Mönster v2, lager 11a) ════════
+           Bygger en komplett klocka i valfri SVG och visar de tre lässtegen
+           (workedSteps i logic/klockan.js). Visas första besöket + via "Visa mig". */
+        function buildClock(svg, hh, mm) {
+            const NS = 'http://www.w3.org/2000/svg';
+            svg.innerHTML = '';
+            const el = (tag, attrs) => {
+                const e = document.createElementNS(NS, tag);
+                for (const k in attrs) e.setAttribute(k, attrs[k]);
+                return e;
+            };
+            svg.appendChild(el('circle', { cx: 150, cy: 150, r: 138, fill: 'white', stroke: '#C8A882', 'stroke-width': 3 }));
+            for (let i = 0; i < 60; i++) {
+                const a = (i / 60) * 2 * Math.PI - Math.PI / 2;
+                const major = i % 5 === 0;
+                const r1 = major ? 117 : 126;
+                svg.appendChild(el('line', {
+                    x1: 150 + r1 * Math.cos(a), y1: 150 + r1 * Math.sin(a),
+                    x2: 150 + 136 * Math.cos(a), y2: 150 + 136 * Math.sin(a),
+                    stroke: major ? '#C8A882' : '#EDE0C8', 'stroke-width': major ? 2.5 : 1.2
+                }));
+            }
+            for (let n = 1; n <= 12; n++) {
+                const a = (n / 12) * 2 * Math.PI - Math.PI / 2;
+                const tx = el('text', {
+                    x: 150 + 102 * Math.cos(a), y: 150 + 102 * Math.sin(a),
+                    'font-family': 'Arial', 'font-weight': 'bold', 'font-size': 22,
+                    'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#4A3728'
+                });
+                tx.textContent = n;
+                svg.appendChild(tx);
+            }
+            const { hrDeg, minDeg } = clockHandAngles(hh, mm);
+            svg.appendChild(el('line', { x1: 150, y1: 150, x2: 150, y2: 50, stroke: '#7A5C42', 'stroke-width': 5, 'stroke-linecap': 'round', transform: `rotate(${minDeg},150,150)` }));
+            svg.appendChild(el('line', { x1: 150, y1: 150, x2: 150, y2: 82, stroke: '#4A3728', 'stroke-width': 9, 'stroke-linecap': 'round', transform: `rotate(${hrDeg},150,150)` }));
+            svg.appendChild(el('circle', { cx: 150, cy: 150, r: 9, fill: '#4A3728' }));
+            svg.appendChild(el('circle', { cx: 150, cy: 150, r: 4.5, fill: '#d94a4a' }));
+        }
+
+        function showExample() {
+            const exH = Math.floor(Math.random() * 12) + 1;          // 1–12
+            const exM = (Math.floor(Math.random() * 11) + 1) * 5;    // 5–55 (aldrig 0 i exemplet)
+            buildClock(document.getElementById('exampleClock'), exH, exM);
+            const ol = document.getElementById('exampleSteps');
+            ol.innerHTML = '';
+            workedSteps(exH, exM).forEach(s => {
+                const li = document.createElement('li');
+                li.textContent = s;
+                ol.appendChild(li);
+            });
+            document.getElementById('examplePanel').hidden = false;
+            document.getElementById('liveArea').hidden = true;
+        }
+        function closeExample() {
+            document.getElementById('examplePanel').hidden = true;
+            document.getElementById('liveArea').hidden = false;
+        }
+        /* Visar exemplet automatiskt bara första besöket. */
+        function maybeFirstExample() {
+            if (!getSetting('klockWeSeen', false)) { setSetting('klockWeSeen', true); showExample(); }
+        }
+
+        /* ════════ Resonemang "Varför?" (Mönster v2, lager 11c) ════════
+           Efter HELT rätt svar, ~var tredje gång. Påverkar aldrig streak. */
+        function maybeWhy() {
+            whyCount++;
+            if (whyCount % 3 !== 0) return;
+            showWhy();
+        }
+        function showWhy() {
+            const q = whyQuestion(h, m);
+            document.getElementById('whyQ').textContent = q.prompt;
+            const fb = document.getElementById('whyFb');
+            fb.textContent = '';
+            const row = document.getElementById('whyChoices');
+            row.innerHTML = '';
+            const choices = [q.correct, ...q.distractors];
+            for (let i = choices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [choices[i], choices[j]] = [choices[j], choices[i]];
+            }
+            let answered = false;
+            choices.forEach(val => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn-text';
+                btn.textContent = val;
+                btn.addEventListener('click', () => {
+                    if (answered) return;
+                    answered = true;
+                    if (val === q.correct) {
+                        btn.classList.add('ok');
+                        fb.textContent = 'Ja, precis! 🎉 Bra tänkt.';
+                        setMiso('miso-glad.webp', 'Bra resonerat!');
+                    } else {
+                        btn.classList.add('err');
+                        [...row.children].forEach(b => { if (b.textContent === q.correct) b.classList.add('ok'); });
+                        fb.textContent = 'Inte riktigt – det gröna är rätt tanke. Och det är helt okej!';
+                        setMiso('miso-uppmuntrande.webp', 'Bra att du funderar!');
+                    }
+                    [...row.children].forEach(b => { b.disabled = true; });
+                });
+                row.appendChild(btn);
+            });
+            document.getElementById('whyPanel').hidden = false;
+        }
+        function hideWhy() { document.getElementById('whyPanel').hidden = true; }
+
         /* ── Händelser ── */
         document.getElementById('checkBtn').addEventListener('click', check);
         document.getElementById('nextBtn').addEventListener('click', nextTime);
+        document.getElementById('showExampleBtn').addEventListener('click', showExample);
+        document.getElementById('exampleClose').addEventListener('click', closeExample);
 
         const allowed = new Set(['Backspace','Delete','Tab','ArrowLeft','ArrowRight']);
 
@@ -378,6 +541,7 @@
 
         /* ── Starta med en slumpmässig tid ── */
         nextTime();
+        maybeFirstExample();
     </script>
 </body>
 </html>

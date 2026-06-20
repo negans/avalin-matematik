@@ -590,6 +590,32 @@ for (let h = 1; h <= 12; h++) {
     }
 }
 
+/* — Mönster v2, lager 11a: löst exempel (workedSteps) — */
+eq(klock.pad(0), '00', 'klock pad 0');
+eq(klock.pad(5), '05', 'klock pad 5');
+eq(klock.minuteStep(0).includes('0 minuter'), true, 'klock minuteStep 0 → 0 minuter');
+for (let h = 1; h <= 12; h++) {
+    for (let m = 0; m < 60; m += 5) {
+        const s = klock.workedSteps(h, m);
+        ok(s.length === 3, 'klock WE '+h+':'+m+': exakt 3 steg');
+        ok(s.every(x => typeof x === 'string' && x.length > 0), 'klock WE '+h+':'+m+': alla steg ifyllda');
+        ok(s[0].includes(String(h)), 'klock WE '+h+':'+m+': steg 1 nämner timmen');
+        if (m > 0) ok(s[1].includes(String(m)), 'klock WE '+h+':'+m+': steg 2 nämner minuterna');
+        ok(s[2].includes(h + ':' + klock.pad(m)), 'klock WE '+h+':'+m+': steg 3 bär tiden');
+    }
+}
+
+/* — Mönster v2, lager 11c: resonemang (whyQuestion) — */
+{
+    const q = klock.whyQuestion(3, 20);
+    ok(typeof q.prompt === 'string' && q.prompt.length > 0, 'klock WHY: prompt ifylld');
+    ok(typeof q.correct === 'string' && q.correct.length > 0, 'klock WHY: korrekt rad ifylld');
+    ok(q.distractors.length === 2, 'klock WHY: exakt 2 distraktorer');
+    ok(distinct([q.correct, ...q.distractors]), 'klock WHY: 3 distinkta alternativ');
+    ok(!q.distractors.includes(q.correct), 'klock WHY: facit ej bland distraktorer');
+    ok(q.distractors.every(d => typeof d === 'string' && d.length > 0), 'klock WHY: distraktorer ifyllda');
+}
+
 /* ═══════════ Resultat ═══════════ */
 console.log('');
 console.log('  PASS: ' + pass);
