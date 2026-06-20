@@ -433,6 +433,29 @@
             border: 1.5px solid var(--color-border);
         }
 
+        /* ── Mönster v2, lager 11a: "Visa mig" + löst exempel ── */
+        .we-btn {
+            background: var(--color-surface); color: var(--color-primary);
+            border: 1.5px solid var(--color-primary); border-radius: 12px;
+            cursor: pointer; font-size: 0.8em; padding: 2px 10px;
+            margin-left: 8px; vertical-align: middle;
+        }
+        .we-btn:hover { background: var(--color-surface-alt); }
+        .worked-example {
+            background: var(--color-surface-alt);
+            border: 2px dashed var(--color-badge); border-radius: 16px;
+            padding: 12px 16px 16px; margin: 6px 0 14px;
+        }
+        .we-head { text-align: center; font-weight: bold; color: var(--color-heading); margin-bottom: 6px; }
+        .we-steps { margin: 10px auto 14px; padding-left: 1.4em; max-width: 360px; color: var(--color-text); }
+        .we-steps li { margin: 6px 0; line-height: 1.4; }
+
+        /* ── Mönster v2, lager 11c: resonemang "Varför?" ── */
+        .why { margin-top: 16px; padding: 14px 16px; background: var(--color-surface-alt); border: 1.5px solid var(--color-border); border-radius: 14px; }
+        .why-q { text-align: center; font-weight: bold; color: var(--color-heading); margin-bottom: 10px; }
+        .why-choices { display: flex; flex-direction: column; gap: 8px; }
+        .why-fb { text-align: center; margin-top: 10px; color: var(--color-text); min-height: 1.2em; }
+
         /* ── Miso-maskot ── */
         #miso-container {
             position: fixed;
@@ -556,20 +579,38 @@
 
 <div class="card">
     <p class="task-label" id="da1Label"></p>
-
-    <div class="choice-row" id="da1Choices"></div>
-
-    <div id="da1Visual" style="display:none">
-        <div class="part-visual" id="da1VisBoxes"></div>
-        <p class="counter-label" id="da1VisLabel"></p>
+    <div style="text-align:center; margin-bottom:8px">
+        <button type="button" class="we-btn" id="da1Show">Visa mig</button>
     </div>
 
-    <div class="btn-row">
-        <button class="btn-secondary" id="da1Next">Ny uppgift →</button>
+    <div class="worked-example" id="da1Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="da1ExampleVisual"></div>
+        <ol class="we-steps" id="da1ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="da1ExampleClose">Jag förstår – min tur →</button></div>
     </div>
 
-    <p class="streak" id="da1Streak"></p>
-    <div class="feedback" id="da1Feedback" aria-live="polite"></div>
+    <div id="da1Live">
+        <div class="choice-row" id="da1Choices"></div>
+
+        <div id="da1Visual" style="display:none">
+            <div class="part-visual" id="da1VisBoxes"></div>
+            <p class="counter-label" id="da1VisLabel"></p>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn-secondary" id="da1Next">Ny uppgift →</button>
+        </div>
+
+        <p class="streak" id="da1Streak"></p>
+        <div class="feedback" id="da1Feedback" aria-live="polite"></div>
+
+        <div class="why" id="da1Why" hidden>
+            <p class="why-q" id="da1WhyQ"></p>
+            <div class="why-choices" id="da1WhyChoices"></div>
+            <div class="why-fb" id="da1WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
 </div>
 
 <!-- ══════ Modul 4B ══════ -->
@@ -577,20 +618,38 @@
 
 <div class="card">
     <p class="task-label" id="da2Label"></p>
-
-    <div class="choice-row" id="da2Choices"></div>
-
-    <div id="da2Visual" style="display:none">
-        <div class="part-visual" id="da2VisBoxes"></div>
-        <p class="counter-label" id="da2VisLabel"></p>
+    <div style="text-align:center; margin-bottom:8px">
+        <button type="button" class="we-btn" id="da2Show">Visa mig</button>
     </div>
 
-    <div class="btn-row">
-        <button class="btn-secondary" id="da2Next">Ny uppgift →</button>
+    <div class="worked-example" id="da2Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="da2ExampleVisual"></div>
+        <ol class="we-steps" id="da2ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="da2ExampleClose">Jag förstår – min tur →</button></div>
     </div>
 
-    <p class="streak" id="da2Streak"></p>
-    <div class="feedback" id="da2Feedback" aria-live="polite"></div>
+    <div id="da2Live">
+        <div class="choice-row" id="da2Choices"></div>
+
+        <div id="da2Visual" style="display:none">
+            <div class="part-visual" id="da2VisBoxes"></div>
+            <p class="counter-label" id="da2VisLabel"></p>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn-secondary" id="da2Next">Ny uppgift →</button>
+        </div>
+
+        <p class="streak" id="da2Streak"></p>
+        <div class="feedback" id="da2Feedback" aria-live="polite"></div>
+
+        <div class="why" id="da2Why" hidden>
+            <p class="why-q" id="da2WhyQ"></p>
+            <div class="why-choices" id="da2WhyChoices"></div>
+            <div class="why-fb" id="da2WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
 </div>
 
 <!-- ══════ Modul 5A ══════ -->
@@ -654,14 +713,31 @@
 <div class="card">
     <div style="text-align:center; margin-bottom:10px">
         <span class="level-badge" id="m7LevelBadge">Nivå 1</span>
+        <button type="button" class="we-btn" id="m7Show">Visa mig</button>
     </div>
-    <p class="task-label" id="m7Label"></p>
-    <div class="choice-row" id="m7Choices"></div>
-    <div class="btn-row">
-        <button class="btn-secondary" id="m7Next">Ny uppgift →</button>
+
+    <div class="worked-example" id="m7Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="m7ExampleVisual"></div>
+        <ol class="we-steps" id="m7ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="m7ExampleClose">Jag förstår – min tur →</button></div>
     </div>
-    <p class="streak" id="m7Streak"></p>
-    <div class="feedback" id="m7Feedback" aria-live="polite"></div>
+
+    <div id="m7Live">
+        <p class="task-label" id="m7Label"></p>
+        <div class="choice-row" id="m7Choices"></div>
+        <div class="btn-row">
+            <button class="btn-secondary" id="m7Next">Ny uppgift →</button>
+        </div>
+        <p class="streak" id="m7Streak"></p>
+        <div class="feedback" id="m7Feedback" aria-live="polite"></div>
+
+        <div class="why" id="m7Why" hidden>
+            <p class="why-q" id="m7WhyQ"></p>
+            <div class="why-choices" id="m7WhyChoices"></div>
+            <div class="why-fb" id="m7WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
 </div>
 
 <!-- ══════ Modul 8 ══════ -->
@@ -669,14 +745,31 @@
 <div class="card">
     <div style="text-align:center; margin-bottom:10px">
         <span class="level-badge" id="m8LevelBadge">Nivå 1</span>
+        <button type="button" class="we-btn" id="m8Show">Visa mig</button>
     </div>
-    <p class="task-label" id="m8Label"></p>
-    <div class="choice-row" id="m8Choices"></div>
-    <div class="btn-row">
-        <button class="btn-secondary" id="m8Next">Ny uppgift →</button>
+
+    <div class="worked-example" id="m8Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="m8ExampleVisual"></div>
+        <ol class="we-steps" id="m8ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="m8ExampleClose">Jag förstår – min tur →</button></div>
     </div>
-    <p class="streak" id="m8Streak"></p>
-    <div class="feedback" id="m8Feedback" aria-live="polite"></div>
+
+    <div id="m8Live">
+        <p class="task-label" id="m8Label"></p>
+        <div class="choice-row" id="m8Choices"></div>
+        <div class="btn-row">
+            <button class="btn-secondary" id="m8Next">Ny uppgift →</button>
+        </div>
+        <p class="streak" id="m8Streak"></p>
+        <div class="feedback" id="m8Feedback" aria-live="polite"></div>
+
+        <div class="why" id="m8Why" hidden>
+            <p class="why-q" id="m8WhyQ"></p>
+            <div class="why-choices" id="m8WhyChoices"></div>
+            <div class="why-fb" id="m8WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
 </div>
 
 <!-- ══════ Modul 9 ══════ -->
@@ -684,14 +777,31 @@
 <div class="card">
     <div style="text-align:center; margin-bottom:10px">
         <span class="level-badge" id="m9LevelBadge">Nivå 1</span>
+        <button type="button" class="we-btn" id="m9Show">Visa mig</button>
     </div>
-    <p class="task-label" id="m9Label" style="line-height:1.65"></p>
-    <div class="choice-row" id="m9Choices"></div>
-    <div class="btn-row">
-        <button class="btn-secondary" id="m9Next">Ny uppgift →</button>
+
+    <div class="worked-example" id="m9Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="m9ExampleVisual"></div>
+        <ol class="we-steps" id="m9ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="m9ExampleClose">Jag förstår – min tur →</button></div>
     </div>
-    <p class="streak" id="m9Streak"></p>
-    <div class="feedback" id="m9Feedback" aria-live="polite"></div>
+
+    <div id="m9Live">
+        <p class="task-label" id="m9Label" style="line-height:1.65"></p>
+        <div class="choice-row" id="m9Choices"></div>
+        <div class="btn-row">
+            <button class="btn-secondary" id="m9Next">Ny uppgift →</button>
+        </div>
+        <p class="streak" id="m9Streak"></p>
+        <div class="feedback" id="m9Feedback" aria-live="polite"></div>
+
+        <div class="why" id="m9Why" hidden>
+            <p class="why-q" id="m9WhyQ"></p>
+            <div class="why-choices" id="m9WhyChoices"></div>
+            <div class="why-fb" id="m9WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
 </div>
 
 <!-- ══════ Modul 10 ══════ -->
@@ -699,7 +809,17 @@
 <div class="card">
     <div style="text-align:center; margin-bottom:10px">
         <span class="level-badge" id="m10LevelBadge">Nivå 1</span>
+        <button type="button" class="we-btn" id="m10Show">Visa mig</button>
     </div>
+
+    <div class="worked-example" id="m10Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="m10ExampleVisual"></div>
+        <ol class="we-steps" id="m10ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="m10ExampleClose">Jag förstår – min tur →</button></div>
+    </div>
+
+    <div id="m10Live">
     <p class="task-label" id="m10Label"></p>
     <div id="m10Source" style="text-align:center; font-size:2.2em; font-weight:bold; color:var(--color-text); margin:6px 0 10px"></div>
     <div class="rect-outer"><div class="frac-rect static" id="m10Rect"></div></div>
@@ -728,6 +848,13 @@
     </div>
     <p class="streak" id="m10Streak"></p>
     <div class="feedback" id="m10Feedback" aria-live="polite"></div>
+
+    <div class="why" id="m10Why" hidden>
+        <p class="why-q" id="m10WhyQ"></p>
+        <div class="why-choices" id="m10WhyChoices"></div>
+        <div class="why-fb" id="m10WhyFb" aria-live="polite"></div>
+    </div>
+    </div><!-- /m10Live -->
 </div>
 
 <div id="miso-container">
@@ -743,6 +870,64 @@ function hl(s)   { return '<span class="hl">'    + s + '</span>'; }
 function hlOk(s) { return '<span class="hl-ok">' + s + '</span>'; }
 let m1Streak = 0, m3Streak = 0;
 let m5aStreak = 0, m5bStreak = 0, m6Streak = 0;
+
+/* ════════════════════════════════
+   Mönster v2 – löst exempel (11a) + resonemang (11c), delad inkoppling.
+   Gäller flervalsmodulerna: da1, da2 (utan nivåer) + m7,m8,m9,m10 (nivå 1–3).
+   "Varför?" på toppnivån (3) för m7–m10, var tredje för da1/da2.
+   brak-prefix på namnen för att inte krocka i den stora filen.
+════════════════════════════════ */
+function brakGen(key, level) {
+    if (key === 'da1') return genDa1Task();
+    if (key === 'da2') return genDa2Task();
+    if (key === 'm7')  return genM7Task(level);
+    if (key === 'm8')  return genM8Task(level);
+    if (key === 'm9')  return genM9Task(level);
+    return genM10Task(level);
+}
+function brakExampleVisual(key, t) {
+    const ok = s => '<span style="color:var(--color-correct)">' + s + '</span>';
+    if (key === 'da1') return fracHTML(t.frac.n, t.frac.d) + ' av ' + ok(t.whole) + ' = ' + t.part;
+    if (key === 'da2') return fracHTML(t.frac.n, t.frac.d) + ' · ' + t.integer + ' = ' + ok(t.result);
+    if (key === 'm7')  return fracHTML(t.a, t.d) + ' + ' + fracHTML(t.b, t.d) + ' = ' + ok(fracHTML(t.ansN, t.ansD));
+    if (key === 'm8')  return fracHTML(t.a, t.d) + ' − ' + fracHTML(t.b, t.d) + ' = ' + ok(fracHTML(t.ansN, t.ansD));
+    if (key === 'm9')  return t.q + ' &nbsp;→&nbsp; ' + ok(t.ans + (t.unit ? ' ' + t.unit : ''));
+    return m10Render(t.from, t) + ' = ' + ok(m10Render(t.to, t));
+}
+function brakShowExample(key, level) {
+    const t = brakGen(key, level);
+    document.getElementById(key + 'ExampleVisual').innerHTML =
+        '<p style="text-align:center; font-weight:bold; color:var(--color-text); font-size:1.4em; line-height:1.5">' +
+        brakExampleVisual(key, t) + '</p>';
+    renderExampleSteps(key + 'ExampleSteps', workedSteps(key, t));
+    toggleExample(key + 'Example', key + 'Live', true);
+}
+function brakCloseExample(key) { toggleExample(key + 'Example', key + 'Live', false); }
+function brakWeKey(key, level) { return key + '.' + (level === undefined ? 'x' : level); }
+function brakWeSeen(key, level) { const s = getSetting('brakWeSeen', {}); return !!s[brakWeKey(key, level)]; }
+function brakWeMark(key, level) { const s = getSetting('brakWeSeen', {}); s[brakWeKey(key, level)] = true; setSetting('brakWeSeen', s); }
+function brakMaybeExample(key, level) { if (!brakWeSeen(key, level)) { brakWeMark(key, level); brakShowExample(key, level); } }
+function brakWireExample(key, getLevel) {
+    document.getElementById(key + 'Show').addEventListener('click', () => brakShowExample(key, getLevel()));
+    document.getElementById(key + 'ExampleClose').addEventListener('click', () => brakCloseExample(key));
+}
+
+const brakWhyCounts = {};
+function brakMaybeWhy(key, level, task) {
+    if (level !== undefined && level !== 3) return;    // m7–m10: bara toppnivå (3)
+    brakWhyCounts[key] = (brakWhyCounts[key] || 0) + 1;
+    if (brakWhyCounts[key] % 3 !== 0) return;          // ~var tredje
+    brakShowWhy(key, task);
+}
+function brakShowWhy(key, task) {
+    renderWhyPanel(whyQuestion(key, task), {
+        panel: key + 'Why', q: key + 'WhyQ', choices: key + 'WhyChoices', fb: key + 'WhyFb'
+    }, {
+        onCorrect: () => showMiso('glad', 'Bra resonerat!'),
+        onWrong:   () => showMiso('uppmuntrande', 'Bra att du funderar!')
+    });
+}
+function brakHideWhy(key) { hideWhyPanel(key + 'Why'); }
 
 /* ════════════════════════════════
    Modul 1
@@ -1095,6 +1280,7 @@ function buildDa1() {
     document.getElementById('da1Visual').style.display = 'none';
     document.getElementById('da1Feedback').textContent = '';
     document.getElementById('da1Next').classList.remove('btn-pulse');
+    brakHideWhy('da1');
 }
 
 function da1Check(val, btn) {
@@ -1123,6 +1309,7 @@ function da1Check(val, btn) {
             frac.d + ' delar av ' + k + '  →  totalt ' + whole;
         document.getElementById('da1Visual').style.display = 'block';
         document.getElementById('da1Next').classList.add('btn-pulse');
+        brakMaybeWhy('da1', undefined, da1Task);
     } else {
         da1HadError = true;
         btn.classList.add('err');
@@ -1132,8 +1319,10 @@ function da1Check(val, btn) {
     }
 }
 
-document.getElementById('da1Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildDa1(); });
+document.getElementById('da1Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildDa1(); brakMaybeExample('da1', undefined); });
+brakWireExample('da1', () => undefined);
 buildDa1();
+brakMaybeExample('da1', undefined);
 
 /* ── Fas 2: Bråk gånger heltal ── */
 
@@ -1164,6 +1353,7 @@ function buildDa2() {
     document.getElementById('da2Visual').style.display = 'none';
     document.getElementById('da2Feedback').textContent = '';
     document.getElementById('da2Next').classList.remove('btn-pulse');
+    brakHideWhy('da2');
 }
 
 function da2Check(val, btn) {
@@ -1193,6 +1383,7 @@ function da2Check(val, btn) {
             frac.n + ' av ' + frac.d + ' grupper  →  ' + result;
         document.getElementById('da2Visual').style.display = 'block';
         document.getElementById('da2Next').classList.add('btn-pulse');
+        brakMaybeWhy('da2', undefined, da2Task);
     } else {
         da2HadError = true;
         btn.classList.add('err');
@@ -1202,8 +1393,10 @@ function da2Check(val, btn) {
     }
 }
 
-document.getElementById('da2Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildDa2(); });
+document.getElementById('da2Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildDa2(); brakMaybeExample('da2', undefined); });
+brakWireExample('da2', () => undefined);
 buildDa2();
+brakMaybeExample('da2', undefined);
 
 /* ════════════════════════════════
    Modul 5
@@ -1657,6 +1850,7 @@ function buildM7() {
     document.getElementById('m7Next').classList.remove('btn-pulse');
     document.getElementById('m7Feedback').textContent = '';
     document.getElementById('m7Streak').textContent = '';
+    brakHideWhy('m7');
 
     const { d, a, b, ansN, ansD } = m7Task;
     document.getElementById('m7Label').innerHTML =
@@ -1698,6 +1892,7 @@ function m7Check(fr, btn) {
         if (rawN !== ansN || d !== ansD) msg += ' = ' + ansN + '/' + ansD;
         fb.textContent = msg + '. Jättebra, Avalin!';
         showMiso('glad', 'Rätt bråkaddition!');
+        brakMaybeWhy('m7', m7Level, m7Task);
 
         if (m7CleanCount >= 3 && m7Level < 3) {
             m7Level++;
@@ -1719,8 +1914,10 @@ function m7Check(fr, btn) {
     }
 }
 
-document.getElementById('m7Next').addEventListener('click', () => { showMiso('neutral', 'Ny addition – kör på!'); buildM7(); });
+document.getElementById('m7Next').addEventListener('click', () => { showMiso('neutral', 'Ny addition – kör på!'); buildM7(); brakMaybeExample('m7', m7Level); });
+brakWireExample('m7', () => m7Level);
 buildM7();
+brakMaybeExample('m7', m7Level);
 
 /* ════════════════════════════════
    Modul 8 – Subtraktion med bråk
@@ -1738,6 +1935,7 @@ function buildM8() {
     document.getElementById('m8Next').classList.remove('btn-pulse');
     document.getElementById('m8Feedback').textContent = '';
     document.getElementById('m8Streak').textContent = '';
+    brakHideWhy('m8');
 
     const { d, a, b, ansN, ansD } = m8Task;
     document.getElementById('m8Label').innerHTML =
@@ -1779,6 +1977,7 @@ function m8Check(fr, btn) {
         if (rawN !== ansN || d !== ansD) msg += ' = ' + ansN + '/' + ansD;
         fb.textContent = msg + '. Jättebra, Avalin!';
         showMiso('glad', 'Rätt bråksubtraktion!');
+        brakMaybeWhy('m8', m8Level, m8Task);
 
         if (m8CleanCount >= 3 && m8Level < 3) {
             m8Level++;
@@ -1800,8 +1999,10 @@ function m8Check(fr, btn) {
     }
 }
 
-document.getElementById('m8Next').addEventListener('click', () => { showMiso('neutral', 'Ny subtraktion – kör på!'); buildM8(); });
+document.getElementById('m8Next').addEventListener('click', () => { showMiso('neutral', 'Ny subtraktion – kör på!'); buildM8(); brakMaybeExample('m8', m8Level); });
+brakWireExample('m8', () => m8Level);
 buildM8();
+brakMaybeExample('m8', m8Level);
 
 /* ════════════════════════════════
    Modul 9 – Procent
@@ -1819,6 +2020,7 @@ function buildM9() {
     document.getElementById('m9Next').classList.remove('btn-pulse');
     document.getElementById('m9Feedback').textContent = '';
     document.getElementById('m9Streak').textContent = '';
+    brakHideWhy('m9');
     document.getElementById('m9Label').textContent = m9Task.q;
 
     const rawVals = m9Task.level === 3
@@ -1862,6 +2064,7 @@ function m9Check(val, btn) {
             fb.textContent = '🐱 Rätt! ' + pct + '% av ' + whole + ' = ' + ans + '. Jättebra, Avalin!';
         }
         showMiso('glad', 'Rätt procent! Snyggt!');
+        brakMaybeWhy('m9', m9Level, m9Task);
 
         if (m9CleanCount >= 3 && m9Level < 3) {
             m9Level++;
@@ -1890,8 +2093,10 @@ function m9Check(val, btn) {
     }
 }
 
-document.getElementById('m9Next').addEventListener('click', () => { showMiso('neutral', 'Ny procentuppgift – lycka till!'); buildM9(); });
+document.getElementById('m9Next').addEventListener('click', () => { showMiso('neutral', 'Ny procentuppgift – lycka till!'); buildM9(); brakMaybeExample('m9', m9Level); });
+brakWireExample('m9', () => m9Level);
 buildM9();
+brakMaybeExample('m9', m9Level);
 
 /* ════════════════════════════════
    Modul 10 – Samma tal, tre former
@@ -1924,6 +2129,7 @@ function buildM10() {
     document.getElementById('m10Next').classList.remove('btn-pulse');
     document.getElementById('m10Feedback').textContent = '';
     document.getElementById('m10Streak').textContent = '';
+    brakHideWhy('m10');
     document.getElementById('m10Label').textContent = 'Hur skrivs detta som ' + M10_LABELS[to] + '?';
     document.getElementById('m10Source').innerHTML = m10Render(from, m10Task);
 
@@ -1980,6 +2186,7 @@ function m10Check(fr, btn) {
 
         fb.innerHTML = '🐱 Rätt! ' + fracHTML(n, d) + ' = ' + fmtDec(n, d) + ' = ' + fmtPct(n, d) + '. Jättebra, Avalin!';
         showMiso('glad', 'Rätt – samma tal, tre former!');
+        brakMaybeWhy('m10', m10Level, m10Task);
 
         if (m10CleanCount >= 3 && m10Level < 3) {
             m10Level++;
@@ -2003,8 +2210,10 @@ function m10Check(fr, btn) {
     }
 }
 
-document.getElementById('m10Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildM10(); });
+document.getElementById('m10Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildM10(); brakMaybeExample('m10', m10Level); });
+brakWireExample('m10', () => m10Level);
 buildM10();
+brakMaybeExample('m10', m10Level);
 </script>
 
 </body>

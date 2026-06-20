@@ -594,6 +594,35 @@ forEachRun(brak.genM9Task, 2, RUNS, t => {
     ok(ch.some(fr => brak.m10Val(fr) === brak.m10Val(t)), 'M10 nivå'+lvl+': facit finns bland alternativen');
 }));
 
+/* — Mönster v2, lager 11a + 11c: workedSteps + whyQuestion (6 flervalsmoduler) — */
+{
+    const sub = s => s.replace('≈ ', '');   // m10-decimaler kan ha ≈-prefix i facit
+    const cases = [
+        { key: 'da1', gen: () => brak.genDa1Task(),  ans: t => String(t.whole) },
+        { key: 'da2', gen: () => brak.genDa2Task(),  ans: t => String(t.result) },
+        { key: 'm7',  gen: () => brak.genM7Task(2),  ans: t => t.ansN + '/' + t.ansD },
+        { key: 'm8',  gen: () => brak.genM8Task(2),  ans: t => t.ansN + '/' + t.ansD },
+        { key: 'm9',  gen: () => brak.genM9Task(2),  ans: t => String(t.ans) },
+        { key: 'm10', gen: () => brak.genM10Task(3), ans: t => sub(brak.m10Text(t.to, t.n, t.d)) }
+    ];
+    cases.forEach(c => {
+        for (let r = 0; r < 400; r++) {
+            const t = c.gen();
+            const steps = brak.workedSteps(c.key, t);
+            ok(steps.length === 3, 'Brak WE ' + c.key + ': exakt 3 steg');
+            ok(steps.every(s => typeof s === 'string' && s.length > 0), 'Brak WE ' + c.key + ': alla steg ifyllda');
+            ok(sub(steps[2]).includes(c.ans(t)), 'Brak WE ' + c.key + ': sista steget bär facit');
+
+            const q = brak.whyQuestion(c.key, t);
+            ok(typeof q.prompt === 'string' && q.prompt.length > 0, 'Brak WHY ' + c.key + ': prompt ifylld');
+            ok(typeof q.correct === 'string' && q.correct.length > 0, 'Brak WHY ' + c.key + ': korrekt rad ifylld');
+            ok(q.distractors.length === 2, 'Brak WHY ' + c.key + ': exakt 2 distraktorer');
+            ok(distinct([q.correct, ...q.distractors]), 'Brak WHY ' + c.key + ': 3 distinkta alternativ');
+            ok(!q.distractors.includes(q.correct), 'Brak WHY ' + c.key + ': facit ej bland distraktorer');
+        }
+    });
+}
+
 /* ═══════════ taluppfattning ═══════════ */
 const tal = require('../logic/taluppfattning.js');
 

@@ -348,9 +348,123 @@
         return out;
     }
 
+    /* ════════ Mönster v2, lager 11a + 11c (flervalsmodulerna) ════════
+       Nyckel: 'da1','da2','m7','m8','m9','m10'. workedSteps → 3 stegrader,
+       whyQuestion → 1 korrekt + 2 distraktorer enligt distraktor-doktrinen.
+       Ren text, testas som vanligt. */
+
+    const M10_FORM_LABEL = { frac: 'bråk', dec: 'decimaltal', pct: 'procent' };
+    function m10Text(kind, n, d) {
+        return kind === 'frac' ? n + '/' + d : kind === 'dec' ? fmtDec(n, d) : fmtPct(n, d);
+    }
+
+    function workedSteps(key, t) {
+        switch (key) {
+            case 'da1':
+                return [
+                    'Du vet att ' + t.frac.n + '/' + t.frac.d + ' av helheten är ' + t.part + '.',
+                    'En del (1/' + t.frac.d + ') är ' + t.part + ' ÷ ' + t.frac.n + ' = ' + t.k + '.',
+                    'Hela helheten är ' + t.frac.d + ' × ' + t.k + ' = ' + t.whole + '.'
+                ];
+            case 'da2': {
+                const perPart = t.integer / t.frac.d;
+                return [
+                    'Dela ' + t.integer + ' i ' + t.frac.d + ' lika delar: ' + t.integer + ' ÷ ' + t.frac.d + ' = ' + perPart + '.',
+                    'Ta ' + t.frac.n + ' av delarna: ' + t.frac.n + ' × ' + perPart + '.',
+                    t.frac.n + '/' + t.frac.d + ' · ' + t.integer + ' = ' + t.result + '.'
+                ];
+            }
+            case 'm7':
+                return [
+                    'Nämnaren är samma (' + t.d + '), så lägg bara ihop täljarna.',
+                    t.a + ' + ' + t.b + ' = ' + t.rawN + ', alltså ' + t.rawN + '/' + t.d + '.',
+                    (t.rawN !== t.ansN || t.d !== t.ansD)
+                        ? 'Förenkla: ' + t.rawN + '/' + t.d + ' = ' + t.ansN + '/' + t.ansD + '.'
+                        : 'Svaret är ' + t.ansN + '/' + t.ansD + '.'
+                ];
+            case 'm8':
+                return [
+                    'Nämnaren är samma (' + t.d + '), så ta bara skillnaden mellan täljarna.',
+                    t.a + ' − ' + t.b + ' = ' + t.rawN + ', alltså ' + t.rawN + '/' + t.d + '.',
+                    (t.rawN !== t.ansN || t.d !== t.ansD)
+                        ? 'Förenkla: ' + t.rawN + '/' + t.d + ' = ' + t.ansN + '/' + t.ansD + '.'
+                        : 'Svaret är ' + t.ansN + '/' + t.ansD + '.'
+                ];
+            case 'm9':
+                return [
+                    'Läs frågan: "' + t.q + '"',
+                    t.level === 3
+                        ? t.hint
+                        : 'Procent betyder hundradelar: dela ' + t.whole + ' med 100 och ta ' + t.pct + ' delar.',
+                    'Svaret är ' + t.ans + (t.unit ? ' ' + t.unit : '') + '.'
+                ];
+            case 'm10':
+                return [
+                    'Talet ' + m10Text(t.from, t.n, t.d) + ' ska skrivas som ' + M10_FORM_LABEL[t.to] + '.',
+                    t.to === 'dec' ? 'Dela täljaren med nämnaren: ' + t.n + ' ÷ ' + t.d + '.'
+                        : t.to === 'pct' ? 'Tänk hur många hundradelar talet är ("av hundra").'
+                        : 'Leta bråket som har samma värde.',
+                    m10Text(t.from, t.n, t.d) + ' = ' + m10Text(t.to, t.n, t.d) + '.'
+                ];
+            default:
+                return [];
+        }
+    }
+
+    const WHY = {
+        da1: {
+            correct: 'Först tar man reda på en del, sedan hela helheten.',
+            distractors: [
+                'Man multiplicerar delen med täljaren.',       // fel operation
+                'Delen och helheten är samma sak.'             // missar begreppet
+            ]
+        },
+        da2: {
+            correct: 'Man delar i lika delar och tar så många man behöver.',
+            distractors: [
+                'Man multiplicerar hela talet med nämnaren.',  // fel operation
+                'Man tar bara täljaren som svar.'              // delberäkning
+            ]
+        },
+        m7: {
+            correct: 'Med samma nämnare lägger man bara ihop täljarna.',
+            distractors: [
+                'Man adderar både täljare och nämnare.',       // klassisk bråk-missuppfattning
+                'Man adderar nämnarna och behåller täljaren.'  // omvänd
+            ]
+        },
+        m8: {
+            correct: 'Med samma nämnare tar man bara skillnaden mellan täljarna.',
+            distractors: [
+                'Man subtraherar både täljare och nämnare.',   // klassisk bråk-missuppfattning
+                'Man subtraherar nämnarna och behåller täljaren.' // omvänd
+            ]
+        },
+        m9: {
+            correct: 'Procent betyder hundradelar — så många delar av hundra.',
+            distractors: [
+                'Procent betyder samma som talet självt.',     // ignorerar /100
+                'Man lägger procenten till talet.'             // fel operation
+            ]
+        },
+        m10: {
+            correct: 'Samma tal kan skrivas som bråk, decimal och procent.',
+            distractors: [
+                'Bråk och procent är alltid olika tal.',       // missar sambandet
+                'Man byter form genom att byta siffrorna.'     // fel metod
+            ]
+        }
+    };
+
+    function whyQuestion(key, t) {
+        const w = WHY[key];
+        return { prompt: 'Varför stämmer det?', correct: w.correct, distractors: w.distractors.slice() };
+    }
+
     return {
         simplify,
         isTerminating, decPlaces, fmtDec, fmtPct,
+        m10Text, workedSteps, whyQuestion,
         M3_DENOMS, genM3Task,
         DA1_FRACS, genDa1Task,
         DA2_FRACS, genDa2Task,

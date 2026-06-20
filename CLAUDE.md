@@ -145,7 +145,8 @@ Mönster v2 läggs FÖRST så att nya filer (Fas 5) föds färdiga och inget ret
     - ✅ geometri.html KLAR (5 moduler): workedSteps + whyQuestion i logic/geometri.js; exempel per nivå + "Varför?" nivå 3 var tredje. Tester + ockulärt verifierat.
     - ✅ algebra.html KLAR (5 moduler, generisk makeModule-motor): workedSteps + whyQuestion i logic/algebra.js; exempel/Varför inhakat i motorn via p.mod. Tester + ockulärt verifierat.
     - ✅ statistik.html KLAR (5 moduler, makeModule-motor): workedSteps + whyQuestion i logic/statistik.js. Tester + ockulärt verifierat.
-    - NÄSTA STEG: brak.html — sista filen. SPECIALFALL (10 moduler, blandad nivåstruktur, egna knapp-id). Kräver noggrann anpassning som klockan, inte copy-paste.
+    - ✅ brak.html KLAR (specialfall): mönster v2 applicerat på de 6 flervalsmodulerna (da1, da2, M7, M8, M9, M10) per Mats beslut 2026-06-21. da1/da2 utan nivåer (exempel första besöket, "Varför?" var tredje); M7–M10 nivå 1–3 ("Varför?" på toppnivå 3). Interaktiva/"kolla svar"-moduler (M1, M2, M3, M5a, M5b, M6) lämnade medvetet (mönstret passar ej). brak-prefixade JS-namn. Tester + ockulärt verifierat.
+    - 🎉 STEG 12 KLAR — mönster v2 (11a + 11c) utrullat på alla 9 filer.
     - Per fil måste Definition of Done passeras (se nedan).
 13. Innehållsluckor i befintliga filer (görs i samma pass som filen ändå öppnas):
     - geometri.html M5: triangelarea (b×h/2) + sammansatta figurer (+ cirkelbegrepp: radie, diameter, medelpunkt)
