@@ -490,6 +490,24 @@ ok(stat.uniqueMode([1,1,2,2]) === null, 'uniqueMode oavgjort → null');
     ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Stat M5 nivå'+lvl+': positiva heltal');
 }));
 
+/* — Mönster v2, lager 11a + 11c: workedSteps + whyQuestion (M1–M5) — */
+{
+    const STAT_GEN = { 1: stat.genM1Task, 2: stat.genM2Task, 3: stat.genM3Task, 4: stat.genM4Task, 5: stat.genM5Task };
+    [1,2,3,4,5].forEach(mod => [0,1,2].forEach(lvl => forEachRun(STAT_GEN[mod], lvl, 300, t => {
+        const steps = stat.workedSteps(mod, t);
+        ok(steps.length === 3, 'Stat WE mod'+mod+' nivå'+lvl+': exakt 3 steg');
+        ok(steps.every(s => typeof s === 'string' && s.length > 0), 'Stat WE mod'+mod+' nivå'+lvl+': alla steg ifyllda');
+        ok(steps[2].includes(String(t.correct)), 'Stat WE mod'+mod+' nivå'+lvl+': sista steget bär facit');
+
+        const q = stat.whyQuestion(mod, t);
+        ok(typeof q.prompt === 'string' && q.prompt.length > 0, 'Stat WHY mod'+mod+': prompt ifylld');
+        ok(typeof q.correct === 'string' && q.correct.length > 0, 'Stat WHY mod'+mod+': korrekt rad ifylld');
+        ok(q.distractors.length === 2, 'Stat WHY mod'+mod+': exakt 2 distraktorer');
+        ok(distinct([q.correct, ...q.distractors]), 'Stat WHY mod'+mod+': 3 distinkta alternativ');
+        ok(!q.distractors.includes(q.correct), 'Stat WHY mod'+mod+': facit ej bland distraktorer');
+    })));
+}
+
 /* ═══════════ brak ═══════════ */
 const brak = require('../logic/brak.js');
 const APX = '≈ ';

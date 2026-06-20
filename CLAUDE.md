@@ -144,7 +144,8 @@ Mönster v2 läggs FÖRST så att nya filer (Fas 5) föds färdiga och inget ret
     - ✅ multiplikation.html KLAR (5 moduler): workedSteps + whyQuestion i logic/multiplikation.js; exempel per nivå + "Varför?" nivå 3 var tredje. Tester + ockulärt verifierat.
     - ✅ geometri.html KLAR (5 moduler): workedSteps + whyQuestion i logic/geometri.js; exempel per nivå + "Varför?" nivå 3 var tredje. Tester + ockulärt verifierat.
     - ✅ algebra.html KLAR (5 moduler, generisk makeModule-motor): workedSteps + whyQuestion i logic/algebra.js; exempel/Varför inhakat i motorn via p.mod. Tester + ockulärt verifierat.
-    - NÄSTA STEG: rulla ut statistik (standardmönster). (brak = specialfall, 10 moduler, tas sist.)
+    - ✅ statistik.html KLAR (5 moduler, makeModule-motor): workedSteps + whyQuestion i logic/statistik.js. Tester + ockulärt verifierat.
+    - NÄSTA STEG: brak.html — sista filen. SPECIALFALL (10 moduler, blandad nivåstruktur, egna knapp-id). Kräver noggrann anpassning som klockan, inte copy-paste.
     - Per fil måste Definition of Done passeras (se nedan).
 13. Innehållsluckor i befintliga filer (görs i samma pass som filen ändå öppnas):
     - geometri.html M5: triangelarea (b×h/2) + sammansatta figurer (+ cirkelbegrepp: radie, diameter, medelpunkt)

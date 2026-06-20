@@ -176,8 +176,94 @@
         return { data, correct, distractors: pickDistractors(correct, cand, 3) };
     }
 
+    /* ════════ Mönster v2, lager 11a + 11c ════════
+       workedSteps(mod, task): 3 stegrader (löst exempel).
+       whyQuestion(mod, task): "Varför stämmer det?" + 1 korrekt + 2 distraktorer
+       enligt distraktor-doktrinen. Ren text, testas som vanligt. */
+
+    function workedSteps(mod, t) {
+        switch (mod) {
+            case 1:
+                return [
+                    'Läs frågan: "' + t.question + '"',
+                    'Titta på staplarnas höjd i diagrammet.',
+                    'Svaret är ' + t.correct + '.'
+                ];
+            case 2:
+                return [
+                    'Lägg ihop alla tal: ' + t.nums.join(' + ') + ' = ' + t.sum + '.',
+                    'Dela summan med antalet tal: ' + t.sum + ' ÷ ' + t.n + '.',
+                    'Medelvärdet är ' + t.correct + '.'
+                ];
+            case 3:
+                return [
+                    'Räkna hur många ' + t.askName + ' det finns: ' + t.k + '.',
+                    'Räkna hur många kulor det finns totalt: ' + t.total + '.',
+                    'Sannolikheten är ' + t.correct + '.'
+                ];
+            case 4:
+                return [
+                    'Varje ' + t.items[0] + ' kan sättas ihop med varje ' + t.items[1] + (t.c ? ' och varje ' + t.items[2] : '') + '.',
+                    'Multiplicera antalet i varje grupp: ' + t.a + ' × ' + t.b + (t.c ? ' × ' + t.c : '') + '.',
+                    'Det blir ' + t.correct + ' olika sätt.'
+                ];
+            case 5:
+                return [
+                    'Titta på talen: ' + t.data.join(', ') + '.',
+                    'Vilket tal kommer flest gånger?',
+                    'Typvärdet är ' + t.correct + '.'
+                ];
+            default:
+                return [];
+        }
+    }
+
+    const WHY = {
+        1: {
+            correct: 'Man läser av höjden på staplarna i diagrammet.',
+            distractors: [
+                'Man räknar antalet staplar.',             // fel storhet
+                'Bara färgen spelar roll, inte höjden.'    // ignorerar värdet
+            ]
+        },
+        2: {
+            correct: 'Medelvärde = summan av talen delat med antalet tal.',
+            distractors: [
+                'Medelvärde är samma som summan.',         // glömmer att dela
+                'Medelvärde är det största talet.'         // fel begrepp
+            ]
+        },
+        3: {
+            correct: 'Sannolikhet = antalet du vill ha av det totala antalet.',
+            distractors: [
+                'Sannolikhet = antalet du inte vill ha av totalen.', // omvänd
+                'Sannolikheten är alltid hälften.'                    // fel regel
+            ]
+        },
+        4: {
+            correct: 'Man multiplicerar antalet val i varje grupp.',
+            distractors: [
+                'Man adderar antalet val i grupperna.',    // fel räknesätt (a+b)
+                'Man räknar bara den största gruppen.'     // delberäkning
+            ]
+        },
+        5: {
+            correct: 'Typvärdet är talet som förekommer flest gånger.',
+            distractors: [
+                'Typvärdet är det största talet.',         // fel begrepp
+                'Typvärdet är talet i mitten.'             // förväxlar med median
+            ]
+        }
+    };
+
+    function whyQuestion(mod, t) {
+        const w = WHY[mod];
+        return { prompt: 'Varför stämmer det?', correct: w.correct, distractors: w.distractors.slice() };
+    }
+
     return {
         pickDistractors, shuffle, uniqueMode,
-        genM1Task, genM2Task, genM3Task, genM4Task, genM5Task
+        genM1Task, genM2Task, genM3Task, genM4Task, genM5Task,
+        workedSteps, whyQuestion
     };
 }));
