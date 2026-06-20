@@ -164,12 +164,102 @@
         return { shape: 'rektangel', a, b, grid: false, unit: 'cm²', correct, distractors: pickDistractors(correct, cand, 3) };
     }
 
+    /* ════════ Mönster v2, lager 11a + 11c ════════
+       workedSteps(mod, task): 3 stegrader (löst exempel).
+       whyQuestion(mod, task): "Varför stämmer det?" + 1 korrekt + 2 distraktorer
+       enligt distraktor-doktrinen. Ren text, testas som vanligt. */
+
+    function workedSteps(mod, t) {
+        switch (mod) {
+            case 1:
+                return [
+                    'Vinkeln är ' + t.deg + ' grader.',
+                    'Mindre än 90° = spetsig, 90° = rät, mellan 90° och 180° = trubbig, 180° = rak.',
+                    'Vinkeln är ' + t.correct.toLowerCase() + '.'
+                ];
+            case 2:
+                return [
+                    'Räkna formens hörn och sidor.',
+                    t.sides > 0 ? 'Den här formen har ' + t.sides + ' sidor.' : 'Den här formen är rund och har inga hörn.',
+                    'Det är en ' + t.correct.toLowerCase() + '.'
+                ];
+            case 3:
+                return [
+                    'Titta på ' + t.name.toLowerCase() + '.',
+                    'En symmetrilinje delar formen i två exakt lika halvor.',
+                    t.name + ' har ' + t.correct + ' symmetrilinjer.'
+                ];
+            case 4: {
+                const expr = t.shape === 'kvadrat' ? '4 × ' + t.a
+                    : t.shape === 'rektangel' ? '2 × (' + t.a + ' + ' + t.b + ')'
+                    : t.a + ' + ' + t.b + ' + ' + t.c;
+                return [
+                    'Omkrets är hela vägen runt formen.',
+                    'Lägg ihop alla sidor: ' + expr + '.',
+                    'Omkretsen är ' + t.correct + ' ' + t.unit + '.'
+                ];
+            }
+            case 5:
+                return [
+                    'Area är hur många rutor som får plats inuti.',
+                    'Räkna längden gånger bredden: ' + t.a + ' × ' + t.b + '.',
+                    'Arean är ' + t.correct + ' ' + t.unit + '.'
+                ];
+            default:
+                return [];
+        }
+    }
+
+    const WHY = {
+        1: {
+            correct: 'En vinkel under 90° är spetsig, 90° är rät, över 90° är trubbig.',
+            distractors: [
+                'Vinkelns typ beror på hur långa strålarna är.',   // klassisk missuppfattning
+                'En större vinkel är alltid spetsig.'              // omvänd riktning
+            ]
+        },
+        2: {
+            correct: 'Man känner igen formen på antalet hörn och sidor.',
+            distractors: [
+                'Man känner igen formen på dess färg.',            // irrelevant egenskap
+                'Man känner igen formen på dess storlek.'          // irrelevant egenskap
+            ]
+        },
+        3: {
+            correct: 'En symmetrilinje delar formen i två exakt lika halvor.',
+            distractors: [
+                'Antalet symmetrilinjer är alltid lika med antalet sidor.', // falskt för rektangel
+                'Alla raka linjer genom mitten är symmetrilinjer.'          // missuppfattning
+            ]
+        },
+        4: {
+            correct: 'Omkrets är summan av alla sidor runt formen.',
+            distractors: [
+                'Omkrets är sidorna multiplicerade med varandra.', // förväxlar med area
+                'Omkrets är bara två av sidorna.'                  // delberäkning
+            ]
+        },
+        5: {
+            correct: 'Area är längden gånger bredden — antalet rutor inuti.',
+            distractors: [
+                'Area är alla sidorna ihoplagda.',                 // förväxlar med omkrets
+                'Area är längden plus bredden.'                    // fel räknesätt
+            ]
+        }
+    };
+
+    function whyQuestion(mod, t) {
+        const w = WHY[mod];
+        return { prompt: 'Varför stämmer det?', correct: w.correct, distractors: w.distractors.slice() };
+    }
+
     return {
         pickDistractors, round5,
         ANGLE_TYPES, classifyAngle, genM1Task,
         SHAPES, genM2Task,
         SYM, genM3Task,
         genM4Task,
-        genM5Task
+        genM5Task,
+        workedSteps, whyQuestion
     };
 }));

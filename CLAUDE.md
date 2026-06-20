@@ -142,7 +142,8 @@ Mönster v2 läggs FÖRST så att nya filer (Fas 5) föds färdiga och inget ret
     - ✅ taluppfattning.html KLAR (8 moduler M1–M8): workedSteps + whyQuestion i logic/taluppfattning.js; per modul exempel-panel (egen visual: markerad siffra/talföljd/jämförelse/tallinje) + "Varför?". M1/M2 saknar nivåer → exempel första besöket, "Varför?" var tredje; M3–M8 → exempel per nivå, "Varför?" bara nivå 2. Tester + ockulärt verifierat.
     - ✅ decimaltal.html KLAR (5 moduler, standardmönster): workedSteps + whyQuestion i logic/decimaltal.js; exempel per nivå + "Varför?" nivå 3 var tredje. Tester + ockulärt verifierat.
     - ✅ multiplikation.html KLAR (5 moduler): workedSteps + whyQuestion i logic/multiplikation.js; exempel per nivå + "Varför?" nivå 3 var tredje. Tester + ockulärt verifierat.
-    - NÄSTA STEG: rulla ut EN fil i taget (standardmönster): geometri · algebra · statistik. (brak = specialfall, 10 moduler, tas sist.)
+    - ✅ geometri.html KLAR (5 moduler): workedSteps + whyQuestion i logic/geometri.js; exempel per nivå + "Varför?" nivå 3 var tredje. Tester + ockulärt verifierat.
+    - NÄSTA STEG: rulla ut EN fil i taget (standardmönster): algebra · statistik. (brak = specialfall, 10 moduler, tas sist.)
     - Per fil måste Definition of Done passeras (se nedan).
 13. Innehållsluckor i befintliga filer (görs i samma pass som filen ändå öppnas):
     - geometri.html M5: triangelarea (b×h/2) + sammansatta figurer (+ cirkelbegrepp: radie, diameter, medelpunkt)

@@ -334,6 +334,27 @@ eq(geo.classifyAngle(180), 'Rak',     'classifyAngle 180');
     ok(t.correct === t.a * t.b, 'Geo M5 nivå'+lvl+': facit = a·b');
 }));
 
+/* — Mönster v2, lager 11a + 11c: workedSteps + whyQuestion (M1–M5) — */
+{
+    const GEO_GEN = { 1: geo.genM1Task, 2: geo.genM2Task, 3: geo.genM3Task, 4: geo.genM4Task, 5: geo.genM5Task };
+    [1,2,3,4,5].forEach(mod => [0,1,2].forEach(lvl => forEachRun(GEO_GEN[mod], lvl, 300, t => {
+        const steps = geo.workedSteps(mod, t);
+        ok(steps.length === 3, 'Geo WE mod'+mod+' nivå'+lvl+': exakt 3 steg');
+        ok(steps.every(s => typeof s === 'string' && s.length > 0), 'Geo WE mod'+mod+' nivå'+lvl+': alla steg ifyllda');
+        /* sista steget bär facit */
+        if (mod === 1)      ok(steps[2].includes(t.correct.toLowerCase()), 'Geo WE mod1: sista steget bär vinkeltyp');
+        else if (mod === 2) ok(steps[2].includes(t.correct.toLowerCase()), 'Geo WE mod2: sista steget bär formnamn');
+        else                ok(steps[2].includes(String(t.correct)),       'Geo WE mod'+mod+': sista steget bär facit');
+
+        const q = geo.whyQuestion(mod, t);
+        ok(typeof q.prompt === 'string' && q.prompt.length > 0, 'Geo WHY mod'+mod+': prompt ifylld');
+        ok(typeof q.correct === 'string' && q.correct.length > 0, 'Geo WHY mod'+mod+': korrekt rad ifylld');
+        ok(q.distractors.length === 2, 'Geo WHY mod'+mod+': exakt 2 distraktorer');
+        ok(distinct([q.correct, ...q.distractors]), 'Geo WHY mod'+mod+': 3 distinkta alternativ');
+        ok(!q.distractors.includes(q.correct), 'Geo WHY mod'+mod+': facit ej bland distraktorer');
+    })));
+}
+
 /* ═══════════ algebra ═══════════ */
 const alg = require('../logic/algebra.js');
 
