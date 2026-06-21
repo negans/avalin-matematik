@@ -120,6 +120,9 @@ Mönster v2 läggs FÖRST så att nya filer (Fas 5) föds färdiga och inget ret
 11. Mönster v2 i template.html — uppgradera skelettet med tre lager. Specat för Claude Code:
 
     11a. ✅ Worked example (löst exempel) före nivåstart — KLAR på piloten (koordinat.html). Logik: workedSteps() i logic/koordinat.js (testad). UI: "Visa mig"-knapp + auto-visning första gången per nivå (sparas i storage), rent rutnät med streckad väg.
+        KONVENTION (efter granskning 2026-06-21, alla filer åtgärdade):
+        (1) BILD FÖRST: exemplet ritar modulens RIKTIGA figur (rita-funktionen tar svgId + task så den kan rita i exempel-rutan), inte bara text. Gäller där modulen har en figur under frågan.
+        (2) Uppgiftsspecifik fråga (med tal) ligger INNE i mXLive så den göms när exemplet visas — annars krockar den synligt med exemplets andra tal. Generiska frågor får ligga kvar utanför.
         - Visas FÖRSTA gången Avalin går in på en nivå (per modul, per nivå). Därefter nåbar via "Visa mig"-knapp — aldrig påtvingad igen.
         - Innehåll: exakt samma uppgiftstyp hon ska göra härnäst, fullständigt löst, ETT steg per rad, med samma visuella representation som uppgiften.
         - Konkret → symbolisk: exemplet visar bilden först, sedan symbolerna/uträkningen.
