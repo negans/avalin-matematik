@@ -239,8 +239,6 @@
     <div style="text-align:center; margin-bottom:6px">
         <span class="level-badge" id="m5LevelLabel">Nivå 1</span>
     </div>
-    <p class="task-label"><span id="m5Label"></span>
-        <button type="button" class="we-btn" id="m5Show">Visa mig</button></p>
 
     <div class="worked-example" id="m5Example" hidden>
         <p class="we-head">Så här gör du 👇</p>
@@ -250,6 +248,8 @@
     </div>
 
     <div id="m5Live">
+        <p class="task-label"><span id="m5Label"></span>
+            <button type="button" class="we-btn" id="m5Show">Visa mig</button></p>
         <div class="number-line-wrap">
             <svg id="m5SVG" width="100%" style="display:block; overflow:visible"></svg>
         </div>
@@ -295,15 +295,26 @@ function renderExampleVisual(mod, containerId, t) {
         el.innerHTML = '<p style="' + big + ' font-size:1.8em">' +
             [t.optA, t.optB].map(v => v === t.correctDisp ? ok(v) : v).join(' &nbsp;&nbsp; ') + '</p>';
     } else if (mod === 3) {
-        el.innerHTML = '<p style="' + big + ' font-size:1.5em">' +
-            t.leftLabel + ' &nbsp;·&nbsp; ' + ok(t.correct) + ' &nbsp;·&nbsp; ' + t.rightLabel + '</p>';
+        const figId = containerId + 'Fig';
+        el.innerHTML = '<div class="number-line-wrap" style="margin:0 auto"><svg id="' + figId + '" width="100%" style="display:block; overflow:visible"></svg></div>' +
+            '<p style="' + big + ' font-size:1.3em">Punkten är ' + ok(t.correct) + '</p>';
+        drawM3SVG(figId, t.pos, t.leftLabel, t.rightLabel, t.correct);
     } else if (mod === 4) {
         el.innerHTML = '<p style="' + big + ' font-size:1.7em">' +
             t.label.replace(' = ?', '') + ' = ' + ok(fmtOp(t.result)) + '</p>';
     } else if (mod === 5) {
-        el.innerHTML = '<p style="' + big + ' font-size:1.6em">' +
-            t.fromVal + ' ' + t.fromUnit + ' = ' + ok(t.correctStr + ' ' + t.toUnit) + '</p>';
+        const figId = containerId + 'Fig';
+        el.innerHTML = '<div class="number-line-wrap" style="margin:0 auto"><svg id="' + figId + '" width="100%" style="display:block; overflow:visible"></svg></div>' +
+            '<p style="' + big + ' font-size:1.3em">' + t.fromVal + ' ' + t.fromUnit + ' = ' + ok(t.correctStr + ' ' + t.toUnit) + '</p>';
+        drawM5Measure(figId, t);
     }
+}
+
+/* Ritar rätt mätredskap (linjal/mätbägare/våg) för M5-uppgiften. */
+function drawM5Measure(svgId, t) {
+    if (t.smallUnit === 'cm')      drawM5Linjal(svgId, t.smallInt, t.fromVal, t.fromUnit);
+    else if (t.smallUnit === 'ml') drawM5Bagare(svgId, t.smallInt, t.fromVal, t.fromUnit);
+    else                           drawM5Vag(svgId, t.smallInt, t.fromVal, t.fromUnit);
 }
 
 function weKey(mod, level) { return 'm' + mod + '.' + level; }
@@ -490,8 +501,8 @@ function svgEl(tag) {
     return document.createElementNS('http://www.w3.org/2000/svg', tag);
 }
 
-function drawM3SVG(pos, leftLabel, rightLabel) {
-    const svg  = document.getElementById('m3SVG');
+function drawM3SVG(svgId, pos, leftLabel, rightLabel, pointLabel) {
+    const svg  = document.getElementById(svgId);
     const W = 400, H = 72, lineY = 36;
     const x0 = 50, x1 = 350, len = x1 - x0;
     const steps = 10;
@@ -547,15 +558,16 @@ function drawM3SVG(pos, leftLabel, rightLabel) {
     q.setAttribute('x', mx); q.setAttribute('y', lineY - 14);
     q.setAttribute('text-anchor', 'middle');
     q.setAttribute('font-size', '15'); q.setAttribute('font-weight', 'bold');
-    q.setAttribute('font-family', 'Arial, sans-serif'); q.setAttribute('fill', '#4a90d9');
-    q.textContent = '?';
+    q.setAttribute('font-family', 'Arial, sans-serif');
+    q.setAttribute('fill', pointLabel ? '#6B9E6B' : '#4a90d9');
+    q.textContent = pointLabel || '?';
     svg.appendChild(q);
 }
 
 function buildM3() {
     m3Task = genM3Task(m3Level); m3Answered = false; m3HadError = false;
 
-    drawM3SVG(m3Task.pos, m3Task.leftLabel, m3Task.rightLabel);
+    drawM3SVG('m3SVG', m3Task.pos, m3Task.leftLabel, m3Task.rightLabel);
 
     const choices = [m3Task.correct, ...m3Task.distractors];
     for (let i = choices.length - 1; i > 0; i--) {
@@ -698,8 +710,8 @@ maybeExample(4, m4Level);
 let m5Level = 0, m5LevelStreak = 0, m5Streak = 0;
 let m5Task = null, m5Answered = false, m5HadError = false;
 
-function drawM5Linjal(smallInt, fromVal, fromUnit) {
-    const svg = document.getElementById('m5SVG');
+function drawM5Linjal(svgId, smallInt, fromVal, fromUnit) {
+    const svg = document.getElementById(svgId);
     const maxCm = 300, W = 400, H = 168, lineY = 96;
     const x0 = 50, x1 = 370, len = x1 - x0;
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
@@ -752,8 +764,8 @@ function drawM5Linjal(smallInt, fromVal, fromUnit) {
 }
 
 /* ── SVG: Mätbägare (ml ↔ l) ── */
-function drawM5Bagare(smallInt, fromVal, fromUnit) {
-    const svg   = document.getElementById('m5SVG');
+function drawM5Bagare(svgId, smallInt, fromVal, fromUnit) {
+    const svg   = document.getElementById(svgId);
     const maxMl = 2000, W = 400, H = 168;
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
     svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
@@ -847,8 +859,8 @@ function drawM5Bagare(smallInt, fromVal, fromUnit) {
 }
 
 /* ── SVG: Våg (g ↔ kg) ── */
-function drawM5Vag(smallInt, fromVal, fromUnit) {
-    const svg = document.getElementById('m5SVG');
+function drawM5Vag(svgId, smallInt, fromVal, fromUnit) {
+    const svg = document.getElementById(svgId);
     const maxG = 2000, W = 400, H = 168;
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
     svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
@@ -922,9 +934,7 @@ function buildM5() {
         'Hur skrivs ' + m5Task.fromVal + ' ' + m5Task.fromUnit +
         ' i ' + m5Task.toUnit + '?';
 
-    if (m5Task.smallUnit === 'cm')      drawM5Linjal(m5Task.smallInt, m5Task.fromVal, m5Task.fromUnit);
-    else if (m5Task.smallUnit === 'ml') drawM5Bagare(m5Task.smallInt, m5Task.fromVal, m5Task.fromUnit);
-    else                                drawM5Vag(m5Task.smallInt, m5Task.fromVal, m5Task.fromUnit);
+    drawM5Measure('m5SVG', m5Task);
 
     const allChoices = [m5Task.correctStr, ...m5Task.distractors];
     for (let i = allChoices.length - 1; i > 0; i--) {
