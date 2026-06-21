@@ -164,6 +164,27 @@
         return { shape: 'rektangel', a, b, grid: false, unit: 'cm²', correct, distractors: pickDistractors(correct, cand, 3) };
     }
 
+    /* ════════ Modul 6 – Triangelns area (bas × höjd ÷ 2) ════════ */
+
+    function genM6Task(level) {
+        let b, h;
+        if (level === 0) {
+            b = rnd(2, 6) * 2;                 // jämn bas → b·h jämnt → heltalsarea
+            h = rnd(2, 6);
+        } else if (level === 1) {
+            do { b = rnd(3, 10); h = rnd(3, 9); } while ((b * h) % 2 !== 0);
+        } else {
+            do { b = rnd(6, 14); h = rnd(4, 12); } while ((b * h) % 2 !== 0);
+        }
+        const correct = b * h / 2;
+        const cand = [
+            b * h,                              // glömmer dela med 2 (klassiskt fel)
+            b + h,                              // adderar i stället
+            correct + b, correct - h, correct + 1, correct - 1, correct + h
+        ].filter(v => v > 0 && v !== correct && Number.isInteger(v));
+        return { b, h, unit: 'cm²', correct, distractors: pickDistractors(correct, cand, 3) };
+    }
+
     /* ════════ Mönster v2, lager 11a + 11c ════════
        workedSteps(mod, task): 3 stegrader (löst exempel).
        whyQuestion(mod, task): "Varför stämmer det?" + 1 korrekt + 2 distraktorer
@@ -203,6 +224,12 @@
                 return [
                     'Area är hur många rutor som får plats inuti.',
                     'Räkna längden gånger bredden: ' + t.a + ' × ' + t.b + '.',
+                    'Arean är ' + t.correct + ' ' + t.unit + '.'
+                ];
+            case 6:
+                return [
+                    'Triangelns area = bas × höjd ÷ 2.',
+                    'Räkna ' + t.b + ' × ' + t.h + ' ÷ 2 = ' + (t.b * t.h) + ' ÷ 2.',
                     'Arean är ' + t.correct + ' ' + t.unit + '.'
                 ];
             default:
@@ -245,6 +272,13 @@
                 'Area är alla sidorna ihoplagda.',                 // förväxlar med omkrets
                 'Area är längden plus bredden.'                    // fel räknesätt
             ]
+        },
+        6: {
+            correct: 'Triangelns area är bas gånger höjd, delat med 2.',
+            distractors: [
+                'Triangelns area är bas gånger höjd.',             // glömmer ÷2
+                'Triangelns area är alla sidorna ihoplagda.'       // förväxlar med omkrets
+            ]
         }
     };
 
@@ -260,6 +294,7 @@
         SYM, genM3Task,
         genM4Task,
         genM5Task,
+        genM6Task,
         workedSteps, whyQuestion
     };
 }));

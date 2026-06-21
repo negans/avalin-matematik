@@ -334,10 +334,20 @@ eq(geo.classifyAngle(180), 'Rak',     'classifyAngle 180');
     ok(t.correct === t.a * t.b, 'Geo M5 nivå'+lvl+': facit = a·b');
 }));
 
-/* — Mönster v2, lager 11a + 11c: workedSteps + whyQuestion (M1–M5) — */
+/* — M6: triangelns area (b·h/2) — */
+[0,1,2].forEach(lvl => forEachRun(geo.genM6Task, lvl, RUNS, t => {
+    ok(t.correct === t.b * t.h / 2, 'Geo M6 nivå'+lvl+': facit = b·h/2');
+    ok(Number.isInteger(t.correct), 'Geo M6 nivå'+lvl+': heltalsarea');
+    ok(t.distractors.length === 3, 'Geo M6 nivå'+lvl+': 3 distraktorer');
+    ok(distinct([t.correct, ...t.distractors]), 'Geo M6 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Geo M6 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Geo M6 nivå'+lvl+': positiva heltal');
+}));
+
+/* — Mönster v2, lager 11a + 11c: workedSteps + whyQuestion (M1–M6) — */
 {
-    const GEO_GEN = { 1: geo.genM1Task, 2: geo.genM2Task, 3: geo.genM3Task, 4: geo.genM4Task, 5: geo.genM5Task };
-    [1,2,3,4,5].forEach(mod => [0,1,2].forEach(lvl => forEachRun(GEO_GEN[mod], lvl, 300, t => {
+    const GEO_GEN = { 1: geo.genM1Task, 2: geo.genM2Task, 3: geo.genM3Task, 4: geo.genM4Task, 5: geo.genM5Task, 6: geo.genM6Task };
+    [1,2,3,4,5,6].forEach(mod => [0,1,2].forEach(lvl => forEachRun(GEO_GEN[mod], lvl, 300, t => {
         const steps = geo.workedSteps(mod, t);
         ok(steps.length === 3, 'Geo WE mod'+mod+' nivå'+lvl+': exakt 3 steg');
         ok(steps.every(s => typeof s === 'string' && s.length > 0), 'Geo WE mod'+mod+' nivå'+lvl+': alla steg ifyllda');

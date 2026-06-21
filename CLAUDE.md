@@ -149,8 +149,9 @@ Mönster v2 läggs FÖRST så att nya filer (Fas 5) föds färdiga och inget ret
     - 🎉 STEG 12 KLAR — mönster v2 (11a + 11c) utrullat på alla 9 filer.
     - Per fil måste Definition of Done passeras (se nedan).
 13. Innehållsluckor i befintliga filer (görs i samma pass som filen ändå öppnas):
-    - geometri.html M5: triangelarea (b×h/2) + sammansatta figurer (+ cirkelbegrepp: radie, diameter, medelpunkt)
-    - taluppfattning.html: överslagsräkning + rimlighetsbedömning; olika talsystem historiskt (romerska siffror)
+    - ✅ geometri.html M6: triangelarea (b×h/2) — ny modul med SVG-triangel (bas/höjd), 3 nivåer, mönster v2. logic/geometri.js genM6Task. KLAR 2026-06-21.
+    - ⬜ geometri.html: sammansatta figurer (+ cirkelbegrepp: radie, diameter, medelpunkt)
+    - ⬜ taluppfattning.html: överslagsräkning + rimlighetsbedömning; olika talsystem historiskt (romerska siffror)
 
 ### Fas 5 — Nya innehållsfiler (på mönster v2), KONKRET → ABSTRAKT
 Ordningen följer Avalins lärstil: konkret bild först, abstraktion sedan.

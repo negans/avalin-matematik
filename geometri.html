@@ -229,6 +229,36 @@
     </div>
 </div>
 
+<!-- ══════ Modul 6 ══════ -->
+<p class="section-title">Modul 6 – Triangelns area</p>
+
+<div class="card">
+    <p class="task-label">Vad är triangelns area?
+        <button type="button" class="we-btn" id="m6Show">Visa mig</button></p>
+    <div style="text-align:center"><span class="level-badge" id="m6LevelLabel">Nivå 1</span></div>
+
+    <div class="worked-example" id="m6Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="m6ExampleVisual"></div>
+        <ol class="we-steps" id="m6ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="m6ExampleClose">Jag förstår – min tur →</button></div>
+    </div>
+
+    <div id="m6Live">
+        <div class="fig-wrap"><svg id="m6SVG" width="100%"></svg></div>
+        <div class="choice-row" id="m6Choices"></div>
+        <div class="btn-row"><button class="btn-secondary" id="m6Next">Ny uppgift →</button></div>
+        <p class="streak" id="m6Streak"></p>
+        <div class="feedback" id="m6Feedback" aria-live="polite"></div>
+
+        <div class="why" id="m6Why" hidden>
+            <p class="why-q" id="m6WhyQ"></p>
+            <div class="why-choices" id="m6WhyChoices"></div>
+            <div class="why-fb" id="m6WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
+</div>
+
 <div id="miso-container">
     <div id="miso-bubble"></div>
     <img id="miso-img" src="images/miso/miso-neutral.webp" alt="Miso" width="100">
@@ -242,7 +272,7 @@ initStatsBar();
    Mönster v2 – löst exempel (11a) + resonemang (11c), delad inkoppling.
    Alla 5 moduler har 3 nivåer: exempel per nivå, "Varför?" nivå 3 var tredje.
 ════════════════════════════════ */
-const GENS = { 1: genM1Task, 2: genM2Task, 3: genM3Task, 4: genM4Task, 5: genM5Task };
+const GENS = { 1: genM1Task, 2: genM2Task, 3: genM3Task, 4: genM4Task, 5: genM5Task, 6: genM6Task };
 function niceExample(mod, level) { return GENS[mod](level); }
 
 function renderExampleVisual(mod, containerId, t) {
@@ -258,8 +288,10 @@ function renderExampleVisual(mod, containerId, t) {
             : t.shape === 'rektangel' ? '2 × (' + t.a + ' + ' + t.b + ')'
             : t.a + ' + ' + t.b + ' + ' + t.c;
         html = expr + ' = ' + ok(t.correct + ' ' + t.unit);
-    } else {
+    } else if (mod === 5) {
         html = t.a + ' × ' + t.b + ' = ' + ok(t.correct + ' ' + t.unit);
+    } else {
+        html = t.b + ' × ' + t.h + ' ÷ 2 = ' + ok(t.correct + ' ' + t.unit);
     }
     el.innerHTML = '<p style="' + big + ' font-size:1.7em">' + html + '</p>';
 }
@@ -281,7 +313,7 @@ function wireExample(mod, getLevel) {
     document.getElementById('m' + mod + 'ExampleClose').addEventListener('click', () => closeExample(mod));
 }
 
-const whyCounts = { 1:0, 2:0, 3:0, 4:0, 5:0 };
+const whyCounts = { 1:0, 2:0, 3:0, 4:0, 5:0, 6:0 };
 function maybeWhy(mod, level, task) {
     if (level !== 2) return;                 // bara nivå 3 (abstrakt)
     whyCounts[mod]++;
@@ -718,6 +750,67 @@ document.getElementById('m5Next').addEventListener('click', () => { showMiso('ne
 wireExample(5, () => m5Level);
 buildM5();
 maybeExample(5, m5Level);
+
+/* ════════════════════════════════ Modul 6 – Triangelns area ════════════════════════════════ */
+
+let m6Streak = 0, m6Task = null, m6Answered = false, m6HadError = false;
+let m6Level = 0, m6LevelStreak = 0;
+
+function drawM6() {
+    const svg = document.getElementById('m6SVG');
+    const t = m6Task;
+    const maxDim = Math.max(t.b, t.h);
+    const cell = Math.min(26, 200 / maxDim);
+    const W = t.b * cell, H = t.h * cell;
+    setBox(svg, W + 80, H + 56);
+    const x0 = 40, y0 = 22, baseY = y0 + H, apexX = x0 + W * 0.5;
+    elPoly(svg, [[x0, baseY], [x0 + W, baseY], [apexX, y0]]);
+    elLine(svg, apexX, y0, apexX, baseY, AXIS, 1.5, '4 3');                 // höjd (streckad)
+    elText(svg, x0 + W / 2, baseY + 20, t.b + ' cm', 13, LABEL);            // bas
+    elText(svg, apexX + 8, y0 + H / 2 + 4, t.h + ' cm', 12, AXIS, 'start'); // höjd
+}
+
+function buildM6() {
+    m6Task = genM6Task(m6Level); m6Answered = false; m6HadError = false;
+    drawM6();
+    buildChoices('m6Choices', [m6Task.correct, ...m6Task.distractors], v => v + ' ' + m6Task.unit, m6Check);
+    document.getElementById('m6LevelLabel').textContent = 'Nivå ' + (m6Level + 1);
+    document.getElementById('m6Feedback').textContent = '';
+    document.getElementById('m6Next').classList.remove('btn-pulse');
+    hideWhy(6);
+}
+
+function m6Check(val, btn) {
+    if (m6Answered) return;
+    const fb = document.getElementById('m6Feedback');
+    const t = m6Task;
+    if (val === t.correct) {
+        m6Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m6Choices .choice-btn').forEach(b => { b.disabled = true; });
+        if (!m6HadError) { m6Streak++; m6LevelStreak++; recordCorrect(); }
+        else { m6Streak = 0; m6LevelStreak = 0; }
+        setStreak('m6Streak', m6Streak);
+        if (m6LevelStreak >= 3 && m6Level < 2) {
+            m6Level++; m6LevelStreak = 0;
+            document.getElementById('m6LevelLabel').textContent = 'Nivå ' + (m6Level + 1);
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi större trianglar!';
+        } else { fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!'; }
+        showMiso('glad', 'Rätt area! Toppen!');
+        document.getElementById('m6Next').classList.add('btn-pulse');
+        maybeWhy(6, m6Level, m6Task);
+    } else {
+        m6HadError = true; m6LevelStreak = 0;
+        btn.classList.add('err'); btn.disabled = true;
+        fb.textContent = 'Nästan – triangelns area är ' + t.b + ' × ' + t.h + ' ÷ 2 = ' + t.correct + ' ' + t.unit + '. Glöm inte dela med 2!';
+        showMiso('uppmuntrande', 'Bas × höjd, sedan dela med 2!');
+    }
+}
+
+document.getElementById('m6Next').addEventListener('click', () => { showMiso('neutral', 'Ny triangel – kör på!'); buildM6(); maybeExample(6, m6Level); });
+wireExample(6, () => m6Level);
+buildM6();
+maybeExample(6, m6Level);
 </script>
 </body>
 </html>
