@@ -299,10 +299,16 @@ function renderExampleVisual(mod, containerId, t) {
     const el  = document.getElementById(containerId);
     const big = 'text-align:center; font-weight:bold; color:var(--color-text);';
     const ok  = s => '<span style="color:var(--color-correct)">' + s + '</span>';
+    if (mod === 1) {                       // prick-array + svar
+        const figId = containerId + 'Fig';
+        el.innerHTML = '<div class="array-wrap" style="margin:0 auto"><svg id="' + figId + '" width="100%" style="display:block; overflow:visible"></svg></div>' +
+            '<p style="' + big + ' font-size:1.6em">' + t.label + ' = ' + ok(t.correct) + '</p>';
+        drawM1Array(figId, t.rows, t.cols);
+        return;
+    }
     let expr, ans;
-    if (mod === 1)      { expr = t.label;                    ans = t.correct; }
-    else if (mod === 2) { expr = t.label.replace(' = ?', ''); ans = t.correct; }
-    else                { expr = t.label.replace(' = ?', ''); ans = t.correctStr; }
+    if (mod === 2) { expr = t.label.replace(' = ?', ''); ans = t.correct; }
+    else           { expr = t.label.replace(' = ?', ''); ans = t.correctStr; }
     el.innerHTML = '<p style="' + big + ' font-size:1.9em">' + expr + ' = ' + ok(ans) + '</p>';
 }
 
@@ -348,8 +354,8 @@ function hideWhy(mod) { hideWhyPanel('m' + mod + 'Why'); }
 let m1Streak = 0, m1Task = null, m1Answered = false, m1HadError = false;
 let m1Level = 0, m1LevelStreak = 0;
 
-function drawM1Array(rows, cols) {
-    const svg  = document.getElementById('m1SVG');
+function drawM1Array(svgId, rows, cols) {
+    const svg  = document.getElementById(svgId);
     const W = 400;
     const cell = Math.min(38, Math.floor(360 / cols), Math.floor(210 / rows));
     const gridW = cell * cols, gridH = cell * rows;
@@ -377,7 +383,7 @@ function drawM1Array(rows, cols) {
 function buildM1() {
     m1Task = genM1Task(m1Level); m1Answered = false; m1HadError = false;
 
-    drawM1Array(m1Task.rows, m1Task.cols);
+    drawM1Array('m1SVG', m1Task.rows, m1Task.cols);
     document.getElementById('m1Expr').textContent = m1Task.label + ' = ?';
 
     const choices = [m1Task.correct, ...m1Task.distractors];
