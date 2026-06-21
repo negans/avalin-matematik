@@ -185,6 +185,35 @@
         return { b, h, unit: 'cm²', correct, distractors: pickDistractors(correct, cand, 3) };
     }
 
+    /* ════════ Modul 7 – Cirkelns delar (radie, diameter, medelpunkt) ════════
+       Nivå 0: känna igen delen · nivå 1: diameter = 2·radie · nivå 2: radie = diameter/2. */
+
+    function genM7Task(level) {
+        if (level === 0) {
+            const parts = [
+                { key: 'radie',      correct: 'Radie' },
+                { key: 'diameter',   correct: 'Diameter' },
+                { key: 'medelpunkt', correct: 'Medelpunkt' }
+            ];
+            const p = parts[rnd(0, 2)];
+            return { kind: 'id', part: p.key, correct: p.correct, choices: ['Radie', 'Diameter', 'Medelpunkt'] };
+        }
+        if (level === 1) {
+            const r = rnd(2, 12), correct = 2 * r;
+            const cand = [r, r + 2, 4 * r, correct + 1, correct - 1].filter(v => v > 0 && v !== correct);
+            return { kind: 'r2d', r, unit: 'cm', correct, distractors: pickDistractors(correct, cand, 3) };
+        }
+        const r = rnd(2, 12), d = 2 * r, correct = r;
+        const cand = [d, d + 2, correct + 1, correct - 1, correct + 2].filter(v => v > 0 && v !== correct);
+        return { kind: 'd2r', d, unit: 'cm', correct, distractors: pickDistractors(correct, cand, 3) };
+    }
+
+    const M7_PART_DESC = {
+        radie: 'från mitten ut till kanten',
+        diameter: 'rakt igenom, från kant till kant via mitten',
+        medelpunkt: 'pricken i mitten'
+    };
+
     /* ════════ Mönster v2, lager 11a + 11c ════════
        workedSteps(mod, task): 3 stegrader (löst exempel).
        whyQuestion(mod, task): "Varför stämmer det?" + 1 korrekt + 2 distraktorer
@@ -231,6 +260,26 @@
                     'Triangelns area = bas × höjd ÷ 2.',
                     'Räkna ' + t.b + ' × ' + t.h + ' ÷ 2 = ' + (t.b * t.h) + ' ÷ 2.',
                     'Arean är ' + t.correct + ' ' + t.unit + '.'
+                ];
+            case 7:
+                if (t.kind === 'id') {
+                    return [
+                        'Titta på den röda markeringen i cirkeln.',
+                        'En ' + t.correct.toLowerCase() + ' är ' + M7_PART_DESC[t.part] + '.',
+                        'Det är en ' + t.correct.toLowerCase() + '.'
+                    ];
+                }
+                if (t.kind === 'r2d') {
+                    return [
+                        'Diametern är dubbelt så lång som radien.',
+                        'Räkna 2 × ' + t.r + '.',
+                        'Diametern är ' + t.correct + ' ' + t.unit + '.'
+                    ];
+                }
+                return [
+                    'Radien är hälften av diametern.',
+                    'Räkna ' + t.d + ' ÷ 2.',
+                    'Radien är ' + t.correct + ' ' + t.unit + '.'
                 ];
             default:
                 return [];
@@ -279,6 +328,13 @@
                 'Triangelns area är bas gånger höjd.',             // glömmer ÷2
                 'Triangelns area är alla sidorna ihoplagda.'       // förväxlar med omkrets
             ]
+        },
+        7: {
+            correct: 'Diametern är dubbelt så lång som radien.',
+            distractors: [
+                'Diametern är lika lång som radien.',              // missar faktor 2
+                'Radien går från kant till kant.'                  // förväxlar radie/diameter
+            ]
         }
     };
 
@@ -295,6 +351,7 @@
         genM4Task,
         genM5Task,
         genM6Task,
+        genM7Task, M7_PART_DESC,
         workedSteps, whyQuestion
     };
 }));

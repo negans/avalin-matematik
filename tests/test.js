@@ -365,6 +365,24 @@ eq(geo.classifyAngle(180), 'Rak',     'classifyAngle 180');
     })));
 }
 
+/* — M7: cirkelns delar (radie/diameter/medelpunkt + d=2r) — */
+[0,1,2].forEach(lvl => forEachRun(geo.genM7Task, lvl, RUNS, t => {
+    if (lvl === 0) {
+        ok(t.kind === 'id', 'Geo M7 nivå0: id-typ');
+        ok(t.choices.length === 3 && t.choices.includes(t.correct), 'Geo M7 nivå0: facit bland 3 termer');
+    } else if (lvl === 1) {
+        ok(t.kind === 'r2d' && t.correct === 2 * t.r, 'Geo M7 nivå1: diameter = 2·radie');
+        ok(t.distractors.length === 3 && distinct([t.correct, ...t.distractors]) && !t.distractors.includes(t.correct), 'Geo M7 nivå1: distraktorer ok');
+    } else {
+        ok(t.kind === 'd2r' && t.correct === t.d / 2, 'Geo M7 nivå2: radie = diameter/2');
+        ok(t.distractors.length === 3 && distinct([t.correct, ...t.distractors]) && !t.distractors.includes(t.correct), 'Geo M7 nivå2: distraktorer ok');
+    }
+    const steps = geo.workedSteps(7, t);
+    ok(steps.length === 3 && steps.every(s => typeof s === 'string' && s.length > 0), 'Geo M7 WE nivå'+lvl+': 3 steg ifyllda');
+    const q = geo.whyQuestion(7, t);
+    ok(q.distractors.length === 2 && distinct([q.correct, ...q.distractors]) && !q.distractors.includes(q.correct), 'Geo M7 WHY: doktrin');
+}));
+
 /* ═══════════ algebra ═══════════ */
 const alg = require('../logic/algebra.js');
 
