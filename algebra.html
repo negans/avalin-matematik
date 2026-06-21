@@ -294,12 +294,23 @@ function renderExampleVisual(mod, containerId, t) {
     const el  = document.getElementById(containerId);
     const big = 'text-align:center; font-weight:bold; color:var(--color-text);';
     const ok  = s => '<span style="color:var(--color-correct)">' + s + '</span>';
+    const figId = containerId + 'Fig';
+    if (mod === 4) {                       // våg + svar
+        el.innerHTML = '<div class="fig-wrap" style="margin:0 auto"><svg id="' + figId + '" width="100%"></svg></div>' +
+            '<p style="' + big + ' font-size:1.4em">' + t.eqStr + ' &nbsp;→&nbsp; ' + ok('x = ' + t.correct) + '</p>';
+        drawBalance(figId, t.left, '' + t.right);
+        return;
+    }
+    if (mod === 5) {                       // mönster + svar
+        el.innerHTML = '<div class="fig-wrap" style="margin:0 auto"><svg id="' + figId + '" width="100%"></svg></div>' +
+            '<p style="' + big + ' font-size:1.3em">Figur ' + t.askIndex + ' har ' + ok(t.correct) + '</p>';
+        drawPattern(figId, t.figures);
+        return;
+    }
     let html;
     if (mod === 1)      html = t.exprStr + ',&nbsp; x = ' + t.x + ' &nbsp;→&nbsp; ' + ok(t.correct);
     else if (mod === 2) html = '”' + t.text + '” &nbsp;→&nbsp; ' + ok(t.correct);
-    else if (mod === 3) html = t.exprStr + ' = ' + ok(t.correctStr);
-    else if (mod === 4) html = t.eqStr + ' &nbsp;→&nbsp; ' + ok('x = ' + t.correct);
-    else                html = t.figures.join(', ') + ', … &nbsp;→&nbsp; figur ' + t.askIndex + ': ' + ok(t.correct);
+    else                html = t.exprStr + ' = ' + ok(t.correctStr);
     el.innerHTML = '<p style="' + big + ' font-size:1.6em">' + html + '</p>';
 }
 
@@ -420,8 +431,8 @@ makeModule({
 });
 
 /* ════════ Modul 4 – Lös ekvationen (med våg) ════════ */
-function drawBalance(leftText, rightText) {
-    const svg = document.getElementById('m4SVG');
+function drawBalance(svgId, leftText, rightText) {
+    const svg = document.getElementById(svgId);
     setBox(svg, 280, 160);
     const cx = 140, beamY = 48, beamHalf = 110, panY = 100, hangX = 70;
     elLine(svg, cx, beamY, cx, 134, AXIS, 5);                       // stativ
@@ -449,7 +460,7 @@ makeModule({
     choices: 'm4Choices', badge: 'm4LevelLabel', next: 'm4Next', streak: 'm4Streak', feedback: 'm4Feedback',
     misoOk: 'Rätt löst! Toppen!', misoTip: 'Vad måste x vara för att vågen ska väga jämnt?',
     render: t => {
-        drawBalance(t.left, '' + t.right);
+        drawBalance('m4SVG', t.left, '' + t.right);
         document.getElementById('m4Eq').textContent = t.eqStr;
     },
     levelUpMsg: lvl => lvl === 2
@@ -459,8 +470,8 @@ makeModule({
 });
 
 /* ════════ Modul 5 – Mönster ════════ */
-function drawPattern(figures) {
-    const svg = document.getElementById('m5SVG');
+function drawPattern(svgId, figures) {
+    const svg = document.getElementById(svgId);
     setBox(svg, 320, 160);
     const colX = [55, 160, 265], r = 7, gap = 18, perRow = 3;
     figures.forEach((count, i) => {
@@ -480,7 +491,7 @@ makeModule({
     choices: 'm5Choices', badge: 'm5LevelLabel', next: 'm5Next', streak: 'm5Streak', feedback: 'm5Feedback',
     misoOk: 'Rätt mönster! Toppen!', misoTip: 'Hur mycket ökar det varje gång?',
     render: t => {
-        drawPattern(t.figures);
+        drawPattern('m5SVG', t.figures);
         document.getElementById('m5Q').textContent = 'Mönstret fortsätter likadant. Hur många i Figur ' + t.askIndex + '?';
     },
     levelUpMsg: () => 'Precis rätt! 🎉 Superbra – nu provar vi ett snabbare mönster!',
