@@ -263,8 +263,6 @@
 <p class="section-title">Modul 7 – Cirkelns delar</p>
 
 <div class="card">
-    <p class="task-label" id="m7Question">Cirkelns delar
-        <button type="button" class="we-btn" id="m7Show">Visa mig</button></p>
     <div style="text-align:center"><span class="level-badge" id="m7LevelLabel">Nivå 1</span></div>
 
     <div class="worked-example" id="m7Example" hidden>
@@ -275,6 +273,8 @@
     </div>
 
     <div id="m7Live">
+        <p class="task-label" id="m7Question">Cirkelns delar
+            <button type="button" class="we-btn" id="m7Show">Visa mig</button></p>
         <div class="fig-wrap"><svg id="m7SVG" width="100%"></svg></div>
         <div class="choice-row" id="m7Choices"></div>
         <div class="btn-row"><button class="btn-secondary" id="m7Next">Ny uppgift →</button></div>
@@ -327,7 +327,16 @@ function renderExampleVisual(mod, containerId, t) {
         else if (t.kind === 'r2d') html = '2 × ' + t.r + ' = ' + ok(t.correct + ' ' + t.unit);
         else                       html = t.d + ' ÷ 2 = ' + ok(t.correct + ' ' + t.unit);
     }
-    el.innerHTML = '<p style="' + big + ' font-size:1.7em">' + html + '</p>';
+    const figId = containerId + 'Fig';
+    el.innerHTML = '<div class="fig-wrap" style="margin:0 auto"><svg id="' + figId + '" width="100%"></svg></div>' +
+                   '<p style="' + big + ' font-size:1.4em">' + html + '</p>';
+    if (mod === 1)      drawAngle(figId, t.deg);
+    else if (mod === 2) drawShape(figId, t.shape);
+    else if (mod === 3) { drawShape(figId, t.shape); symAxes(t.shape, 110, 88, 60).forEach(l => elLine(document.getElementById(figId), l[0], l[1], l[2], l[3], '#6B9E6B', 2, '6 4')); }
+    else if (mod === 4) drawM4(figId, t);
+    else if (mod === 5) drawM5(figId, t);
+    else if (mod === 6) drawM6(figId, t);
+    else                drawM7Circle(figId, t);
 }
 
 function weKey(mod, level) { return 'm' + mod + '.' + level; }
@@ -432,8 +441,8 @@ function buildChoices(rowId, raws, fmt, onPick) {
 let m1Streak = 0, m1Task = null, m1Answered = false, m1HadError = false;
 let m1Level = 0, m1LevelStreak = 0;
 
-function drawAngle(deg) {
-    const svg = document.getElementById('m1SVG');
+function drawAngle(svgId, deg) {
+    const svg = document.getElementById(svgId);
     setBox(svg, 220, 150);
     const V = { x: 45, y: 125 }, L = 120, ar = 32;
     const rad = deg * Math.PI / 180;
@@ -455,7 +464,7 @@ function drawAngle(deg) {
 
 function buildM1() {
     m1Task = genM1Task(m1Level); m1Answered = false; m1HadError = false;
-    drawAngle(m1Task.deg);
+    drawAngle('m1SVG', m1Task.deg);
     buildChoices('m1Choices', m1Task.choices, x => x, m1Check);
     document.getElementById('m1LevelLabel').textContent = 'Nivå ' + (m1Level + 1);
     document.getElementById('m1Feedback').textContent = '';
@@ -652,9 +661,8 @@ maybeExample(3, m3Level);
 let m4Streak = 0, m4Task = null, m4Answered = false, m4HadError = false;
 let m4Level = 0, m4LevelStreak = 0;
 
-function drawM4() {
-    const svg = document.getElementById('m4SVG');
-    const t = m4Task;
+function drawM4(svgId, t) {
+    const svg = document.getElementById(svgId);
     if (t.shape === 'triangel') {
         setBox(svg, 240, 180);
         const P = [[120, 30], [30, 150], [210, 150]];
@@ -677,7 +685,7 @@ function drawM4() {
 
 function buildM4() {
     m4Task = genM4Task(m4Level); m4Answered = false; m4HadError = false;
-    drawM4();
+    drawM4('m4SVG', m4Task);
     buildChoices('m4Choices', [m4Task.correct, ...m4Task.distractors], v => v + ' ' + m4Task.unit, m4Check);
     document.getElementById('m4LevelLabel').textContent = 'Nivå ' + (m4Level + 1);
     document.getElementById('m4Feedback').textContent = '';
@@ -724,9 +732,8 @@ maybeExample(4, m4Level);
 let m5Streak = 0, m5Task = null, m5Answered = false, m5HadError = false;
 let m5Level = 0, m5LevelStreak = 0;
 
-function drawM5() {
-    const svg = document.getElementById('m5SVG');
-    const t = m5Task;
+function drawM5(svgId, t) {
+    const svg = document.getElementById(svgId);
     const maxSide = Math.max(t.a, t.b);
     const cell = Math.min(t.grid ? 34 : 150 / maxSide, t.grid ? 34 : 28);
     const w = t.a * cell, h = t.b * cell;
@@ -743,7 +750,7 @@ function drawM5() {
 
 function buildM5() {
     m5Task = genM5Task(m5Level); m5Answered = false; m5HadError = false;
-    drawM5();
+    drawM5('m5SVG', m5Task);
     buildChoices('m5Choices', [m5Task.correct, ...m5Task.distractors], v => v + ' ' + m5Task.unit, m5Check);
     document.getElementById('m5LevelLabel').textContent = 'Nivå ' + (m5Level + 1);
     document.getElementById('m5Feedback').textContent = '';
@@ -790,9 +797,8 @@ maybeExample(5, m5Level);
 let m6Streak = 0, m6Task = null, m6Answered = false, m6HadError = false;
 let m6Level = 0, m6LevelStreak = 0;
 
-function drawM6() {
-    const svg = document.getElementById('m6SVG');
-    const t = m6Task;
+function drawM6(svgId, t) {
+    const svg = document.getElementById(svgId);
     const maxDim = Math.max(t.b, t.h);
     const cell = Math.min(26, 200 / maxDim);
     const W = t.b * cell, H = t.h * cell;
@@ -806,7 +812,7 @@ function drawM6() {
 
 function buildM6() {
     m6Task = genM6Task(m6Level); m6Answered = false; m6HadError = false;
-    drawM6();
+    drawM6('m6SVG', m6Task);
     buildChoices('m6Choices', [m6Task.correct, ...m6Task.distractors], v => v + ' ' + m6Task.unit, m6Check);
     document.getElementById('m6LevelLabel').textContent = 'Nivå ' + (m6Level + 1);
     document.getElementById('m6Feedback').textContent = '';
