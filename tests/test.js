@@ -728,9 +728,10 @@ const TAL_GEN = {
     1: () => tal.genM1Task(),  2: () => tal.genM2Task(),
     3: (l) => tal.genM3Task(l), 4: (l) => tal.genM4Task(l),
     5: (l) => tal.genM5Task(l), 6: (l) => tal.genM6Task(l),
-    7: (l) => tal.genM7Task(l), 8: (l) => tal.genM8Task(l)
+    7: (l) => tal.genM7Task(l), 8: (l) => tal.genM8Task(l),
+    9: (l) => tal.genM9Task(l), 10: (l) => tal.genM10Task(l)
 };
-[1,2,3,4,5,6,7,8].forEach(mod => {
+[1,2,3,4,5,6,7,8,9,10].forEach(mod => {
     for (let r = 0; r < 400; r++) {
         const lvl = mod <= 2 ? undefined : (r % 3);
         const t = TAL_GEN[mod](lvl);
@@ -750,6 +751,33 @@ const TAL_GEN = {
         ok(!q.distractors.includes(q.correct), 'Tal WHY mod'+mod+': facit ej bland distraktorer');
     }
 });
+
+/* — M9: överslagsräkning — */
+[0,1,2].forEach(lvl => forEachRun(tal.genM9Task, lvl, RUNS, t => {
+    ok(t.est === t.rounded.reduce((s,x)=>s+x,0), 'Tal M9 nivå'+lvl+': est = summa av avrundade');
+    ok(t.rounded.every((r,i) => r === Math.round(t.parts[i]/t.roundTo)*t.roundTo), 'Tal M9 nivå'+lvl+': korrekt avrundning');
+    ok(t.distractors.length === 3, 'Tal M9 nivå'+lvl+': 3 distraktorer');
+    ok(distinct([t.correct, ...t.distractors]), 'Tal M9 nivå'+lvl+': distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Tal M9 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Tal M9 nivå'+lvl+': positiva heltal');
+}));
+
+/* — M10: romerska siffror — */
+eq(tal.toRoman(4),  'IV',   'toRoman 4');
+eq(tal.toRoman(9),  'IX',   'toRoman 9');
+eq(tal.toRoman(14), 'XIV',  'toRoman 14');
+eq(tal.toRoman(40), 'XL',   'toRoman 40');
+eq(tal.toRoman(49), 'XLIX', 'toRoman 49');
+eq(tal.toRoman(90), 'XC',   'toRoman 90');
+eq(tal.toRoman(100),'C',    'toRoman 100');
+[0,1,2].forEach(lvl => forEachRun(tal.genM10Task, lvl, RUNS, t => {
+    ok(t.roman === tal.toRoman(t.n), 'Tal M10 nivå'+lvl+': roman = toRoman(n)');
+    ok(t.correct === t.n, 'Tal M10 nivå'+lvl+': facit = n');
+    ok(t.distractors.length === 3, 'Tal M10 nivå'+lvl+': 3 distraktorer');
+    ok(distinct([t.correct, ...t.distractors]), 'Tal M10 nivå'+lvl+': distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Tal M10 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Tal M10 nivå'+lvl+': positiva heltal');
+}));
 
 /* ═══════════ klockan ═══════════ */
 const klock = require('../logic/klockan.js');

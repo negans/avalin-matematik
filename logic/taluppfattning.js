@@ -11,6 +11,9 @@
     else Object.assign(root, api);
 }(typeof window !== 'undefined' ? window : globalThis, function () {
 
+    /* Heltal i [a, b] (lokal hjälpare; övriga moduler använder Math.random direkt). */
+    function rnd(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+
     /* ════════ Modul 1 & 2 – positionssystemet ════════ */
 
     function makeDistractors(digitVal, posValue, numStr, pos, correct) {
@@ -331,6 +334,50 @@
         return { numbers, correct };
     }
 
+    /* ════════ Modul 9 – Överslagsräkning (avrunda och uppskatta) ════════ */
+
+    function genM9Task(level) {
+        const roundTo = level === 0 ? 10 : 100;
+        let parts;
+        if (level === 0)      parts = [rnd(21, 89), rnd(21, 89)];
+        else if (level === 1) parts = [rnd(120, 880), rnd(120, 880)];
+        else                  parts = [rnd(120, 880), rnd(120, 880), rnd(120, 880)];
+
+        const exact   = parts.reduce((s, x) => s + x, 0);
+        const rounded = parts.map(x => Math.round(x / roundTo) * roundTo);
+        const est     = rounded.reduce((s, x) => s + x, 0);
+
+        const seen = new Set([est]);
+        const distractors = [];
+        for (const d of [est + roundTo, est - roundTo, est + 2 * roundTo, est - 2 * roundTo]) {
+            if (d > 0 && !seen.has(d)) { seen.add(d); distractors.push(d); }
+            if (distractors.length >= 3) break;
+        }
+        return { parts, roundTo, rounded, exact, est, correct: est, distractors: distractors.slice(0, 3) };
+    }
+
+    /* ════════ Modul 10 – Romerska siffror (läsa) ════════ */
+
+    function toRoman(n) {
+        const map = [[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
+        let s = '', x = n;
+        for (const [v, sym] of map) { while (x >= v) { s += sym; x -= v; } }
+        return s;
+    }
+
+    function genM10Task(level) {
+        const min = level === 0 ? 1  : level === 1 ? 21 : 51;
+        const max = level === 0 ? 20 : level === 1 ? 50 : 100;
+        const n = rnd(min, max);
+        const seen = new Set([n]);
+        const distractors = [];
+        for (const d of [n + 1, n - 1, n + 2, n - 2, n + 10, n - 10, n + 5]) {
+            if (d > 0 && !seen.has(d)) { seen.add(d); distractors.push(d); }
+            if (distractors.length >= 3) break;
+        }
+        return { n, roman: toRoman(n), correct: n, distractors: distractors.slice(0, 3) };
+    }
+
     /* ════════ Mönster v2, lager 11a + 11c – delad logik per modul ════════
        workedSteps(mod, task): exakt 3 stegrader (löst exempel).
        whyQuestion(mod, task): "Varför stämmer det?" + 1 korrekt + 2 distraktorer
@@ -388,6 +435,19 @@
                     'Positiva tal är störst; av två negativa är den närmast 0 störst.',
                     t.correct + ' är störst.'
                 ];
+            case 9:
+                return [
+                    'Avrunda varje tal till närmaste ' + (t.roundTo === 10 ? 'tiotal' : 'hundratal') +
+                        ': ' + t.parts.join(', ') + ' ≈ ' + t.rounded.join(', ') + '.',
+                    'Lägg ihop de avrundade talen: ' + t.rounded.join(' + ') + '.',
+                    'Överslaget är ungefär ' + t.est + '.'
+                ];
+            case 10:
+                return [
+                    'Romerska siffror: I = 1, V = 5, X = 10, L = 50, C = 100.',
+                    'Räkna ihop tecknen (ett mindre tecken före ett större betyder minus).',
+                    t.roman + ' är ' + t.n + '.'
+                ];
             default:
                 return [];
         }
@@ -442,6 +502,20 @@
                 'Ju större siffra (utan tecken), desto större tal.',   // ignorerar minustecknet
                 'Negativa tal är alltid större än positiva.'           // omvänd riktning
             ]
+        },
+        9: {
+            correct: 'Man avrundar talen först och räknar sedan med de enkla talen.',
+            distractors: [
+                'Man räknar exakt och avrundar svaret sist.',          // missar poängen med överslag
+                'Man avrundar alltid uppåt.'                           // fel avrundningsregel
+            ]
+        },
+        10: {
+            correct: 'Ett mindre tecken före ett större betyder minus (IV = 5 − 1).',
+            distractors: [
+                'Tecknen läggs alltid ihop, aldrig minus.',            // missar subtraktiv notation
+                'Romerska siffror läses från höger till vänster.'      // fel läsriktning
+            ]
         }
     };
     WHY[2] = WHY[1];   // M2 = samma positionsresonemang som M1
@@ -459,6 +533,8 @@
         M6_LEVELS, genM6Task,
         M7_LEVELS, genM7Distractors, genM7Task,
         genM8Task,
+        genM9Task,
+        toRoman, genM10Task,
         PLACE_NAME, workedSteps, whyQuestion
     };
 }));

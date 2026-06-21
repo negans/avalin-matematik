@@ -436,6 +436,82 @@
     </div>
 </div>
 
+<!-- ══════ Modul 9 ══════ -->
+<p class="section-title">Modul 9 – Överslagsräkning</p>
+
+<div class="card">
+    <p class="task-label" id="m9Label"></p>
+    <div style="text-align:center; margin-bottom:8px">
+        <button type="button" class="we-btn" id="m9Show">Visa mig</button>
+    </div>
+
+    <div style="text-align:center">
+        <span class="level-badge" id="m9LevelLabel">Nivå 1</span>
+    </div>
+
+    <div class="worked-example" id="m9Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="m9ExampleVisual"></div>
+        <ol class="we-steps" id="m9ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="m9ExampleClose">Jag förstår – min tur →</button></div>
+    </div>
+
+    <div id="m9Live">
+        <div class="choice-row" id="m9Choices"></div>
+
+        <div class="btn-row">
+            <button class="btn-secondary" id="m9Next">Ny uppgift →</button>
+        </div>
+
+        <p class="streak" id="m9Streak"></p>
+        <div class="feedback" id="m9Feedback" aria-live="polite"></div>
+
+        <div class="why" id="m9Why" hidden>
+            <p class="why-q" id="m9WhyQ"></p>
+            <div class="why-choices" id="m9WhyChoices"></div>
+            <div class="why-fb" id="m9WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════ Modul 10 ══════ -->
+<p class="section-title">Modul 10 – Romerska siffror</p>
+
+<div class="card">
+    <p class="task-label" id="m10Label"></p>
+    <div style="text-align:center; margin-bottom:8px">
+        <button type="button" class="we-btn" id="m10Show">Visa mig</button>
+    </div>
+
+    <div style="text-align:center">
+        <span class="level-badge" id="m10LevelLabel">Nivå 1</span>
+    </div>
+
+    <div class="worked-example" id="m10Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="m10ExampleVisual"></div>
+        <ol class="we-steps" id="m10ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="m10ExampleClose">Jag förstår – min tur →</button></div>
+    </div>
+
+    <div id="m10Live">
+        <div class="choice-row" id="m10Choices"></div>
+
+        <div class="btn-row">
+            <button class="btn-secondary" id="m10Next">Ny uppgift →</button>
+        </div>
+
+        <p class="streak" id="m10Streak"></p>
+        <div class="feedback" id="m10Feedback" aria-live="polite"></div>
+
+        <div class="why" id="m10Why" hidden>
+            <p class="why-q" id="m10WhyQ"></p>
+            <div class="why-choices" id="m10WhyChoices"></div>
+            <div class="why-fb" id="m10WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
+</div>
+
 <div id="miso-container">
     <div id="miso-bubble"></div>
     <img id="miso-img" src="images/miso/miso-neutral.webp" alt="Miso" width="100">
@@ -456,7 +532,8 @@ const GENS = {
     1: () => genM1Task(), 2: () => genM2Task(),
     3: l => genM3Task(l), 4: l => genM4Task(l),
     5: l => genM5Task(l), 6: l => genM6Task(l),
-    7: l => genM7Task(l), 8: l => genM8Task(l)
+    7: l => genM7Task(l), 8: l => genM8Task(l),
+    9: l => genM9Task(l), 10: l => genM10Task(l)
 };
 function niceExample(mod, level) { return GENS[mod](level); }
 function svFmt(n) { return new Intl.NumberFormat('sv-SE').format(n); }
@@ -496,6 +573,13 @@ function renderExampleVisual(mod, containerId, t) {
             t.numbers.map(v => v === t.correct
                 ? '<span style="color:var(--color-correct)">' + v + '</span>' : v
             ).join(' &nbsp;&nbsp; ') + '</p>';
+    } else if (mod === 9) {
+        el.innerHTML = '<p style="' + big + ' font-size:1.6em">' +
+            t.parts.join(' + ') + ' &nbsp;≈&nbsp; ' + t.rounded.join(' + ') +
+            ' = <span style="color:var(--color-correct)">' + t.est + '</span></p>';
+    } else if (mod === 10) {
+        el.innerHTML = '<p style="' + big + ' font-size:2.2em">' + t.roman +
+            ' &nbsp;=&nbsp; <span style="color:var(--color-correct)">' + t.n + '</span></p>';
     }
 }
 
@@ -516,7 +600,7 @@ function wireExample(mod, getLevel) {
     document.getElementById('m' + mod + 'ExampleClose').addEventListener('click', () => closeExample(mod));
 }
 
-const whyCounts = { 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0 };
+const whyCounts = { 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0 };
 function maybeWhy(mod, level, task) {
     if (level !== undefined && level !== 2) return;   // moduler med nivåer: bara nivå 2
     whyCounts[mod]++;
@@ -1199,6 +1283,140 @@ document.getElementById('m8Next').addEventListener('click', () => { showMiso('ne
 wireExample(8, () => m8Level);
 buildM8();
 maybeExample(8, m8Level);
+
+/* ════════════════════════════════
+   Modul 9 – Överslagsräkning
+════════════════════════════════ */
+
+let m9Streak = 0, m9Task = null, m9Answered = false, m9HadError = false;
+let m9Level = 0, m9LevelStreak = 0;
+
+function buildM9() {
+    m9Task = genM9Task(m9Level); m9Answered = false; m9HadError = false;
+
+    document.getElementById('m9Label').innerHTML =
+        'Ungefär hur mycket är <strong>' + m9Task.parts.join(' + ') + '</strong>?';
+
+    const choices = [m9Task.correct, ...m9Task.distractors];
+    for (let i = choices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [choices[i], choices[j]] = [choices[j], choices[i]];
+    }
+    const row = document.getElementById('m9Choices');
+    row.innerHTML = '';
+    choices.forEach(val => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = '≈ ' + val;
+        btn.addEventListener('click', () => m9Check(val, btn));
+        row.appendChild(btn);
+    });
+
+    document.getElementById('m9LevelLabel').textContent = 'Nivå ' + (m9Level + 1);
+    document.getElementById('m9Feedback').textContent = '';
+    document.getElementById('m9Next').classList.remove('btn-pulse');
+    hideWhy(9);
+}
+
+function m9Check(val, btn) {
+    if (m9Answered) return;
+    const fb = document.getElementById('m9Feedback');
+
+    if (val === m9Task.correct) {
+        m9Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m9Choices .choice-btn').forEach(b => { b.disabled = true; });
+        if (!m9HadError) { m9Streak++; m9LevelStreak++; recordCorrect(); } else { m9Streak = 0; m9LevelStreak = 0; }
+        setStreak('m9Streak', m9Streak);
+        if (m9LevelStreak >= 3 && m9Level < 2) {
+            m9Level++; m9LevelStreak = 0;
+            document.getElementById('m9LevelLabel').textContent = 'Nivå ' + (m9Level + 1);
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi större tal!';
+        } else {
+            fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
+        }
+        document.getElementById('m9Next').classList.add('btn-pulse');
+        showMiso('glad', 'Bra överslag! Toppen!');
+        maybeWhy(9, m9Level, m9Task);
+    } else {
+        m9HadError = true; m9LevelStreak = 0;
+        btn.classList.add('err'); btn.disabled = true;
+        fb.textContent = 'Nästan – avrunda först: ' + m9Task.rounded.join(' + ') + ' = ' + m9Task.est + '.';
+        showMiso('uppmuntrande', 'Avrunda talen först!');
+    }
+}
+
+document.getElementById('m9Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – gör ett överslag!'); buildM9(); maybeExample(9, m9Level); });
+wireExample(9, () => m9Level);
+buildM9();
+maybeExample(9, m9Level);
+
+/* ════════════════════════════════
+   Modul 10 – Romerska siffror
+════════════════════════════════ */
+
+let m10Streak = 0, m10Task = null, m10Answered = false, m10HadError = false;
+let m10Level = 0, m10LevelStreak = 0;
+
+function buildM10() {
+    m10Task = genM10Task(m10Level); m10Answered = false; m10HadError = false;
+
+    document.getElementById('m10Label').innerHTML =
+        'Vilket tal är <strong style="letter-spacing:0.06em">' + m10Task.roman + '</strong>?';
+
+    const choices = [m10Task.correct, ...m10Task.distractors];
+    for (let i = choices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [choices[i], choices[j]] = [choices[j], choices[i]];
+    }
+    const row = document.getElementById('m10Choices');
+    row.innerHTML = '';
+    choices.forEach(val => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = val;
+        btn.addEventListener('click', () => m10Check(val, btn));
+        row.appendChild(btn);
+    });
+
+    document.getElementById('m10LevelLabel').textContent = 'Nivå ' + (m10Level + 1);
+    document.getElementById('m10Feedback').textContent = '';
+    document.getElementById('m10Next').classList.remove('btn-pulse');
+    hideWhy(10);
+}
+
+function m10Check(val, btn) {
+    if (m10Answered) return;
+    const fb = document.getElementById('m10Feedback');
+
+    if (val === m10Task.correct) {
+        m10Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m10Choices .choice-btn').forEach(b => { b.disabled = true; });
+        if (!m10HadError) { m10Streak++; m10LevelStreak++; recordCorrect(); } else { m10Streak = 0; m10LevelStreak = 0; }
+        setStreak('m10Streak', m10Streak);
+        if (m10LevelStreak >= 3 && m10Level < 2) {
+            m10Level++; m10LevelStreak = 0;
+            document.getElementById('m10LevelLabel').textContent = 'Nivå ' + (m10Level + 1);
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi större tal!';
+        } else {
+            fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!';
+        }
+        document.getElementById('m10Next').classList.add('btn-pulse');
+        showMiso('glad', 'Rätt avläst! Toppen!');
+        maybeWhy(10, m10Level, m10Task);
+    } else {
+        m10HadError = true; m10LevelStreak = 0;
+        btn.classList.add('err'); btn.disabled = true;
+        fb.textContent = 'Nästan – ' + m10Task.roman + ' är ' + m10Task.n + '. (I=1, V=5, X=10, L=50, C=100.)';
+        showMiso('uppmuntrande', 'Räkna ihop tecknen!');
+    }
+}
+
+document.getElementById('m10Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – läs romerska siffror!'); buildM10(); maybeExample(10, m10Level); });
+wireExample(10, () => m10Level);
+buildM10();
+maybeExample(10, m10Level);
 </script>
 </body>
 </html>
