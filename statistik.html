@@ -69,8 +69,6 @@
 <!-- ══════ Modul 1 ══════ -->
 <p class="section-title">Modul 1 – Läsa diagram</p>
 <div class="card">
-    <p class="task-label" id="m1Q">Läs av stapeldiagrammet.
-        <button type="button" class="we-btn" id="m1Show">Visa mig</button></p>
     <div style="text-align:center"><span class="level-badge" id="m1LevelLabel">Nivå 1</span></div>
 
     <div class="worked-example" id="m1Example" hidden>
@@ -81,6 +79,8 @@
     </div>
 
     <div id="m1Live">
+        <p class="task-label" id="m1Q">Läs av stapeldiagrammet.
+            <button type="button" class="we-btn" id="m1Show">Visa mig</button></p>
         <div class="fig-wrap"><svg id="m1SVG" width="100%"></svg></div>
         <div class="choice-row" id="m1Choices"></div>
         <div class="btn-row"><button class="btn-secondary" id="m1Next">Ny uppgift →</button></div>
@@ -98,8 +98,6 @@
 <!-- ══════ Modul 2 ══════ -->
 <p class="section-title">Modul 2 – Medelvärde</p>
 <div class="card">
-    <p class="task-label">Räkna ut medelvärdet: lägg ihop och dela med antalet.
-        <button type="button" class="we-btn" id="m2Show">Visa mig</button></p>
     <div style="text-align:center"><span class="level-badge" id="m2LevelLabel">Nivå 1</span></div>
 
     <div class="worked-example" id="m2Example" hidden>
@@ -110,6 +108,8 @@
     </div>
 
     <div id="m2Live">
+        <p class="task-label">Räkna ut medelvärdet: lägg ihop och dela med antalet.
+            <button type="button" class="we-btn" id="m2Show">Visa mig</button></p>
         <p class="numlist" id="m2Nums"></p>
         <div class="choice-row" id="m2Choices"></div>
         <div class="btn-row"><button class="btn-secondary" id="m2Next">Ny uppgift →</button></div>
@@ -127,8 +127,6 @@
 <!-- ══════ Modul 3 ══════ -->
 <p class="section-title">Modul 3 – Sannolikhet</p>
 <div class="card">
-    <p class="task-label" id="m3Q">Hur stor är chansen?
-        <button type="button" class="we-btn" id="m3Show">Visa mig</button></p>
     <div style="text-align:center"><span class="level-badge" id="m3LevelLabel">Nivå 1</span></div>
 
     <div class="worked-example" id="m3Example" hidden>
@@ -139,6 +137,8 @@
     </div>
 
     <div id="m3Live">
+        <p class="task-label" id="m3Q">Hur stor är chansen?
+            <button type="button" class="we-btn" id="m3Show">Visa mig</button></p>
         <div class="fig-wrap"><svg id="m3SVG" width="100%"></svg></div>
         <div class="choice-row" id="m3Choices"></div>
         <div class="btn-row"><button class="btn-secondary" id="m3Next">Ny uppgift →</button></div>
@@ -156,8 +156,6 @@
 <!-- ══════ Modul 4 ══════ -->
 <p class="section-title">Modul 4 – Kombinationer</p>
 <div class="card">
-    <p class="task-label" id="m4Q">Hur många olika kombinationer?
-        <button type="button" class="we-btn" id="m4Show">Visa mig</button></p>
     <div style="text-align:center"><span class="level-badge" id="m4LevelLabel">Nivå 1</span></div>
 
     <div class="worked-example" id="m4Example" hidden>
@@ -168,6 +166,8 @@
     </div>
 
     <div id="m4Live">
+        <p class="task-label" id="m4Q">Hur många olika kombinationer?
+            <button type="button" class="we-btn" id="m4Show">Visa mig</button></p>
         <div class="fig-wrap"><svg id="m4SVG" width="100%"></svg></div>
         <div class="choice-row" id="m4Choices"></div>
         <div class="btn-row"><button class="btn-secondary" id="m4Next">Ny uppgift →</button></div>
@@ -185,8 +185,6 @@
 <!-- ══════ Modul 5 ══════ -->
 <p class="section-title">Modul 5 – Typvärde</p>
 <div class="card">
-    <p class="task-label">Vilket värde är vanligast? (typvärdet)
-        <button type="button" class="we-btn" id="m5Show">Visa mig</button></p>
     <div style="text-align:center"><span class="level-badge" id="m5LevelLabel">Nivå 1</span></div>
 
     <div class="worked-example" id="m5Example" hidden>
@@ -197,6 +195,8 @@
     </div>
 
     <div id="m5Live">
+        <p class="task-label">Vilket värde är vanligast? (typvärdet)
+            <button type="button" class="we-btn" id="m5Show">Visa mig</button></p>
         <p class="numlist" id="m5Nums"></p>
         <div class="choice-row" id="m5Choices"></div>
         <div class="btn-row"><button class="btn-secondary" id="m5Next">Ny uppgift →</button></div>
@@ -275,11 +275,28 @@ function renderExampleVisual(mod, containerId, t) {
     const el  = document.getElementById(containerId);
     const big = 'text-align:center; font-weight:bold; color:var(--color-text);';
     const ok  = s => '<span style="color:var(--color-correct)">' + s + '</span>';
+    const figId = containerId + 'Fig';
+    const figWrap = '<div class="fig-wrap" style="max-width:300px; margin:0 auto"><svg id="' + figId + '" width="100%"></svg></div>';
+
+    if (mod === 1) {                       // stapeldiagram + svar
+        el.innerHTML = figWrap + '<p style="' + big + ' font-size:1.15em">' + t.question + ' &nbsp;→&nbsp; ' + ok(t.correct) + '</p>';
+        drawBars(figId, t.names, t.values);
+        return;
+    }
+    if (mod === 3) {                       // kulor + svar
+        el.innerHTML = figWrap + '<p style="' + big + ' font-size:1.15em">Chansen att dra ' + t.askName + ' är ' + ok(t.correct) + '</p>';
+        drawMarbles(figId, t.colors);
+        return;
+    }
+    if (mod === 4 && t.c == null) {        // rutnät + svar
+        el.innerHTML = figWrap + '<p style="' + big + ' font-size:1.15em">' + t.a + ' × ' + t.b + ' = ' + ok(t.correct) + '</p>';
+        drawGrid(figId, t.a, t.b);
+        return;
+    }
+
     let html;
-    if (mod === 1)      html = t.question + ' &nbsp;→&nbsp; ' + ok(t.correct);
-    else if (mod === 2) html = t.nums.join(' + ') + ' = ' + t.sum + ', &nbsp; ' + t.sum + ' ÷ ' + t.n + ' = ' + ok(t.correct);
-    else if (mod === 3) html = t.askName + ': &nbsp; ' + ok(t.correct);
-    else if (mod === 4) html = t.a + ' × ' + t.b + (t.c ? ' × ' + t.c : '') + ' = ' + ok(t.correct);
+    if (mod === 2)      html = t.nums.join(' + ') + ' = ' + t.sum + ', &nbsp; ' + t.sum + ' ÷ ' + t.n + ' = ' + ok(t.correct);
+    else if (mod === 4) html = t.a + ' × ' + t.b + ' × ' + t.c + ' = ' + ok(t.correct);
     else                html = t.data.join(', ') + ' &nbsp;→&nbsp; ' + ok(t.correct);
     el.innerHTML = '<p style="' + big + ' font-size:1.5em">' + html + '</p>';
 }
@@ -363,8 +380,8 @@ function makeModule(p) {
 }
 
 /* ════════ Modul 1 – Stapeldiagram ════════ */
-function drawBars(names, values) {
-    const svg = document.getElementById('m1SVG');
+function drawBars(svgId, names, values) {
+    const svg = document.getElementById(svgId);
     const W = 300, H = 200; setBox(svg, W, H);
     const n = values.length, maxV = Math.max(...values);
     const padL = 16, padR = 10, padB = 34, padT = 22;
@@ -386,7 +403,7 @@ makeModule({
     mod: 1, gen: genM1Task, correctOf: t => t.correct, fmt: v => v,
     choices: 'm1Choices', badge: 'm1LevelLabel', next: 'm1Next', streak: 'm1Streak', feedback: 'm1Feedback',
     misoOk: 'Rätt avläst! Toppen!', misoTip: 'Titta på hur hög stapeln är!',
-    render: t => { drawBars(t.names, t.values); document.getElementById('m1Q').textContent = t.question; },
+    render: t => { drawBars('m1SVG', t.names, t.values); document.getElementById('m1Q').textContent = t.question; },
     levelUpMsg: () => 'Precis rätt! 🎉 Superbra – nu kommer en klurigare fråga!',
     hint: t => 'Nästan – rätt svar är ' + t.correct + '. Läs av stapelns höjd noga.'
 });
@@ -402,8 +419,8 @@ makeModule({
 });
 
 /* ════════ Modul 3 – Sannolikhet ════════ */
-function drawMarbles(colors) {
-    const svg = document.getElementById('m3SVG');
+function drawMarbles(svgId, colors) {
+    const svg = document.getElementById(svgId);
     setBox(svg, 300, 150);
     const r = 13, gap = 32, perRow = 8;
     let x = 22, y = 26, count = 0;
@@ -423,7 +440,7 @@ makeModule({
     choices: 'm3Choices', badge: 'm3LevelLabel', next: 'm3Next', streak: 'm3Streak', feedback: 'm3Feedback',
     misoOk: 'Rätt chans! Toppen!', misoTip: 'Räkna hur många av den färgen, av alla.',
     render: t => {
-        drawMarbles(t.colors);
+        drawMarbles('m3SVG', t.colors);
         document.getElementById('m3Q').textContent =
             'Du drar en kula utan att titta. Hur stor är chansen att den är ' + t.askName + '?';
     },
@@ -432,8 +449,8 @@ makeModule({
 });
 
 /* ════════ Modul 4 – Kombinationer ════════ */
-function drawGrid(a, b) {
-    const svg = document.getElementById('m4SVG');
+function drawGrid(svgId, a, b) {
+    const svg = document.getElementById(svgId);
     setBox(svg, 300, 180);
     const cell = Math.min(40, Math.floor(240 / Math.max(a, b)));
     const w = b * cell, h = a * cell, x0 = (300 - w) / 2, y0 = (180 - h) / 2;
@@ -452,7 +469,7 @@ makeModule({
     render: t => {
         const q = document.getElementById('m4Q');
         if (t.c == null) {
-            drawGrid(t.a, t.b);
+            drawGrid('m4SVG', t.a, t.b);
             q.textContent = 'Du har ' + t.a + ' sorters ' + t.items[0] + ' och ' + t.b + ' sorters ' +
                             t.items[1] + '. Hur många olika kombinationer kan du göra?';
         } else {
