@@ -383,6 +383,21 @@ eq(geo.classifyAngle(180), 'Rak',     'classifyAngle 180');
     ok(q.distractors.length === 2 && distinct([q.correct, ...q.distractors]) && !q.distractors.includes(q.correct), 'Geo M7 WHY: doktrin');
 }));
 
+/* — M8: sammansatta figurer (a·c + b·d) — */
+[0,1,2].forEach(lvl => forEachRun(geo.genM8Task, lvl, RUNS, t => {
+    ok(t.correct === t.a * t.c + t.b * t.d, 'Geo M8 nivå'+lvl+': area = a·c + b·d');
+    ok(t.r1 === t.a * t.c && t.r2 === t.b * t.d, 'Geo M8 nivå'+lvl+': delareor');
+    ok(t.b < t.a, 'Geo M8 nivå'+lvl+': överdel smalare');
+    ok(t.distractors.length === 3, 'Geo M8 nivå'+lvl+': 3 distraktorer');
+    ok(distinct([t.correct, ...t.distractors]), 'Geo M8 nivå'+lvl+': distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Geo M8 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Geo M8 nivå'+lvl+': positiva heltal');
+    const steps = geo.workedSteps(8, t);
+    ok(steps.length === 3 && steps[2].includes(String(t.correct)), 'Geo M8 WE: 3 steg, sista bär facit');
+    const q = geo.whyQuestion(8, t);
+    ok(q.distractors.length === 2 && distinct([q.correct, ...q.distractors]) && !q.distractors.includes(q.correct), 'Geo M8 WHY: doktrin');
+}));
+
 /* ═══════════ algebra ═══════════ */
 const alg = require('../logic/algebra.js');
 

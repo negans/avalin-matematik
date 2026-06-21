@@ -214,6 +214,25 @@
         medelpunkt: 'pricken i mitten'
     };
 
+    /* ════════ Modul 8 – Sammansatta figurer (L-form = två rektanglar) ════════
+       L-formen = en överrektangel (b×d) ovanpå vänstra delen av en
+       underrektangel (a×c). Area = a·c + b·d. */
+
+    function genM8Task(level) {
+        let a, b, c, d;
+        if (level === 0)      { a = rnd(3, 5); c = rnd(2, 3); d = rnd(2, 3); }
+        else if (level === 1) { a = rnd(4, 7); c = rnd(2, 4); d = rnd(2, 4); }
+        else                  { a = rnd(5, 9); c = rnd(3, 6); d = rnd(2, 5); }
+        b = rnd(2, a - 1);                       // överdelen smalare än underdelen
+        const r1 = a * c, r2 = b * d, correct = r1 + r2;
+        const cand = [
+            a * (c + d),                         // hela rektangeln (glömmer urtaget)
+            r1, r2,                              // bara en rektangel
+            correct + a, correct - b, correct + 2
+        ].filter(v => v > 0 && v !== correct);
+        return { a, b, c, d, r1, r2, unit: 'cm²', correct, distractors: pickDistractors(correct, cand, 3) };
+    }
+
     /* ════════ Mönster v2, lager 11a + 11c ════════
        workedSteps(mod, task): 3 stegrader (löst exempel).
        whyQuestion(mod, task): "Varför stämmer det?" + 1 korrekt + 2 distraktorer
@@ -260,6 +279,12 @@
                     'Triangelns area = bas × höjd ÷ 2.',
                     'Räkna ' + t.b + ' × ' + t.h + ' ÷ 2 = ' + (t.b * t.h) + ' ÷ 2.',
                     'Arean är ' + t.correct + ' ' + t.unit + '.'
+                ];
+            case 8:
+                return [
+                    'Dela upp figuren i två rektanglar.',
+                    'Rektangel 1: ' + t.a + ' × ' + t.c + ' = ' + t.r1 + '. Rektangel 2: ' + t.b + ' × ' + t.d + ' = ' + t.r2 + '.',
+                    'Lägg ihop: ' + t.r1 + ' + ' + t.r2 + ' = ' + t.correct + ' ' + t.unit + '.'
                 ];
             case 7:
                 if (t.kind === 'id') {
@@ -335,6 +360,13 @@
                 'Diametern är lika lång som radien.',              // missar faktor 2
                 'Radien går från kant till kant.'                  // förväxlar radie/diameter
             ]
+        },
+        8: {
+            correct: 'Man delar upp figuren i rektanglar och lägger ihop areorna.',
+            distractors: [
+                'Man räknar hela rektangeln utan att ta bort urtaget.', // över-räknar
+                'Man räknar bara en av rektanglarna.'                   // delberäkning
+            ]
         }
     };
 
@@ -352,6 +384,7 @@
         genM5Task,
         genM6Task,
         genM7Task, M7_PART_DESC,
+        genM8Task,
         workedSteps, whyQuestion
     };
 }));

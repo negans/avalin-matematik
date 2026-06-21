@@ -154,7 +154,8 @@ Mönster v2 läggs FÖRST så att nya filer (Fas 5) föds färdiga och inget ret
 13. Innehållsluckor i befintliga filer (görs i samma pass som filen ändå öppnas):
     - ✅ geometri.html M6: triangelarea (b×h/2) — ny modul med SVG-triangel (bas/höjd), 3 nivåer, mönster v2. logic/geometri.js genM6Task. KLAR 2026-06-21.
     - ✅ geometri.html M7: cirkelbegrepp (radie/diameter/medelpunkt + d=2·r) — ny modul, SVG-cirkel, 3 nivåer (känna igen → d från r → r från d), mönster v2. KLAR 2026-06-21.
-    - ⬜ geometri.html: sammansatta figurer (uppskjutet — krångligast, osäkrast värde; tas vid behov)
+    - ✅ geometri.html M8: sammansatta figurer (L-form = två rektanglar, area = a·c + b·d) — ny modul, SVG-L med streckad delningslinje + mått, 3 nivåer, mönster v2. KLAR 2026-06-21.
+    🎉 FAS 4 KLAR — mönster v2 (alla 9 filer) + granskningsfix (bild först + fråga i live) + alla innehållsluckor (steg 13).
     - ✅ taluppfattning.html M9: överslagsräkning (avrunda till tiotal/hundratal, uppskatta summa, 3 nivåer) — genM9Task. KLAR 2026-06-21.
     - ✅ taluppfattning.html M10: romerska siffror (läsa, I–C, 3 nivåer) — genM10Task + toRoman. KLAR 2026-06-21.
     - Återstår av steg 13: bara sammansatta figurer (uppskjutet, se ovan). Övriga innehållsluckor klara.

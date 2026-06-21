@@ -289,6 +289,36 @@
     </div>
 </div>
 
+<!-- ══════ Modul 8 ══════ -->
+<p class="section-title">Modul 8 – Sammansatta figurer</p>
+
+<div class="card">
+    <div style="text-align:center"><span class="level-badge" id="m8LevelLabel">Nivå 1</span></div>
+
+    <div class="worked-example" id="m8Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="m8ExampleVisual"></div>
+        <ol class="we-steps" id="m8ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="m8ExampleClose">Jag förstår – min tur →</button></div>
+    </div>
+
+    <div id="m8Live">
+        <p class="task-label">Vad är figurens area?
+            <button type="button" class="we-btn" id="m8Show">Visa mig</button></p>
+        <div class="fig-wrap"><svg id="m8SVG" width="100%"></svg></div>
+        <div class="choice-row" id="m8Choices"></div>
+        <div class="btn-row"><button class="btn-secondary" id="m8Next">Ny uppgift →</button></div>
+        <p class="streak" id="m8Streak"></p>
+        <div class="feedback" id="m8Feedback" aria-live="polite"></div>
+
+        <div class="why" id="m8Why" hidden>
+            <p class="why-q" id="m8WhyQ"></p>
+            <div class="why-choices" id="m8WhyChoices"></div>
+            <div class="why-fb" id="m8WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
+</div>
+
 <div id="miso-container">
     <div id="miso-bubble"></div>
     <img id="miso-img" src="images/miso/miso-neutral.webp" alt="Miso" width="100">
@@ -302,7 +332,7 @@ initStatsBar();
    Mönster v2 – löst exempel (11a) + resonemang (11c), delad inkoppling.
    Alla 5 moduler har 3 nivåer: exempel per nivå, "Varför?" nivå 3 var tredje.
 ════════════════════════════════ */
-const GENS = { 1: genM1Task, 2: genM2Task, 3: genM3Task, 4: genM4Task, 5: genM5Task, 6: genM6Task, 7: genM7Task };
+const GENS = { 1: genM1Task, 2: genM2Task, 3: genM3Task, 4: genM4Task, 5: genM5Task, 6: genM6Task, 7: genM7Task, 8: genM8Task };
 function niceExample(mod, level) { return GENS[mod](level); }
 
 function renderExampleVisual(mod, containerId, t) {
@@ -322,10 +352,12 @@ function renderExampleVisual(mod, containerId, t) {
         html = t.a + ' × ' + t.b + ' = ' + ok(t.correct + ' ' + t.unit);
     } else if (mod === 6) {
         html = t.b + ' × ' + t.h + ' ÷ 2 = ' + ok(t.correct + ' ' + t.unit);
-    } else {
+    } else if (mod === 7) {
         if (t.kind === 'id')       html = ok(t.correct) + ' — ' + M7_PART_DESC[t.part];
         else if (t.kind === 'r2d') html = '2 × ' + t.r + ' = ' + ok(t.correct + ' ' + t.unit);
         else                       html = t.d + ' ÷ 2 = ' + ok(t.correct + ' ' + t.unit);
+    } else {
+        html = t.r1 + ' + ' + t.r2 + ' = ' + ok(t.correct + ' ' + t.unit);
     }
     const figId = containerId + 'Fig';
     el.innerHTML = '<div class="fig-wrap" style="margin:0 auto"><svg id="' + figId + '" width="100%"></svg></div>' +
@@ -336,7 +368,8 @@ function renderExampleVisual(mod, containerId, t) {
     else if (mod === 4) drawM4(figId, t);
     else if (mod === 5) drawM5(figId, t);
     else if (mod === 6) drawM6(figId, t);
-    else                drawM7Circle(figId, t);
+    else if (mod === 7) drawM7Circle(figId, t);
+    else                drawM8Composite(figId, t);
 }
 
 function weKey(mod, level) { return 'm' + mod + '.' + level; }
@@ -356,7 +389,7 @@ function wireExample(mod, getLevel) {
     document.getElementById('m' + mod + 'ExampleClose').addEventListener('click', () => closeExample(mod));
 }
 
-const whyCounts = { 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0 };
+const whyCounts = { 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0 };
 function maybeWhy(mod, level, task) {
     if (level !== 2) return;                 // bara nivå 3 (abstrakt)
     whyCounts[mod]++;
@@ -941,6 +974,71 @@ document.getElementById('m7Next').addEventListener('click', () => { showMiso('ne
 wireExample(7, () => m7Level);
 buildM7();
 maybeExample(7, m7Level);
+
+/* ════════════════════════════════ Modul 8 – Sammansatta figurer ════════════════════════════════ */
+
+let m8Streak = 0, m8Task = null, m8Answered = false, m8HadError = false;
+let m8Level = 0, m8LevelStreak = 0;
+
+function drawM8Composite(svgId, t) {
+    const svg = document.getElementById(svgId);
+    const cell = Math.min(26, Math.floor(180 / Math.max(t.a, t.c + t.d)));
+    const W = t.a * cell, H = (t.c + t.d) * cell;
+    setBox(svg, W + 80, H + 50);
+    const x0 = 40, y0 = 22;
+    const px = (gx, gy) => [x0 + gx * cell, y0 + gy * cell];
+    /* L-form: överrektangel (b×d) ovanpå vänstra delen av underrektangel (a×c) */
+    elPoly(svg, [px(0, 0), px(t.b, 0), px(t.b, t.d), px(t.a, t.d), px(t.a, t.c + t.d), px(0, t.c + t.d)]);
+    /* streckad linje som delar i två rektanglar */
+    elLine(svg, x0, y0 + t.d * cell, x0 + t.a * cell, y0 + t.d * cell, AXIS, 1.5, '4 3');
+    /* mått */
+    elText(svg, x0 + t.b * cell / 2, y0 - 6, t.b + ' cm', 12, LABEL);                               // överdel bredd
+    elText(svg, x0 + t.a * cell / 2, y0 + (t.c + t.d) * cell + 16, t.a + ' cm', 12, LABEL);          // underdel bredd
+    elText(svg, x0 - 8, y0 + t.d * cell / 2 + 4, t.d + ' cm', 12, LABEL, 'end');                     // överdel höjd
+    elText(svg, x0 - 8, y0 + t.d * cell + t.c * cell / 2 + 4, t.c + ' cm', 12, LABEL, 'end');        // underdel höjd
+}
+
+function buildM8() {
+    m8Task = genM8Task(m8Level); m8Answered = false; m8HadError = false;
+    drawM8Composite('m8SVG', m8Task);
+    buildChoices('m8Choices', [m8Task.correct, ...m8Task.distractors], v => v + ' ' + m8Task.unit, m8Check);
+    document.getElementById('m8LevelLabel').textContent = 'Nivå ' + (m8Level + 1);
+    document.getElementById('m8Feedback').textContent = '';
+    document.getElementById('m8Next').classList.remove('btn-pulse');
+    hideWhy(8);
+}
+
+function m8Check(val, btn) {
+    if (m8Answered) return;
+    const fb = document.getElementById('m8Feedback');
+    const t = m8Task;
+    if (val === t.correct) {
+        m8Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m8Choices .choice-btn').forEach(b => { b.disabled = true; });
+        if (!m8HadError) { m8Streak++; m8LevelStreak++; recordCorrect(); }
+        else { m8Streak = 0; m8LevelStreak = 0; }
+        setStreak('m8Streak', m8Streak);
+        if (m8LevelStreak >= 3 && m8Level < 2) {
+            m8Level++; m8LevelStreak = 0;
+            document.getElementById('m8LevelLabel').textContent = 'Nivå ' + (m8Level + 1);
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi större figurer!';
+        } else { fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!'; }
+        showMiso('glad', 'Rätt area! Toppen!');
+        document.getElementById('m8Next').classList.add('btn-pulse');
+        maybeWhy(8, m8Level, m8Task);
+    } else {
+        m8HadError = true; m8LevelStreak = 0;
+        btn.classList.add('err'); btn.disabled = true;
+        fb.textContent = 'Nästan – dela i två rektanglar: ' + t.a + '×' + t.c + ' + ' + t.b + '×' + t.d + ' = ' + t.correct + ' ' + t.unit + '.';
+        showMiso('uppmuntrande', 'Dela figuren i två rektanglar!');
+    }
+}
+
+document.getElementById('m8Next').addEventListener('click', () => { showMiso('neutral', 'Ny figur – kör på!'); buildM8(); maybeExample(8, m8Level); });
+wireExample(8, () => m8Level);
+buildM8();
+maybeExample(8, m8Level);
 </script>
 </body>
 </html>
