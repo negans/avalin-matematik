@@ -845,6 +845,78 @@ for (let h = 1; h <= 12; h++) {
     ok(q.distractors.every(d => typeof d === 'string' && d.length > 0), 'klock WHY: distraktorer ifyllda');
 }
 
+/* ═══════════ skala ═══════════ */
+const ska = require('../logic/skala.js');
+
+/* — classify: exakta gränser — */
+eq(ska.classify(4, 8), 'Förstoring',   'classify 4→8');
+eq(ska.classify(8, 4), 'Förminskning', 'classify 8→4');
+eq(ska.classify(5, 5), 'Lika stor',    'classify 5→5');
+
+/* — M1: förstoring/förminskning (känna igen) — */
+[0,1,2].forEach(lvl => forEachRun(ska.genM1Task, lvl, RUNS, t => {
+    ok(t.choices.length === 3, 'Skala M1 nivå'+lvl+': 3 alternativ');
+    ok(distinct(t.choices), 'Skala M1 nivå'+lvl+': distinkta alternativ');
+    ok(t.choices.includes(t.correct), 'Skala M1 nivå'+lvl+': facit finns bland alternativen');
+    if (t.mode === 'pic') {
+        ok(t.orig > 0 && t.ny > 0, 'Skala M1 nivå'+lvl+': positiva rutor');
+        ok(ska.classify(t.orig, t.ny) === t.correct, 'Skala M1 nivå'+lvl+': facit = jämförelse rutor');
+    } else {
+        ok(t.a > 0 && t.b > 0, 'Skala M1 nivå'+lvl+': positiva skaltal');
+        ok(ska.classify(t.a, t.b) === t.correct, 'Skala M1 nivå'+lvl+': facit = jämförelse a:b');
+        if (lvl >= 1) ok(t.a === 1 || t.b === 1, 'Skala M1 nivå'+lvl+': ena talet är 1');
+    }
+}));
+/* alla tre kategorier ska vara nåbara på varje nivå */
+[0,1,2].forEach(lvl => {
+    const seen = new Set();
+    for (let i = 0; i < 2000; i++) seen.add(ska.genM1Task(lvl).correct);
+    ska.CHOICES_M1.forEach(c => ok(seen.has(c), 'Skala M1 nivå'+lvl+': "'+c+'" är nåbar'));
+});
+
+/* — M2: skalfaktor på en längd (× / ÷) — */
+[0,1,2].forEach(lvl => forEachRun(ska.genM2Task, lvl, RUNS, t => {
+    const exp = t.type === 'forstoring' ? t.n * t.orig : t.orig / t.n;
+    ok(t.correct === exp, 'Skala M2 nivå'+lvl+': facit = '+(t.type)+' ('+t.orig+', n='+t.n+')');
+    ok(Number.isInteger(t.correct) && t.correct > 0, 'Skala M2 nivå'+lvl+': heltal > 0');
+    if (t.type === 'forminskning') ok(t.orig % t.n === 0, 'Skala M2 nivå'+lvl+': original delbart med n');
+    if (lvl === 0) ok(t.type === 'forstoring', 'Skala M2 nivå0: bara förstoring');
+    if (lvl === 1) ok(t.type === 'forminskning', 'Skala M2 nivå1: bara förminskning');
+    ok(t.distractors.length === 3, 'Skala M2 nivå'+lvl+': 3 distraktorer');
+    ok(distinct([t.correct, ...t.distractors]), 'Skala M2 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Skala M2 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Skala M2 nivå'+lvl+': positiva heltal');
+}));
+
+/* — M3: karta, verklig längd (k × M) — */
+[0,1,2].forEach(lvl => forEachRun(ska.genM3Task, lvl, RUNS, t => {
+    ok(t.correct === t.k * t.M, 'Skala M3 nivå'+lvl+': facit = k × M');
+    ok(Number.isInteger(t.correct) && t.correct > 0, 'Skala M3 nivå'+lvl+': heltal > 0');
+    ok(t.distractors.length === 3, 'Skala M3 nivå'+lvl+': 3 distraktorer');
+    ok(distinct([t.correct, ...t.distractors]), 'Skala M3 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Skala M3 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Skala M3 nivå'+lvl+': positiva heltal');
+}));
+
+/* — Mönster v2, lager 11a + 11c: workedSteps + whyQuestion (M1–M3) — */
+{
+    const SKA_GEN = { 1: ska.genM1Task, 2: ska.genM2Task, 3: ska.genM3Task };
+    [1,2,3].forEach(mod => [0,1,2].forEach(lvl => forEachRun(SKA_GEN[mod], lvl, 300, t => {
+        const steps = ska.workedSteps(mod, t);
+        ok(steps.length === 3, 'Skala WE mod'+mod+' nivå'+lvl+': exakt 3 steg');
+        ok(steps.every(s => typeof s === 'string' && s.length > 0), 'Skala WE mod'+mod+' nivå'+lvl+': alla steg ifyllda');
+        if (mod === 1) ok(steps[2].includes(t.correct.toLowerCase()), 'Skala WE mod1: sista steget bär kategori');
+        else           ok(steps[2].includes(String(t.correct)),       'Skala WE mod'+mod+': sista steget bär facit');
+
+        const q = ska.whyQuestion(mod);
+        ok(typeof q.prompt === 'string' && q.prompt.length > 0, 'Skala WHY mod'+mod+': prompt ifylld');
+        ok(typeof q.correct === 'string' && q.correct.length > 0, 'Skala WHY mod'+mod+': korrekt rad ifylld');
+        ok(q.distractors.length === 2, 'Skala WHY mod'+mod+': exakt 2 distraktorer');
+        ok(distinct([q.correct, ...q.distractors]), 'Skala WHY mod'+mod+': 3 distinkta alternativ');
+        ok(!q.distractors.includes(q.correct), 'Skala WHY mod'+mod+': facit ej bland distraktorer');
+    })));
+}
+
 /* ═══════════ Resultat ═══════════ */
 console.log('');
 console.log('  PASS: ' + pass);

@@ -70,9 +70,9 @@ avalin-matematik/
 ├── geometri.html       (✅ klar — Modul 1–5: vinklar, former, symmetri, omkrets, area)
 ├── algebra.html        (✅ klar — Modul 1–5: uttryck, variabler, förenkla, ekvationer, mönster)
 ├── statistik.html      (✅ klar — Modul 1–5: diagram, medelvärde, sannolikhet, kombinatorik, typvärde)
-├── skala.html          (⬜ ej skapad — Fas 5)
+├── skala.html          (✅ klar — Modul 1–3: förstoring/förminskning, skalfaktor, karta↔verklighet)
 ├── template.html       (✅ klar — extraherad ur koordinat.html; skelett för nya modulsidor)
-├── logic/              (✅ delad ren logik: shared, decimaltal, brak, taluppfattning, klockan, multiplikation, koordinat, geometri, algebra, statistik)
+├── logic/              (✅ delad ren logik: shared, decimaltal, brak, taluppfattning, klockan, multiplikation, koordinat, geometri, algebra, statistik, skala)
 ├── tests/              (✅ test.js — beroendefri svit, körs med "node tests/test.js")
 ├── CLAUDE.md
 └── README.md
@@ -162,7 +162,7 @@ Mönster v2 läggs FÖRST så att nya filer (Fas 5) föds färdiga och inget ret
 
 ### Fas 5 — Nya innehållsfiler (på mönster v2), KONKRET → ABSTRAKT
 Ordningen följer Avalins lärstil: konkret bild först, abstraktion sedan.
-14. skala.html — förminskning/förstoring, elevnära (karta, förstora en teckning). Konkret ingång till proportionalitet. Knyt till katter/rita.
+14. ✅ skala.html KLAR — förminskning/förstoring, elevnära. Modul 1 förstoring/förminskning (känna igen: kattteckning i rutor + skala a:b) · 2 skalfaktor på en längd (förstoring n:1 ×, förminskning 1:n ÷) · 3 karta↔verklighet (1 cm = M m). Mönster v2 (worked example + "Varför?") inbyggt från start. logic/skala.js testad (genM1–3Task, workedSteps, whyQuestion); ockulärt verifierat i Brave. Knyter till katter/rita via 🐱-teckning.
 15. proportionalitet — proportionella samband i bråk-/decimal-/procentform (abstraktionen som generaliserar skala + procent). Egen fil eller modul.
 16. grafer för proportionella samband — i koordinat.html (koordinatsystemet finns) eller i proportionalitet-filen.
 17. 3D-former — tredimensionella objekt och deras egenskaper (utöka geometri.html eller egen fil).
