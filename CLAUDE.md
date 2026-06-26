@@ -71,8 +71,9 @@ avalin-matematik/
 ├── algebra.html        (✅ klar — Modul 1–5: uttryck, variabler, förenkla, ekvationer, mönster)
 ├── statistik.html      (✅ klar — Modul 1–5: diagram, medelvärde, sannolikhet, kombinatorik, typvärde)
 ├── skala.html          (✅ klar — Modul 1–3: förstoring/förminskning, skalfaktor, karta↔verklighet)
+├── proportionalitet.html (✅ klar — Modul 1–3: per styck, enhetspris, samma förhållande)
 ├── template.html       (✅ klar — extraherad ur koordinat.html; skelett för nya modulsidor)
-├── logic/              (✅ delad ren logik: shared, decimaltal, brak, taluppfattning, klockan, multiplikation, koordinat, geometri, algebra, statistik, skala)
+├── logic/              (✅ delad ren logik: shared, decimaltal, brak, taluppfattning, klockan, multiplikation, koordinat, geometri, algebra, statistik, skala, proportionalitet)
 ├── tests/              (✅ test.js — beroendefri svit, körs med "node tests/test.js")
 ├── CLAUDE.md
 └── README.md
@@ -163,7 +164,7 @@ Mönster v2 läggs FÖRST så att nya filer (Fas 5) föds färdiga och inget ret
 ### Fas 5 — Nya innehållsfiler (på mönster v2), KONKRET → ABSTRAKT
 Ordningen följer Avalins lärstil: konkret bild först, abstraktion sedan.
 14. ✅ skala.html KLAR — förminskning/förstoring, elevnära. Modul 1 förstoring/förminskning (känna igen: kattteckning i rutor + skala a:b) · 2 skalfaktor på en längd (förstoring n:1 ×, förminskning 1:n ÷) · 3 karta↔verklighet (1 cm = M m). Mönster v2 (worked example + "Varför?") inbyggt från start. logic/skala.js testad (genM1–3Task, workedSteps, whyQuestion); ockulärt verifierat i Brave. Knyter till katter/rita via 🐱-teckning.
-15. proportionalitet — proportionella samband i bråk-/decimal-/procentform (abstraktionen som generaliserar skala + procent). Egen fil eller modul.
+15. ✅ proportionalitet.html KLAR — proportionella samband (y = k·x), elevnära. Modul 1 lika mycket per styck (total = antal × styckpris, föremål i rad) · 2 hur mycket kostar ett? (styckpris = total ÷ antal, alltid heltal) · 3 samma förhållande (värdetabell a→b, c→?; konstanten k, knyter till bråk/decimal/procent i resonemanget). Mönster v2 (worked example + "Varför?") inbyggt från start. logic/proportionalitet.js testad (genM1–3Task, workedSteps, whyQuestion; art+plural i ITEMS för korrekt svensk grammatik); ockulärt verifierat via preview. Generaliserar skala (steg 14) + procent (brak M10).
 16. grafer för proportionella samband — i koordinat.html (koordinatsystemet finns) eller i proportionalitet-filen.
 17. 3D-former — tredimensionella objekt och deras egenskaper (utöka geometri.html eller egen fil).
 

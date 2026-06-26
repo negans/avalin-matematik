@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proportionalitet – Avalins Matematikverkstad</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="storage.js"></script>
+    <script src="ui.js"></script>
+    <script src="logic/shared.js"></script>
+    <script src="logic/proportionalitet.js"></script>
+    <style>
+        /* Rubrik i heading-färg istället för style.css primary */
+        .section-title { color: var(--color-heading); }
+
+        /* Badge: ljus text mot #C8A882-bakgrund */
+        .level-badge { color: #FFF8F0; }
+
+        /* Svarsalternativ: explicit yta och tunn kantlinje */
+        .choice-btn { background: var(--color-surface); border: 1.5px solid var(--color-border); }
+
+        /* Figurytan */
+        .fig-wrap { width: 100%; max-width: 340px; margin: 6px auto 14px; }
+
+        /* ── Mönster v2, lager 11a: "Visa mig" + löst exempel ── */
+        .we-btn {
+            background: var(--color-surface); color: var(--color-primary);
+            border: 1.5px solid var(--color-primary); border-radius: 12px;
+            cursor: pointer; font-size: 0.8em; padding: 2px 10px;
+            margin-left: 8px; vertical-align: middle;
+        }
+        .we-btn:hover { background: var(--color-surface-alt); }
+        .worked-example {
+            background: var(--color-surface-alt);
+            border: 2px dashed var(--color-badge); border-radius: 16px;
+            padding: 12px 16px 16px; margin: 6px 0 14px;
+        }
+        .we-head { text-align: center; font-weight: bold; color: var(--color-heading); margin-bottom: 6px; }
+        .we-steps { margin: 10px auto 14px; padding-left: 1.4em; max-width: 360px; color: var(--color-text); }
+        .we-steps li { margin: 6px 0; line-height: 1.4; }
+
+        /* ── Mönster v2, lager 11c: resonemang "Varför?" ── */
+        .why { margin-top: 16px; padding: 14px 16px; background: var(--color-surface-alt); border: 1.5px solid var(--color-border); border-radius: 14px; }
+        .why-q { text-align: center; font-weight: bold; color: var(--color-heading); margin-bottom: 10px; }
+        .why-choices { display: flex; flex-direction: column; gap: 8px; }
+        .why-fb { text-align: center; margin-top: 10px; color: var(--color-text); min-height: 1.2em; }
+        #m1SVG, #m2SVG, #m3SVG { display: block; overflow: visible; }
+
+        #miso-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1000;
+        }
+        #miso-img { width: clamp(100px, 12vw, 140px); display: block; }
+        #miso-bubble {
+            display: none;
+            background: rgba(255,248,240,0.88);
+            border: 2px solid var(--color-border);
+            border-radius: 16px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            font-size: 0.85em;
+            max-width: 160px;
+            text-align: center;
+            color: var(--color-text);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+    </style>
+</head>
+<body>
+
+<nav class="top-nav">
+    <a href="index.html">← Avalins Matematikverkstad</a>
+</nav>
+
+<h1>⚖️ Proportionalitet</h1>
+
+<!-- ══════ Modul 1 ══════ -->
+<p class="section-title">Modul 1 – Lika mycket per styck</p>
+
+<div class="card">
+    <div style="text-align:center"><span class="level-badge" id="m1LevelLabel">Nivå 1</span></div>
+
+    <div class="worked-example" id="m1Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="m1ExampleVisual"></div>
+        <ol class="we-steps" id="m1ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="m1ExampleClose">Jag förstår – min tur →</button></div>
+    </div>
+
+    <div id="m1Live">
+        <p class="task-label" id="m1Question">Hur mycket kostar alla?
+            <button type="button" class="we-btn" id="m1Show">Visa mig</button></p>
+        <div class="fig-wrap"><svg id="m1SVG" width="100%"></svg></div>
+        <div class="choice-row" id="m1Choices"></div>
+        <div class="btn-row"><button class="btn-secondary" id="m1Next">Ny uppgift →</button></div>
+        <p class="streak" id="m1Streak"></p>
+        <div class="feedback" id="m1Feedback" aria-live="polite"></div>
+
+        <div class="why" id="m1Why" hidden>
+            <p class="why-q" id="m1WhyQ"></p>
+            <div class="why-choices" id="m1WhyChoices"></div>
+            <div class="why-fb" id="m1WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════ Modul 2 ══════ -->
+<p class="section-title">Modul 2 – Hur mycket kostar ett?</p>
+
+<div class="card">
+    <div style="text-align:center"><span class="level-badge" id="m2LevelLabel">Nivå 1</span></div>
+
+    <div class="worked-example" id="m2Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="m2ExampleVisual"></div>
+        <ol class="we-steps" id="m2ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="m2ExampleClose">Jag förstår – min tur →</button></div>
+    </div>
+
+    <div id="m2Live">
+        <p class="task-label" id="m2Question">Hur mycket kostar ett?
+            <button type="button" class="we-btn" id="m2Show">Visa mig</button></p>
+        <div class="fig-wrap"><svg id="m2SVG" width="100%"></svg></div>
+        <div class="choice-row" id="m2Choices"></div>
+        <div class="btn-row"><button class="btn-secondary" id="m2Next">Ny uppgift →</button></div>
+        <p class="streak" id="m2Streak"></p>
+        <div class="feedback" id="m2Feedback" aria-live="polite"></div>
+
+        <div class="why" id="m2Why" hidden>
+            <p class="why-q" id="m2WhyQ"></p>
+            <div class="why-choices" id="m2WhyChoices"></div>
+            <div class="why-fb" id="m2WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════ Modul 3 ══════ -->
+<p class="section-title">Modul 3 – Samma förhållande</p>
+
+<div class="card">
+    <div style="text-align:center"><span class="level-badge" id="m3LevelLabel">Nivå 1</span></div>
+
+    <div class="worked-example" id="m3Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="m3ExampleVisual"></div>
+        <ol class="we-steps" id="m3ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="m3ExampleClose">Jag förstår – min tur →</button></div>
+    </div>
+
+    <div id="m3Live">
+        <p class="task-label" id="m3Question">Vilket tal saknas?
+            <button type="button" class="we-btn" id="m3Show">Visa mig</button></p>
+        <div class="fig-wrap"><svg id="m3SVG" width="100%"></svg></div>
+        <div class="choice-row" id="m3Choices"></div>
+        <div class="btn-row"><button class="btn-secondary" id="m3Next">Ny uppgift →</button></div>
+        <p class="streak" id="m3Streak"></p>
+        <div class="feedback" id="m3Feedback" aria-live="polite"></div>
+
+        <div class="why" id="m3Why" hidden>
+            <p class="why-q" id="m3WhyQ"></p>
+            <div class="why-choices" id="m3WhyChoices"></div>
+            <div class="why-fb" id="m3WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
+</div>
+
+<div id="miso-container">
+    <div id="miso-bubble"></div>
+    <img id="miso-img" src="images/miso/miso-neutral.webp" alt="Miso" width="100">
+</div>
+
+<script>
+const CAT_NAME = "Miso";
+initStatsBar();
+
+/* ════════════════════════════════
+   Mönster v2 – löst exempel (11a) + resonemang (11c), delad inkoppling.
+   3 moduler, 3 nivåer: exempel per nivå, "Varför?" nivå 3 var tredje.
+════════════════════════════════ */
+const GENS = { 1: genM1Task, 2: genM2Task, 3: genM3Task };
+function niceExample(mod, level) { return GENS[mod](level); }
+
+function renderExampleVisual(mod, containerId, t) {
+    const big = 'text-align:center; font-weight:bold; color:var(--color-text);';
+    const ok  = s => '<span style="color:var(--color-correct)">' + s + '</span>';
+    let html;
+    if (mod === 1) {
+        html = t.n + ' × ' + t.each + ' = ' + ok(t.correct + ' kr');
+    } else if (mod === 2) {
+        html = t.total + ' ÷ ' + t.n + ' = ' + ok(t.correct + ' kr');
+    } else {
+        html = t.c + ' × ' + t.k + ' = ' + ok(t.correct);
+    }
+    const el = document.getElementById(containerId);
+    const figId = containerId + 'Fig';
+    el.innerHTML = '<div class="fig-wrap" style="margin:0 auto"><svg id="' + figId + '" width="100%"></svg></div>' +
+                   '<p style="' + big + ' font-size:1.4em">' + html + '</p>';
+    if (mod === 1)      drawM1(figId, t);
+    else if (mod === 2) drawM2(figId, t);
+    else                drawM3(figId, t);
+}
+
+function weKey(mod, level) { return 'm' + mod + '.' + level; }
+function weSeen(mod, level) { const s = getSetting('propWeSeen', {}); return !!s[weKey(mod, level)]; }
+function weMark(mod, level) { const s = getSetting('propWeSeen', {}); s[weKey(mod, level)] = true; setSetting('propWeSeen', s); }
+
+function showExample(mod, level) {
+    const t = niceExample(mod, level);
+    renderExampleVisual(mod, 'm' + mod + 'ExampleVisual', t);
+    renderExampleSteps('m' + mod + 'ExampleSteps', workedSteps(mod, t));
+    toggleExample('m' + mod + 'Example', 'm' + mod + 'Live', true);
+}
+function closeExample(mod) { toggleExample('m' + mod + 'Example', 'm' + mod + 'Live', false); }
+function maybeExample(mod, level) { if (!weSeen(mod, level)) { weMark(mod, level); showExample(mod, level); } }
+function wireExample(mod, getLevel) {
+    document.getElementById('m' + mod + 'Show').addEventListener('click', () => showExample(mod, getLevel()));
+    document.getElementById('m' + mod + 'ExampleClose').addEventListener('click', () => closeExample(mod));
+}
+
+const whyCounts = { 1: 0, 2: 0, 3: 0 };
+function maybeWhy(mod, level, task) {
+    if (level !== 2) return;                 // bara nivå 3 (abstrakt)
+    whyCounts[mod]++;
+    if (whyCounts[mod] % 3 !== 0) return;    // ~var tredje
+    showWhy(mod, task);
+}
+function showWhy(mod, task) {
+    renderWhyPanel(whyQuestion(mod, task), {
+        panel: 'm' + mod + 'Why', q: 'm' + mod + 'WhyQ',
+        choices: 'm' + mod + 'WhyChoices', fb: 'm' + mod + 'WhyFb'
+    }, {
+        onCorrect: () => showMiso('glad', 'Bra resonerat!'),
+        onWrong:   () => showMiso('uppmuntrande', 'Bra att du funderar!')
+    });
+}
+function hideWhy(mod) { hideWhyPanel('m' + mod + 'Why'); }
+
+/* ════════ Delade rit-hjälpare ════════ */
+const STROKE = '#C97B3A', AXIS = '#8A6D4F', LABEL = '#4A3728';
+const TAG = '#9CB98C', CELL = '#FBF3E6', HL = '#F3D9B8';
+
+function svgEl(tag) { return document.createElementNS('http://www.w3.org/2000/svg', tag); }
+function setBox(svg, w, h) {
+    svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.innerHTML = '';
+}
+function elText(svg, x, y, str, size, color, anchor) {
+    const t = svgEl('text');
+    t.setAttribute('x', x); t.setAttribute('y', y);
+    t.setAttribute('text-anchor', anchor || 'middle');
+    t.setAttribute('font-size', size || 13);
+    t.setAttribute('font-family', 'Arial, sans-serif');
+    t.setAttribute('fill', color || LABEL);
+    t.textContent = str;
+    svg.appendChild(t);
+}
+function elRect(svg, x, y, w, h, fill, stroke, sw, rx) {
+    const r = svgEl('rect');
+    r.setAttribute('x', x); r.setAttribute('y', y);
+    r.setAttribute('width', w); r.setAttribute('height', h);
+    r.setAttribute('fill', fill); r.setAttribute('stroke', stroke);
+    r.setAttribute('stroke-width', sw);
+    if (rx) r.setAttribute('rx', rx);
+    svg.appendChild(r);
+    return r;
+}
+function elEmoji(svg, cx, cy, size, ch) {
+    const t = svgEl('text');
+    t.setAttribute('x', cx); t.setAttribute('y', cy);
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('dominant-baseline', 'central');
+    t.setAttribute('font-size', size);
+    t.textContent = ch;
+    svg.appendChild(t);
+}
+
+/* En rad med n likadana föremål, jämnt fördelade. Returnerar radens höjd-mitt. */
+function drawItemRow(svg, ch, n, x0, y, totalW) {
+    const step = totalW / n;
+    for (let i = 0; i < n; i++) elEmoji(svg, x0 + step * (i + 0.5), y, Math.min(34, step * 0.7), ch);
+}
+
+/* Skapar svarsknappar. raws = råvärden, fmt(raw) -> etikett, onPick(raw, btn). */
+function buildChoices(rowId, raws, fmt, onPick) {
+    const shuffled = raws.slice();
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = rnd(0, i);
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    const row = document.getElementById(rowId);
+    row.innerHTML = '';
+    shuffled.forEach(raw => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = fmt(raw);
+        btn.addEventListener('click', () => onPick(raw, btn));
+        row.appendChild(btn);
+    });
+}
+
+/* ════════════════════════════════ Modul 1 – Lika mycket per styck ════════════════════════════════ */
+
+let m1Streak = 0, m1Task = null, m1Answered = false, m1HadError = false;
+let m1Level = 0, m1LevelStreak = 0;
+
+function drawM1(svgId, t) {
+    const svg = document.getElementById(svgId);
+    const W = 300, H = 130, pad = 20;
+    setBox(svg, W, H);
+    drawItemRow(svg, t.emoji, t.n, pad, 50, W - pad * 2);
+    elText(svg, W / 2, 100, '1 styck = ' + t.each + ' kr', 15, STROKE);
+    elText(svg, W / 2, 122, t.n + ' st ' + t.item, 12, AXIS);
+}
+
+function buildM1() {
+    m1Task = genM1Task(m1Level); m1Answered = false; m1HadError = false;
+    drawM1('m1SVG', m1Task);
+    document.getElementById('m1Question').childNodes[0].nodeValue =
+        m1Task.art + ' ' + m1Task.item + ' kostar ' + m1Task.each + ' kr. Vad kostar ' + m1Task.n + ' ' + m1Task.plural + '? ';
+    buildChoices('m1Choices', [m1Task.correct, ...m1Task.distractors], v => v + ' kr', m1Check);
+    document.getElementById('m1LevelLabel').textContent = 'Nivå ' + (m1Level + 1);
+    document.getElementById('m1Feedback').textContent = '';
+    document.getElementById('m1Next').classList.remove('btn-pulse');
+    hideWhy(1);
+}
+
+function m1Check(val, btn) {
+    if (m1Answered) return;
+    const fb = document.getElementById('m1Feedback');
+    const t = m1Task;
+    if (val === t.correct) {
+        m1Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m1Choices .choice-btn').forEach(b => { b.disabled = true; });
+        if (!m1HadError) { m1Streak++; m1LevelStreak++; recordCorrect(); }
+        else { m1Streak = 0; m1LevelStreak = 0; }
+        setStreak('m1Streak', m1Streak);
+        if (m1LevelStreak >= 3 && m1Level < 2) {
+            m1Level++; m1LevelStreak = 0;
+            document.getElementById('m1LevelLabel').textContent = 'Nivå ' + (m1Level + 1);
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi med större tal!';
+        } else { fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!'; }
+        showMiso('glad', 'Rätt pris! Toppen!');
+        document.getElementById('m1Next').classList.add('btn-pulse');
+        maybeWhy(1, m1Level, m1Task);
+    } else {
+        m1HadError = true; m1LevelStreak = 0;
+        btn.classList.add('err'); btn.disabled = true;
+        fb.textContent = 'Nästan – ' + t.n + ' × ' + t.each + ' = ' + t.correct + ' kr.';
+        showMiso('uppmuntrande', 'Gångra antalet med priset för en!');
+    }
+}
+document.getElementById('m1Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildM1(); maybeExample(1, m1Level); });
+wireExample(1, () => m1Level);
+buildM1();
+maybeExample(1, m1Level);
+
+/* ════════════════════════════════ Modul 2 – Hur mycket kostar ett? ════════════════════════════════ */
+
+let m2Streak = 0, m2Task = null, m2Answered = false, m2HadError = false;
+let m2Level = 0, m2LevelStreak = 0;
+
+function drawM2(svgId, t) {
+    const svg = document.getElementById(svgId);
+    const W = 300, H = 140, pad = 24;
+    setBox(svg, W, H);
+    elRect(svg, pad - 6, 28, W - (pad - 6) * 2, 52, CELL, TAG, 2, 10);
+    drawItemRow(svg, t.emoji, t.n, pad, 54, W - pad * 2);
+    elText(svg, W / 2, 104, 'Tillsammans: ' + t.total + ' kr', 16, STROKE);
+    elText(svg, W / 2, 126, t.n + ' st ' + t.item, 12, AXIS);
+}
+
+function buildM2() {
+    m2Task = genM2Task(m2Level); m2Answered = false; m2HadError = false;
+    drawM2('m2SVG', m2Task);
+    document.getElementById('m2Question').childNodes[0].nodeValue =
+        m2Task.n + ' ' + m2Task.plural + ' kostar ' + m2Task.total + ' kr. Vad kostar 1 ' + m2Task.item + '? ';
+    buildChoices('m2Choices', [m2Task.correct, ...m2Task.distractors], v => v + ' kr', m2Check);
+    document.getElementById('m2LevelLabel').textContent = 'Nivå ' + (m2Level + 1);
+    document.getElementById('m2Feedback').textContent = '';
+    document.getElementById('m2Next').classList.remove('btn-pulse');
+    hideWhy(2);
+}
+
+function m2Check(val, btn) {
+    if (m2Answered) return;
+    const fb = document.getElementById('m2Feedback');
+    const t = m2Task;
+    if (val === t.correct) {
+        m2Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m2Choices .choice-btn').forEach(b => { b.disabled = true; });
+        if (!m2HadError) { m2Streak++; m2LevelStreak++; recordCorrect(); }
+        else { m2Streak = 0; m2LevelStreak = 0; }
+        setStreak('m2Streak', m2Streak);
+        if (m2LevelStreak >= 3 && m2Level < 2) {
+            m2Level++; m2LevelStreak = 0;
+            document.getElementById('m2LevelLabel').textContent = 'Nivå ' + (m2Level + 1);
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi med större tal!';
+        } else { fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!'; }
+        showMiso('glad', 'Rätt styckpris! Toppen!');
+        document.getElementById('m2Next').classList.add('btn-pulse');
+        maybeWhy(2, m2Level, m2Task);
+    } else {
+        m2HadError = true; m2LevelStreak = 0;
+        btn.classList.add('err'); btn.disabled = true;
+        fb.textContent = 'Nästan – ' + t.total + ' ÷ ' + t.n + ' = ' + t.correct + ' kr.';
+        showMiso('uppmuntrande', 'Dela totalen med antalet!');
+    }
+}
+document.getElementById('m2Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildM2(); maybeExample(2, m2Level); });
+wireExample(2, () => m2Level);
+buildM2();
+maybeExample(2, m2Level);
+
+/* ════════════════════════════════ Modul 3 – Samma förhållande ════════════════════════════════ */
+
+let m3Streak = 0, m3Task = null, m3Answered = false, m3HadError = false;
+let m3Level = 0, m3LevelStreak = 0;
+
+/* En värdetabell: rad 1 (a → b) är ifylld, rad 2 (c → ?) söks. */
+function drawM3(svgId, t) {
+    const svg = document.getElementById(svgId);
+    const colW = 110, rowH = 40, x0 = 40, y0 = 24;
+    const W = x0 * 2 + colW * 2, H = y0 + rowH * 3 + 16;
+    setBox(svg, W, H);
+    /* huvudrad */
+    elRect(svg, x0, y0, colW, rowH, TAG, AXIS, 1.5);
+    elRect(svg, x0 + colW, y0, colW, rowH, TAG, AXIS, 1.5);
+    elText(svg, x0 + colW / 2, y0 + rowH / 2 + 5, 'Antal', 14, '#FFF8F0');
+    elText(svg, x0 + colW * 1.5, y0 + rowH / 2 + 5, 'Pris (kr)', 14, '#FFF8F0');
+    /* rad 1: a → b (ifylld) */
+    let ry = y0 + rowH;
+    elRect(svg, x0, ry, colW, rowH, CELL, AXIS, 1.5);
+    elRect(svg, x0 + colW, ry, colW, rowH, CELL, AXIS, 1.5);
+    elText(svg, x0 + colW / 2, ry + rowH / 2 + 6, String(t.a), 20, LABEL);
+    elText(svg, x0 + colW * 1.5, ry + rowH / 2 + 6, String(t.b), 20, LABEL);
+    /* rad 2: c → ? (söks, markerad) */
+    ry += rowH;
+    elRect(svg, x0, ry, colW, rowH, CELL, AXIS, 1.5);
+    elRect(svg, x0 + colW, ry, colW, rowH, HL, STROKE, 2.5);
+    elText(svg, x0 + colW / 2, ry + rowH / 2 + 6, String(t.c), 20, LABEL);
+    elText(svg, x0 + colW * 1.5, ry + rowH / 2 + 6, '?', 22, STROKE);
+}
+
+function buildM3() {
+    m3Task = genM3Task(m3Level); m3Answered = false; m3HadError = false;
+    drawM3('m3SVG', m3Task);
+    document.getElementById('m3Question').childNodes[0].nodeValue =
+        'Samma förhållande i hela tabellen. Vilket tal saknas? ';
+    buildChoices('m3Choices', [m3Task.correct, ...m3Task.distractors], v => String(v), m3Check);
+    document.getElementById('m3LevelLabel').textContent = 'Nivå ' + (m3Level + 1);
+    document.getElementById('m3Feedback').textContent = '';
+    document.getElementById('m3Next').classList.remove('btn-pulse');
+    hideWhy(3);
+}
+
+function m3Check(val, btn) {
+    if (m3Answered) return;
+    const fb = document.getElementById('m3Feedback');
+    const t = m3Task;
+    if (val === t.correct) {
+        m3Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m3Choices .choice-btn').forEach(b => { b.disabled = true; });
+        if (!m3HadError) { m3Streak++; m3LevelStreak++; recordCorrect(); }
+        else { m3Streak = 0; m3LevelStreak = 0; }
+        setStreak('m3Streak', m3Streak);
+        if (m3LevelStreak >= 3 && m3Level < 2) {
+            m3Level++; m3LevelStreak = 0;
+            document.getElementById('m3LevelLabel').textContent = 'Nivå ' + (m3Level + 1);
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi med större tal!';
+        } else { fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!'; }
+        showMiso('glad', 'Rätt förhållande! Toppen!');
+        document.getElementById('m3Next').classList.add('btn-pulse');
+        maybeWhy(3, m3Level, m3Task);
+    } else {
+        m3HadError = true; m3LevelStreak = 0;
+        btn.classList.add('err'); btn.disabled = true;
+        fb.textContent = 'Nästan – ' + t.a + ' blir ' + t.b + ' (gånger ' + t.k + '), så ' + t.c + ' × ' + t.k + ' = ' + t.correct + '.';
+        showMiso('uppmuntrande', 'Samma gångertal i båda raderna!');
+    }
+}
+document.getElementById('m3Next').addEventListener('click', () => { showMiso('neutral', 'Ny tabell – kör på!'); buildM3(); maybeExample(3, m3Level); });
+wireExample(3, () => m3Level);
+buildM3();
+maybeExample(3, m3Level);
+</script>
+</body>
+</html>

@@ -917,6 +917,61 @@ eq(ska.classify(5, 5), 'Lika stor',    'classify 5→5');
     })));
 }
 
+/* ═══════════ proportionalitet ═══════════ */
+const pro = require('../logic/proportionalitet.js');
+
+/* — M1: lika mycket per styck (total = n × each) — */
+[0,1,2].forEach(lvl => forEachRun(pro.genM1Task, lvl, RUNS, t => {
+    ok(t.correct === t.n * t.each, 'Prop M1 nivå'+lvl+': facit = n × each');
+    ok(Number.isInteger(t.correct) && t.correct > 0, 'Prop M1 nivå'+lvl+': heltal > 0');
+    ok(t.n > 0 && t.each > 0, 'Prop M1 nivå'+lvl+': positiva tal');
+    ok(t.distractors.length === 3, 'Prop M1 nivå'+lvl+': 3 distraktorer');
+    ok(distinct([t.correct, ...t.distractors]), 'Prop M1 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Prop M1 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Prop M1 nivå'+lvl+': positiva heltal');
+}));
+
+/* — M2: enhetspris (each = total ÷ n, alltid helt) — */
+[0,1,2].forEach(lvl => forEachRun(pro.genM2Task, lvl, RUNS, t => {
+    ok(t.total === t.n * t.correct, 'Prop M2 nivå'+lvl+': total = n × facit');
+    ok(t.total % t.n === 0, 'Prop M2 nivå'+lvl+': total delbart med n');
+    ok(Number.isInteger(t.correct) && t.correct > 0, 'Prop M2 nivå'+lvl+': heltal > 0');
+    ok(t.distractors.length === 3, 'Prop M2 nivå'+lvl+': 3 distraktorer');
+    ok(distinct([t.correct, ...t.distractors]), 'Prop M2 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Prop M2 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Prop M2 nivå'+lvl+': positiva heltal');
+}));
+
+/* — M3: samma förhållande (b = a×k, facit = c×k, c ≠ a) — */
+[0,1,2].forEach(lvl => forEachRun(pro.genM3Task, lvl, RUNS, t => {
+    ok(t.b === t.a * t.k, 'Prop M3 nivå'+lvl+': b = a × k');
+    ok(t.correct === t.c * t.k, 'Prop M3 nivå'+lvl+': facit = c × k');
+    ok(t.c !== t.a, 'Prop M3 nivå'+lvl+': c skild från a');
+    ok(Number.isInteger(t.correct) && t.correct > 0, 'Prop M3 nivå'+lvl+': heltal > 0');
+    ok(t.distractors.length === 3, 'Prop M3 nivå'+lvl+': 3 distraktorer');
+    ok(distinct([t.correct, ...t.distractors]), 'Prop M3 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Prop M3 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Prop M3 nivå'+lvl+': positiva heltal');
+}));
+
+/* — Mönster v2, lager 11a + 11c: workedSteps + whyQuestion (M1–M3) — */
+{
+    const PRO_GEN = { 1: pro.genM1Task, 2: pro.genM2Task, 3: pro.genM3Task };
+    [1,2,3].forEach(mod => [0,1,2].forEach(lvl => forEachRun(PRO_GEN[mod], lvl, 300, t => {
+        const steps = pro.workedSteps(mod, t);
+        ok(steps.length === 3, 'Prop WE mod'+mod+' nivå'+lvl+': exakt 3 steg');
+        ok(steps.every(s => typeof s === 'string' && s.length > 0), 'Prop WE mod'+mod+' nivå'+lvl+': alla steg ifyllda');
+        ok(steps[2].includes(String(t.correct)), 'Prop WE mod'+mod+': sista steget bär facit');
+
+        const q = pro.whyQuestion(mod);
+        ok(typeof q.prompt === 'string' && q.prompt.length > 0, 'Prop WHY mod'+mod+': prompt ifylld');
+        ok(typeof q.correct === 'string' && q.correct.length > 0, 'Prop WHY mod'+mod+': korrekt rad ifylld');
+        ok(q.distractors.length === 2, 'Prop WHY mod'+mod+': exakt 2 distraktorer');
+        ok(distinct([q.correct, ...q.distractors]), 'Prop WHY mod'+mod+': 3 distinkta alternativ');
+        ok(!q.distractors.includes(q.correct), 'Prop WHY mod'+mod+': facit ej bland distraktorer');
+    })));
+}
+
 /* ═══════════ Resultat ═══════════ */
 console.log('');
 console.log('  PASS: ' + pass);
