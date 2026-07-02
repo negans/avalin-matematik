@@ -85,11 +85,10 @@ Resonemangslager (C/D) "Varför?" — whyQuestion():
 - CLAUDE.md (denna) · HISTORIK.md (avklarat) · README.md
 
 ## STATUS & ÅTERSTÅENDE ARBETE
-Klart: Fas 1–4 (SINGMA 5A/5B + mönster v2 på alla 9 filer + innehållsluckor) och Fas 5 steg 14–15. Detaljer i HISTORIK.md.
+Klart: Fas 1–4 (SINGMA 5A/5B + mönster v2 på alla 9 filer + innehållsluckor) och Fas 5 steg 14–16. Detaljer i HISTORIK.md.
 WHY-ordning för det som återstår: bygg nya filer på färdigt mönster → lägg retrieval-/problemlösningslager ovanpå stabilt innehåll → backlog sist → slutpass. Så rörs ingen fil två gånger för samma sak.
 
 ### Fas 5 — Nya innehållsfiler (konkret → abstrakt)
-16. grafer för proportionella samband — i koordinat.html (koordinatsystemet finns) eller i proportionalitet-filen.
 17. 3D-former — tredimensionella objekt och deras egenskaper (utöka geometri.html eller egen fil).
 
 ### Fas 6 — Retrieval- och problemlösningslager (byggs sent; vill ha innehållet stabilt)

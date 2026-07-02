@@ -111,6 +111,32 @@
                  distractors: pickDistractors(correct, cand, 3) };
     }
 
+    /* ════════ Modul 4 – Läs av grafen (proportionell graf y = k·x) ════════
+       En rät linje genom origo, lutning k (1 styck = k kr).
+       Vid x = a på linjen är y = a × k. Tränar grafen som representation
+       av samma per-styck-samband som M1. Tal hålls snälla (k, a små). */
+    function genM4Task(level) {
+        let kset, arange;
+        if (level === 0)      { kset = [2, 3];       arange = [2, 4]; }
+        else if (level === 1) { kset = [2, 3, 4];    arange = [2, 5]; }
+        else                  { kset = [2, 3, 4, 5]; arange = [2, 6]; }
+        const k = kset[rnd(0, kset.length - 1)];
+        const a = rnd(arange[0], arange[1]);
+        const item = pickItem();
+        const correct = a * k;
+        const cand = [
+            a + k,            // fel räknesätt: adderade lutning och antal
+            a,                // läste bara av x (glömde lutningen)
+            k,                // läste bara lutningen (glömde antalet)
+            (a + 1) * k,      // off-by-one: läste av en ruta för långt
+            (a - 1) * k,      // off-by-one åt andra hållet
+            correct + 1, correct - 1, correct + k
+        ];
+        return { mod: 4, a, k, item: item.name, art: item.art, plural: item.plural,
+                 emoji: item.emoji, unit: 'kr', correct,
+                 distractors: pickDistractors(correct, cand, 3) };
+    }
+
     /* ════════ Mönster v2, lager 11a + 11c ════════
        workedSteps(mod, task): 3 stegrader (löst exempel).
        whyQuestion(mod): "Varför stämmer det?" + 1 korrekt + 2 distraktorer. */
@@ -133,6 +159,12 @@
                     t.a + ' ger ' + t.b + ' — det är gånger ' + t.k + '.',
                     'Samma förhållande: räkna ' + t.c + ' × ' + t.k + '.',
                     t.c + ' ger ' + t.correct + '.'
+                ];
+            case 4:
+                return [
+                    '1 ' + t.item + ' kostar ' + t.k + ' kr — linjen går genom origo.',
+                    'Gå till ' + t.a + ' på x-axeln, följ upp till linjen: ' + t.a + ' × ' + t.k + '.',
+                    t.a + ' ' + t.plural + ' kostar ' + t.correct + ' ' + t.unit + '.'
                 ];
             default:
                 return [];
@@ -160,6 +192,13 @@
                 'Man lägger till samma tal i båda kolumnerna.',     // additiv missuppfattning
                 'Förhållandet ändras när talen blir större.'        // fel: k är konstant
             ]
+        },
+        4: {
+            correct: 'En proportionell graf är en rak linje genom origo, så priset är antalet gånger priset för ett.',
+            distractors: [
+                'Man lägger ihop antalet och priset för ett.',      // fel räknesätt
+                'Grafen visar samma pris hur många man än köper.'   // ignorerar lutningen
+            ]
         }
     };
 
@@ -170,7 +209,7 @@
 
     return {
         pickDistractors, ITEMS,
-        genM1Task, genM2Task, genM3Task,
+        genM1Task, genM2Task, genM3Task, genM4Task,
         workedSteps, whyQuestion
     };
 }));

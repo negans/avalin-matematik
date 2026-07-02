@@ -954,10 +954,21 @@ const pro = require('../logic/proportionalitet.js');
     ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Prop M3 nivå'+lvl+': positiva heltal');
 }));
 
-/* — Mönster v2, lager 11a + 11c: workedSteps + whyQuestion (M1–M3) — */
+/* — M4: läs av proportionell graf (facit = a × k) — */
+[0,1,2].forEach(lvl => forEachRun(pro.genM4Task, lvl, RUNS, t => {
+    ok(t.correct === t.a * t.k, 'Prop M4 nivå'+lvl+': facit = a × k');
+    ok(Number.isInteger(t.correct) && t.correct > 0, 'Prop M4 nivå'+lvl+': heltal > 0');
+    ok(t.a > 0 && t.k > 0, 'Prop M4 nivå'+lvl+': positiva tal');
+    ok(t.distractors.length === 3, 'Prop M4 nivå'+lvl+': 3 distraktorer');
+    ok(distinct([t.correct, ...t.distractors]), 'Prop M4 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Prop M4 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Prop M4 nivå'+lvl+': positiva heltal');
+}));
+
+/* — Mönster v2, lager 11a + 11c: workedSteps + whyQuestion (M1–M4) — */
 {
-    const PRO_GEN = { 1: pro.genM1Task, 2: pro.genM2Task, 3: pro.genM3Task };
-    [1,2,3].forEach(mod => [0,1,2].forEach(lvl => forEachRun(PRO_GEN[mod], lvl, 300, t => {
+    const PRO_GEN = { 1: pro.genM1Task, 2: pro.genM2Task, 3: pro.genM3Task, 4: pro.genM4Task };
+    [1,2,3,4].forEach(mod => [0,1,2].forEach(lvl => forEachRun(PRO_GEN[mod], lvl, 300, t => {
         const steps = pro.workedSteps(mod, t);
         ok(steps.length === 3, 'Prop WE mod'+mod+' nivå'+lvl+': exakt 3 steg');
         ok(steps.every(s => typeof s === 'string' && s.length > 0), 'Prop WE mod'+mod+' nivå'+lvl+': alla steg ifyllda');

@@ -52,6 +52,7 @@ De aktiva mönster v2-reglerna finns i CLAUDE.md ("MÖNSTER V2"). Nedan är utru
 - ✅ taluppfattning.html M9: överslagsräkning (avrunda till tiotal/hundratal, uppskatta summa, 3 nivåer) — genM9Task. 2026-06-21.
 - ✅ taluppfattning.html M10: romerska siffror (läsa, I–C, 3 nivåer) — genM10Task + toRoman. 2026-06-21.
 
-## Fas 5 — Nya innehållsfiler (pågår; steg 14–15 KLARA)
+## Fas 5 — Nya innehållsfiler (pågår; steg 14–16 KLARA)
 14. ✅ skala.html — förminskning/förstoring, elevnära. Modul 1 förstoring/förminskning (kattteckning i rutor + skala a:b) · 2 skalfaktor på en längd (förstoring n:1 ×, förminskning 1:n ÷) · 3 karta↔verklighet (1 cm = M m). logic/skala.js testad (genM1–3Task, workedSteps, whyQuestion). Knyter till katter/rita via 🐱-teckning.
 15. ✅ proportionalitet.html — proportionella samband (y = k·x), elevnära. Modul 1 lika mycket per styck (total = antal × styckpris) · 2 hur mycket kostar ett? (styckpris = total ÷ antal, alltid heltal) · 3 samma förhållande (värdetabell a→b, c→?; konstanten k). logic/proportionalitet.js testad (art+plural i ITEMS för korrekt svensk grammatik). Generaliserar skala (steg 14) + procent (brak M10).
+16. ✅ grafer för proportionella samband — proportionalitet.html M4 "Läs av grafen" (Mats val: prop-filen, inte koordinat.html — håller y=k·x-tråden). Rät linje genom origo, y-skala = multiplar av k med "?" på facit-raden, streckade avläs-guider + punkt. genM4Task (3 nivåer), workedSteps case 4, WHY[4]. Granskningsfynd åtgärdat: första versionen saknade y-skala → grafen var oavläsbar (linjen normaliserades identiskt för alla k); fixat med stödlinjer + y-siffror. Byggd via /ny-modul-skillen, Fable ockulär-pass + /code-review high 2026-07-03.
