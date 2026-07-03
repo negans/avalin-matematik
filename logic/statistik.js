@@ -176,6 +176,40 @@
         return { data, correct, distractors: pickDistractors(correct, cand, 3) };
     }
 
+    /* ════════ Modul 6 – Median (mittersta talet i sorterad ordning) ════════
+       Udda antal tal → medianen är exakt ETT mittvärde, alltid heltal (ingen
+       delning av två mittersta). Isolerar färdigheten "sortera → ta mitten".
+       Datan tvingas vara oordnad (osorterat mittvärde ≠ median) så att
+       sorteringssteget alltid spelar roll och "glömde sortera" alltid är en
+       giltig distraktor. */
+    function genM6Task(level) {
+        const size   = level === 0 ? 3 : level === 1 ? 5 : 7;
+        const maxVal = level === 0 ? 8 : level === 1 ? 10 : 12;
+        const mid    = (size - 1) / 2;
+        let data, sorted, median, unsortedMid, mean;
+        do {
+            data        = Array.from({ length: size }, () => rnd(1, maxVal));
+            sorted      = [...data].sort((a, b) => a - b);
+            median      = sorted[mid];
+            unsortedMid = data[mid];
+            mean        = data.reduce((a, b) => a + b, 0) / size;
+        } while (unsortedMid === median ||          // sorteringen måste ändra svaret
+                 sorted[0] === sorted[size - 1]);    // inte alla lika (median=max=min)
+        const correct = median;
+
+        const cand = [
+            unsortedMid,                            // glömmer sortera – tar mittersta i ursprunglig ordning
+            Number.isInteger(mean) ? mean : null,   // förväxlar median med medelvärde
+            sorted[size - 1],                       // tar största talet
+            sorted[0],                              // tar minsta talet
+            sorted[mid - 1],                        // off-by-one: ett steg för tidigt i sorterad ordning
+            sorted[mid + 1],                        // off-by-one: ett steg för sent
+            correct + 1, correct + 2, correct + 3   // generiska närvärden (garanterad reserv)
+        ].filter(v => v !== null && v !== undefined && v > 0 && Number.isInteger(v) && v !== correct);
+
+        return { data, sorted, correct, distractors: pickDistractors(correct, cand, 3) };
+    }
+
     /* ════════ Mönster v2, lager 11a + 11c ════════
        workedSteps(mod, task): 3 stegrader (löst exempel).
        whyQuestion(mod, task): "Varför stämmer det?" + 1 korrekt + 2 distraktorer
@@ -212,6 +246,12 @@
                     'Titta på talen: ' + t.data.join(', ') + '.',
                     'Vilket tal kommer flest gånger?',
                     'Typvärdet är ' + t.correct + '.'
+                ];
+            case 6:
+                return [
+                    'Sortera talen: ' + t.data.join(', ') + ' → ' + t.sorted.join(', ') + '.',
+                    'Ta talet som står i mitten.',
+                    'Medianen är ' + t.correct + '.'
                 ];
             default:
                 return [];
@@ -253,6 +293,13 @@
                 'Typvärdet är det största talet.',         // fel begrepp
                 'Typvärdet är talet i mitten.'             // förväxlar med median
             ]
+        },
+        6: {
+            correct: 'Medianen är mittersta talet när talen står i storleksordning.',
+            distractors: [
+                'Medianen är summan delat med antalet.',   // förväxlar med medelvärde
+                'Medianen är talet som syns flest gånger.' // förväxlar med typvärde
+            ]
         }
     };
 
@@ -263,7 +310,7 @@
 
     return {
         pickDistractors, shuffle, uniqueMode,
-        genM1Task, genM2Task, genM3Task, genM4Task, genM5Task,
+        genM1Task, genM2Task, genM3Task, genM4Task, genM5Task, genM6Task,
         workedSteps, whyQuestion
     };
 }));

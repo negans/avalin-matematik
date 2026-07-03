@@ -536,10 +536,29 @@ ok(stat.uniqueMode([1,1,2,2]) === null, 'uniqueMode oavgjort → null');
     ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Stat M5 nivå'+lvl+': positiva heltal');
 }));
 
-/* — Mönster v2, lager 11a + 11c: workedSteps + whyQuestion (M1–M5) — */
+/* — M6: median — */
+function medianOf(a) { const s = [...a].sort((x,y)=>x-y); return s[(s.length-1)/2]; }
+[0,1,2].forEach(lvl => forEachRun(stat.genM6Task, lvl, RUNS, t => {
+    const size = lvl === 0 ? 3 : lvl === 1 ? 5 : 7;
+    ok(t.data.length === size, 'Stat M6 nivå'+lvl+': '+size+' tal (udda antal)');
+    ok(t.correct === medianOf(t.data), 'Stat M6 nivå'+lvl+': facit = mittersta i sorterad ordning');
+    ok(Number.isInteger(t.correct) && t.correct > 0, 'Stat M6 nivå'+lvl+': median heltal > 0');
+    ok(t.data.includes(t.correct), 'Stat M6 nivå'+lvl+': medianen finns i datan');
+    ok(t.sorted.join(',') === [...t.data].sort((a,b)=>a-b).join(','), 'Stat M6 nivå'+lvl+': sorted = datan sorterad stigande');
+    ok(t.data[(size-1)/2] !== t.correct, 'Stat M6 nivå'+lvl+': osorterat mittvärde ≠ median (sortering krävs)');
+    ok(t.distractors.length === 3, 'Stat M6 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+    ok(distinct([t.correct, ...t.distractors]), 'Stat M6 nivå'+lvl+': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Stat M6 nivå'+lvl+': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Stat M6 nivå'+lvl+': positiva heltal');
+    const we6 = stat.workedSteps(6, t);
+    ok(we6[0].includes(t.data.join(', ')) && we6[0].includes(t.sorted.join(', ')),
+       'Stat M6 nivå'+lvl+': WE steg 1 visar osorterat → sorterat (transformationen)');
+}));
+
+/* — Mönster v2, lager 11a + 11c: workedSteps + whyQuestion (M1–M6) — */
 {
-    const STAT_GEN = { 1: stat.genM1Task, 2: stat.genM2Task, 3: stat.genM3Task, 4: stat.genM4Task, 5: stat.genM5Task };
-    [1,2,3,4,5].forEach(mod => [0,1,2].forEach(lvl => forEachRun(STAT_GEN[mod], lvl, 300, t => {
+    const STAT_GEN = { 1: stat.genM1Task, 2: stat.genM2Task, 3: stat.genM3Task, 4: stat.genM4Task, 5: stat.genM5Task, 6: stat.genM6Task };
+    [1,2,3,4,5,6].forEach(mod => [0,1,2].forEach(lvl => forEachRun(STAT_GEN[mod], lvl, 300, t => {
         const steps = stat.workedSteps(mod, t);
         ok(steps.length === 3, 'Stat WE mod'+mod+' nivå'+lvl+': exakt 3 steg');
         ok(steps.every(s => typeof s === 'string' && s.length > 0), 'Stat WE mod'+mod+' nivå'+lvl+': alla steg ifyllda');
