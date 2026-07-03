@@ -211,6 +211,35 @@
     </div>
 </div>
 
+<!-- ══════ Modul 6 ══════ -->
+<p class="section-title">Modul 6 – Median</p>
+<div class="card">
+    <div style="text-align:center"><span class="level-badge" id="m6LevelLabel">Nivå 1</span></div>
+
+    <div class="worked-example" id="m6Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="m6ExampleVisual"></div>
+        <ol class="we-steps" id="m6ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="m6ExampleClose">Jag förstår – min tur →</button></div>
+    </div>
+
+    <div id="m6Live">
+        <p class="task-label">Vilket är det mittersta talet i storleksordning? (medianen)
+            <button type="button" class="we-btn" id="m6Show">Visa mig</button></p>
+        <p class="numlist" id="m6Nums"></p>
+        <div class="choice-row" id="m6Choices"></div>
+        <div class="btn-row"><button class="btn-secondary" id="m6Next">Ny uppgift →</button></div>
+        <p class="streak" id="m6Streak"></p>
+        <div class="feedback" id="m6Feedback" aria-live="polite"></div>
+
+        <div class="why" id="m6Why" hidden>
+            <p class="why-q" id="m6WhyQ"></p>
+            <div class="why-choices" id="m6WhyChoices"></div>
+            <div class="why-fb" id="m6WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
+</div>
+
 <div id="miso-container">
     <div id="miso-bubble"></div>
     <img id="miso-img" src="images/miso/miso-neutral.webp" alt="Miso" width="100">
@@ -266,9 +295,9 @@ function buildChoices(rowId, raws, fmt, onPick) {
 
 /* ════════════════════════════════
    Mönster v2 – löst exempel (11a) + resonemang (11c), delad inkoppling.
-   Alla 5 moduler har 3 nivåer: exempel per nivå, "Varför?" nivå 3 var tredje.
+   Alla 6 moduler har 3 nivåer: exempel per nivå, "Varför?" nivå 3 var tredje.
 ════════════════════════════════ */
-const GENS = { 1: genM1Task, 2: genM2Task, 3: genM3Task, 4: genM4Task, 5: genM5Task };
+const GENS = { 1: genM1Task, 2: genM2Task, 3: genM3Task, 4: genM4Task, 5: genM5Task, 6: genM6Task };
 function niceExample(mod, level) { return GENS[mod](level); }
 
 function renderExampleVisual(mod, containerId, t) {
@@ -294,6 +323,17 @@ function renderExampleVisual(mod, containerId, t) {
         return;
     }
 
+    if (mod === 6) {                       // osorterat → sorterat, mittersta talet markerat
+        const mid = (t.sorted.length - 1) / 2;
+        const parts = t.sorted.map((v, i) =>
+            i === mid ? '<span style="color:var(--color-correct)">[ ' + v + ' ]</span>' : v);
+        el.innerHTML = '<p style="' + big + ' font-size:1.5em">' + t.data.join(', ') + '</p>' +
+                       '<p style="' + big + ' font-size:1.05em">↓ sortera</p>' +
+                       '<p style="' + big + ' font-size:1.5em">' + parts.join(', ') + '</p>' +
+                       '<p style="' + big + ' font-size:1.05em">Talet i mitten är ' + ok(t.correct) + '</p>';
+        return;
+    }
+
     let html;
     if (mod === 2)      html = t.nums.join(' + ') + ' = ' + t.sum + ', &nbsp; ' + t.sum + ' ÷ ' + t.n + ' = ' + ok(t.correct);
     else if (mod === 4) html = t.a + ' × ' + t.b + ' × ' + t.c + ' = ' + ok(t.correct);
@@ -314,7 +354,7 @@ function showExample(mod, level) {
 function closeExample(mod) { toggleExample('m' + mod + 'Example', 'm' + mod + 'Live', false); }
 function maybeExample(mod, level) { if (!weSeen(mod, level)) { weMark(mod, level); showExample(mod, level); } }
 
-const whyCounts = { 1:0, 2:0, 3:0, 4:0, 5:0 };
+const whyCounts = { 1:0, 2:0, 3:0, 4:0, 5:0, 6:0 };
 function maybeWhy(mod, level, task) {
     if (level !== 2) return;                 // bara nivå 3 (abstrakt)
     whyCounts[mod]++;
@@ -495,6 +535,16 @@ makeModule({
     render: t => { document.getElementById('m5Nums').textContent = t.data.join(',  '); },
     levelUpMsg: () => 'Precis rätt! 🎉 Superbra – nu provar vi en längre lista!',
     hint: t => 'Nästan – ' + t.correct + ' förekommer flest gånger, så det är typvärdet.'
+});
+
+/* ════════ Modul 6 – Median ════════ */
+makeModule({
+    mod: 6, gen: genM6Task, correctOf: t => t.correct, fmt: v => v,
+    choices: 'm6Choices', badge: 'm6LevelLabel', next: 'm6Next', streak: 'm6Streak', feedback: 'm6Feedback',
+    misoOk: 'Rätt median! Toppen!', misoTip: 'Sortera först – ta sedan talet i mitten!',
+    render: t => { document.getElementById('m6Nums').textContent = t.data.join(',  '); },
+    levelUpMsg: () => 'Precis rätt! 🎉 Superbra – nu provar vi en längre lista!',
+    hint: t => 'Nästan – sortera först: ' + t.sorted.join(', ') + '. Talet i mitten är ' + t.correct + '.'
 });
 </script>
 </body>

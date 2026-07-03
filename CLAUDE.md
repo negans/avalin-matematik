@@ -85,11 +85,12 @@ Resonemangslager (C/D) "Varför?" — whyQuestion():
 - CLAUDE.md (denna) · HISTORIK.md (avklarat) · README.md
 
 ## STATUS & ÅTERSTÅENDE ARBETE
-Klart: Fas 1–4 (SINGMA 5A/5B + mönster v2 på alla 9 filer + innehållsluckor) och Fas 5 steg 14–16. Detaljer i HISTORIK.md.
+Klart: Fas 1–4 (SINGMA 5A/5B + mönster v2 på alla 9 filer + innehållsluckor), Fas 5 steg 14–16, statistik M6 median (Lgr22-gap), samt första pass av Fas 8 steg 22+25 (2026-07-03). Detaljer i HISTORIK.md.
 WHY-ordning för det som återstår: bygg nya filer på färdigt mönster → lägg retrieval-/problemlösningslager ovanpå stabilt innehåll → backlog sist → slutpass. Så rörs ingen fil två gånger för samma sak.
 
 ### Fas 5 — Nya innehållsfiler (konkret → abstrakt)
 17. 3D-former — tredimensionella objekt och deras egenskaper (utöka geometri.html eller egen fil).
+17b. Volym — jämförelse/uppskattning/mätning med standardenheter (Lgr22-gap funnet i steg 25-avstämningen; byggs naturligt ihop med 17).
 
 ### Fas 6 — Retrieval- och problemlösningslager (byggs sent; vill ha innehållet stabilt)
 18. Blandat repetitionsläge (interleaving) — slumpade uppgifter tvärs alla moduler. Tränar att VÄLJA metod. Starkaste C/D-greppet.
@@ -100,10 +101,10 @@ WHY-ordning för det som återstår: bygg nya filer på färdigt mönster → l�
 21. Övriga småsaker som dyker upp under bygget — fångas här, inte ad hoc.
 
 ### Fas 8 — Slutpass (kvalitetsgrind före skolstart aug 2026)
-22. Cross-page consistency-genomgång (hård regel — alla sidor samma UX).
+22. Cross-page consistency-genomgång (hård regel — alla sidor samma UX). Första pass körd på Fable 2026-07-03 (fynd fixade, se HISTORIK.md); körs om som slutgrind när Fas 5–7 är klara.
 23. node tests/test.js grön + utöka testsviten för ALL ny logik.
 24. /code-review high per ny/ändrad modul.
-25. Slutlig avstämning mot Lgr22 åk 4–6 (checklista) — bekräfta att inget moment saknas.
+25. Slutlig avstämning mot Lgr22 åk 4–6 (checklista) — körd 2026-07-03: gap = median (✅ byggd), volym (17b), 3D (17), programmering (20), problemlösning (18–19). Bekräfta igen som slutgrind.
 
 ## DISTRAKTOR-DOKTRIN (kärnan i kvaliteten)
 Varje felaktigt svarsalternativ kodar en SPECIFIK, namngiven missuppfattning — aldrig en slumpmässig närmiss.
