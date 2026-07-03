@@ -44,7 +44,7 @@
         .why-q { text-align: center; font-weight: bold; color: var(--color-heading); margin-bottom: 10px; }
         .why-choices { display: flex; flex-direction: column; gap: 8px; }
         .why-fb { text-align: center; margin-top: 10px; color: var(--color-text); min-height: 1.2em; }
-        #m1SVG, #m2SVG, #m3SVG { display: block; overflow: visible; }
+        #m1SVG, #m2SVG, #m3SVG, #m4SVG { display: block; overflow: visible; }
 
         #miso-container {
             position: fixed;
@@ -169,6 +169,36 @@
     </div>
 </div>
 
+<!-- ══════ Modul 4 ══════ -->
+<p class="section-title">Modul 4 – Läs av grafen</p>
+
+<div class="card">
+    <div style="text-align:center"><span class="level-badge" id="m4LevelLabel">Nivå 1</span></div>
+
+    <div class="worked-example" id="m4Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="m4ExampleVisual"></div>
+        <ol class="we-steps" id="m4ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="m4ExampleClose">Jag förstår – min tur →</button></div>
+    </div>
+
+    <div id="m4Live">
+        <p class="task-label" id="m4Question">Vad kostar de?
+            <button type="button" class="we-btn" id="m4Show">Visa mig</button></p>
+        <div class="fig-wrap"><svg id="m4SVG" width="100%"></svg></div>
+        <div class="choice-row" id="m4Choices"></div>
+        <div class="btn-row"><button class="btn-secondary" id="m4Next">Ny uppgift →</button></div>
+        <p class="streak" id="m4Streak"></p>
+        <div class="feedback" id="m4Feedback" aria-live="polite"></div>
+
+        <div class="why" id="m4Why" hidden>
+            <p class="why-q" id="m4WhyQ"></p>
+            <div class="why-choices" id="m4WhyChoices"></div>
+            <div class="why-fb" id="m4WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
+</div>
+
 <div id="miso-container">
     <div id="miso-bubble"></div>
     <img id="miso-img" src="images/miso/miso-neutral.webp" alt="Miso" width="100">
@@ -180,9 +210,9 @@ initStatsBar();
 
 /* ════════════════════════════════
    Mönster v2 – löst exempel (11a) + resonemang (11c), delad inkoppling.
-   3 moduler, 3 nivåer: exempel per nivå, "Varför?" nivå 3 var tredje.
+   4 moduler, 3 nivåer: exempel per nivå, "Varför?" nivå 3 var tredje.
 ════════════════════════════════ */
-const GENS = { 1: genM1Task, 2: genM2Task, 3: genM3Task };
+const GENS = { 1: genM1Task, 2: genM2Task, 3: genM3Task, 4: genM4Task };
 function niceExample(mod, level) { return GENS[mod](level); }
 
 function renderExampleVisual(mod, containerId, t) {
@@ -193,8 +223,10 @@ function renderExampleVisual(mod, containerId, t) {
         html = t.n + ' × ' + t.each + ' = ' + ok(t.correct + ' kr');
     } else if (mod === 2) {
         html = t.total + ' ÷ ' + t.n + ' = ' + ok(t.correct + ' kr');
-    } else {
+    } else if (mod === 3) {
         html = t.c + ' × ' + t.k + ' = ' + ok(t.correct);
+    } else {
+        html = t.a + ' × ' + t.k + ' = ' + ok(t.correct + ' kr');
     }
     const el = document.getElementById(containerId);
     const figId = containerId + 'Fig';
@@ -202,7 +234,8 @@ function renderExampleVisual(mod, containerId, t) {
                    '<p style="' + big + ' font-size:1.4em">' + html + '</p>';
     if (mod === 1)      drawM1(figId, t);
     else if (mod === 2) drawM2(figId, t);
-    else                drawM3(figId, t);
+    else if (mod === 3) drawM3(figId, t);
+    else                drawM4(figId, t, true);
 }
 
 function weKey(mod, level) { return 'm' + mod + '.' + level; }
@@ -222,7 +255,7 @@ function wireExample(mod, getLevel) {
     document.getElementById('m' + mod + 'ExampleClose').addEventListener('click', () => closeExample(mod));
 }
 
-const whyCounts = { 1: 0, 2: 0, 3: 0 };
+const whyCounts = { 1: 0, 2: 0, 3: 0, 4: 0 };
 function maybeWhy(mod, level, task) {
     if (level !== 2) return;                 // bara nivå 3 (abstrakt)
     whyCounts[mod]++;
@@ -491,6 +524,106 @@ document.getElementById('m3Next').addEventListener('click', () => { showMiso('ne
 wireExample(3, () => m3Level);
 buildM3();
 maybeExample(3, m3Level);
+
+/* ════════════════════════════════ Modul 4 – Läs av grafen ════════════════════════════════ */
+
+let m4Streak = 0, m4Task = null, m4Answered = false, m4HadError = false;
+let m4Level = 0, m4LevelStreak = 0;
+
+/* Proportionell graf: rät linje genom origo (lutning k). Avläs-guide vid x = a.
+   reveal=false i uppgiften (y visas som "?"), reveal=true i exemplet (y visas). */
+function drawM4(svgId, t, reveal) {
+    const svg = document.getElementById(svgId);
+    const xMax = t.a + 1, yMax = t.k * xMax;
+    const W = 300, H = 200, padL = 40, padB = 30, padT = 16, padR = 14;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    setBox(svg, W, H);
+    const X = x => padL + (x / xMax) * plotW;
+    const Y = y => padT + plotH - (y / yMax) * plotH;
+    const line = (x1, y1, x2, y2, color, sw, dash) => {
+        const l = svgEl('line');
+        l.setAttribute('x1', x1); l.setAttribute('y1', y1);
+        l.setAttribute('x2', x2); l.setAttribute('y2', y2);
+        l.setAttribute('stroke', color); l.setAttribute('stroke-width', sw);
+        if (dash) l.setAttribute('stroke-dasharray', '5 4');
+        l.setAttribute('stroke-linecap', 'round');
+        svg.appendChild(l);
+    };
+    /* rutnät + x-siffror */
+    for (let gx = 1; gx <= xMax; gx++) {
+        line(X(gx), padT, X(gx), padT + plotH, '#EFE2CE', 1);
+        elText(svg, X(gx), padT + plotH + 16, String(gx), 12, AXIS);
+    }
+    /* vågräta stödlinjer + y-skala (multiplar av k) — utan dem går grafen inte att läsa av.
+       Raden vid facit visar ? i uppgiften och talet i exemplet. */
+    for (let i = 1; i <= xMax; i++) {
+        const yv = i * t.k;
+        line(padL, Y(yv), padL + plotW, Y(yv), '#EFE2CE', 1);
+        const isAnswer = yv === t.correct;
+        elText(svg, padL - 8, Y(yv) + 4, isAnswer && !reveal ? '?' : String(yv),
+               isAnswer ? 14 : 11, isAnswer ? STROKE : AXIS, 'end');
+    }
+    /* axlar */
+    line(padL, padT, padL, padT + plotH, AXIS, 2);
+    line(padL, padT + plotH, padL + plotW, padT + plotH, AXIS, 2);
+    /* proportionella linjen genom origo */
+    line(X(0), Y(0), X(xMax), Y(yMax), STROKE, 3);
+    /* avläs-guider vid x = a */
+    const gx = X(t.a), gy = Y(t.correct);
+    line(gx, padT + plotH, gx, gy, TAG, 2, true);
+    line(padL, gy, gx, gy, TAG, 2, true);
+    /* punkt på linjen */
+    const dot = svgEl('circle');
+    dot.setAttribute('cx', gx); dot.setAttribute('cy', gy);
+    dot.setAttribute('r', 5); dot.setAttribute('fill', STROKE);
+    svg.appendChild(dot);
+    /* rubriker */
+    elText(svg, padL + plotW / 2, H - 4, 'Antal ' + t.plural, 12, AXIS);
+    elText(svg, padL - 6, 8, 'kr', 11, AXIS, 'end');
+}
+
+function buildM4() {
+    m4Task = genM4Task(m4Level); m4Answered = false; m4HadError = false;
+    drawM4('m4SVG', m4Task, false);
+    document.getElementById('m4Question').childNodes[0].nodeValue =
+        'Grafen visar priset. Vad kostar ' + m4Task.a + ' ' + m4Task.plural + '? ';
+    buildChoices('m4Choices', [m4Task.correct, ...m4Task.distractors], v => v + ' kr', m4Check);
+    document.getElementById('m4LevelLabel').textContent = 'Nivå ' + (m4Level + 1);
+    document.getElementById('m4Feedback').textContent = '';
+    document.getElementById('m4Next').classList.remove('btn-pulse');
+    hideWhy(4);
+}
+
+function m4Check(val, btn) {
+    if (m4Answered) return;
+    const fb = document.getElementById('m4Feedback');
+    const t = m4Task;
+    if (val === t.correct) {
+        m4Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m4Choices .choice-btn').forEach(b => { b.disabled = true; });
+        if (!m4HadError) { m4Streak++; m4LevelStreak++; recordCorrect(); }
+        else { m4Streak = 0; m4LevelStreak = 0; }
+        setStreak('m4Streak', m4Streak);
+        if (m4LevelStreak >= 3 && m4Level < 2) {
+            m4Level++; m4LevelStreak = 0;
+            document.getElementById('m4LevelLabel').textContent = 'Nivå ' + (m4Level + 1);
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi med större tal!';
+        } else { fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!'; }
+        showMiso('glad', 'Rätt avläst! Toppen!');
+        document.getElementById('m4Next').classList.add('btn-pulse');
+        maybeWhy(4, m4Level, m4Task);
+    } else {
+        m4HadError = true; m4LevelStreak = 0;
+        btn.classList.add('err'); btn.disabled = true;
+        fb.textContent = 'Nästan – vid ' + t.a + ' på linjen: ' + t.a + ' × ' + t.k + ' = ' + t.correct + ' kr.';
+        showMiso('uppmuntrande', 'Följ upp till linjen och läs av!');
+    }
+}
+document.getElementById('m4Next').addEventListener('click', () => { showMiso('neutral', 'Ny graf – kör på!'); buildM4(); maybeExample(4, m4Level); });
+wireExample(4, () => m4Level);
+buildM4();
+maybeExample(4, m4Level);
 </script>
 </body>
 </html>

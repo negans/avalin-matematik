@@ -1,9 +1,11 @@
 # CLAUDE.md — Avalins Matematikverkstad
 
+> Avklarad handlingsplan (Fas 1–4 + steg 14–15) bor i **HISTORIK.md**. Läs den bara vid behov.
+> Denna fil = aktiv instruktion + var vi är nu. Håll den tokenlätt: nya "KLAR"-rader förs till HISTORIK.md, inte hit.
+
 ## PROJEKTÖVERSIKT
 Interaktiv matematikplattform för Avalin (f. 2014, börjar åk 6 i augusti 2026).
-Live: negans.github.io/avalin-matematik
-Repo: github.com/negans/avalin-matematik
+Live: negans.github.io/avalin-matematik · Repo: github.com/negans/avalin-matematik
 Stack: HTML/CSS/JavaScript — inga ramverk.
 
 ## AVALINS PROFIL
@@ -16,22 +18,24 @@ Mål: golv E, sikte C–D i matematik åk 6 (första betyg jul 2026) — genom d
 
 ## PEDAGOGISK ROLL
 Plattformen är komplement till SINGMA/skolan — inte fristående.
-Avalin möter ett begrepp i skolan → befäster det här.
-Samma moment som skolan, men mer visuellt, mer konkret, mer anpassat.
+Avalin möter ett begrepp i skolan → befäster det här. Samma moment, men mer visuellt, konkret, anpassat.
 Följer SINGMA-strukturen: 5A och 5B är referens för innehåll och ordning (Fas 1–3).
 
-BETYGSKONTEXT (åk 6)
-Avalin börjar åk 6 i augusti 2026; första betyget sätts till jul 2026, mot betygskriterierna för åk 6 som täcker HELA centralinnehållet åk 4–6 — inte bara höstens nya moment. "Befästa grunden" är därför rätt strategi, men verktyget måste också nå de åk-6-typiska moment som 5A/5B inte täcker (Fas 4–7).
-Golv = E. Sikte = C–D. Betyget är en FÖLJD, inte en byggsten: skillnaden mellan E och C/D är djup förståelse, att välja ändamålsenlig metod och att föra resonemang — inte fler moduler. Därför designar vi för förståelse och metodval (worked examples, interleaving, resonemangslager) och håller E som golv så att Avalin aldrig sätts under press.
-Ingen deadline att forcera mot: KVALITET FÖRE TEMPO. Allt ska vara klart och putsat före skolstart aug 2026, så Avalin kan förbereda sig under sommaren.
-⚠️ SINGMA 6A/6B exakta kapitellista är INTE verifierad (NOK inloggningsskyddat). Fas 4–7 vilar på Lgr22 åk 4–6 + publicerade åk 6-planeringar. Bekräfta kapitelordningen mot Singma 6A/6B elevwebb/lärarhandledning.
+BETYGSKONTEXT (åk 6): Första betyget jul 2026 mäts mot betygskriterierna för åk 6, som täcker HELA
+centralinnehållet åk 4–6 — inte bara höstens nya moment. Därför måste verktyget även nå åk-6-typiska
+moment som 5A/5B inte täcker (Fas 4–7). Golv = E, sikte = C–D. Betyget är en FÖLJD, inte en byggsten:
+skillnaden mellan E och C/D är djup förståelse, ändamålsenligt metodval och resonemang — inte fler moduler.
+Vi designar för förståelse/metodval (worked examples, interleaving, resonemangslager) och håller E som golv.
+KVALITET FÖRE TEMPO — ingen deadline att forcera mot. Allt klart och putsat före skolstart aug 2026.
+⚠️ SINGMA 6A/6B exakta kapitellista är INTE verifierad (NOK inloggningsskyddat). Fas 4–7 vilar på Lgr22
+åk 4–6 + publicerade åk 6-planeringar. Bekräfta kapitelordningen mot Singma 6A/6B elevwebb/lärarhandledning.
 
 ## PEDAGOGISKA DESIGNPRINCIPER (gäller ALLA moduler)
 Härledda ur Avalins profil. Bryts inte utan att ändringen skrivs in här.
 
 Arbetsminne:
 - En instruktion = en mening, presens, konkret. Inga bisatser, inga idiom. Aldrig två krav synliga samtidigt.
-- Visa hellre än beskriv: bilden bär uppgiften, texten är en knuff. Konkret representation före symbolisk (kropp → bild → förståelse → abstraktion).
+- Visa hellre än beskriv: bilden bär uppgiften, texten är en knuff. Konkret före symbolisk (kropp → bild → förståelse → abstraktion).
 - Isolera färdigheten som tränas. Incidentell aritmetik får ALDRIG vara svårare än momentet som övas — t.ex. medelvärde tvingas bli heltal, vinklar/tal hålls "snälla".
 
 Dyskalkyli:
@@ -42,143 +46,57 @@ Dyskalkyli:
 Autism / förutsägbarhet:
 - Layout identisk mellan sidor: samma knappplaceringar, samma plats för feedback, samma färgbetydelser. Hon ska aldrig behöva lära om gränssnittet.
 - Inga överraskningar: inga timers, ingen nedräkning, ingen plötslig rörelse. Miso firar lugnt, aldrig mitt i en uppgift.
-- Mjuka animationer. Ingen uppläsning/ljud alls (Mats beslut 2026-06-20: hela uppläsningsfunktionen borttagen, se Fas 4 / lager 11b).
+- Mjuka animationer. Ingen uppläsning/ljud alls (Mats beslut 2026-06-20; all uppläsningskod borttagen — återinför INTE utan nytt beslut).
 
 Trygghet / mående (E är golvet):
 - Tid mäts inte och visas inte. Långsamhet bestraffas aldrig.
 - Fel är information, inte misslyckande: vänlig feedback, visa rätt väg, försök igen utan dramatik.
 - Framsteg ska kännas: små täta vinster, Miso bekräftar, svårighet höjs först efter säker behärskning.
 
+## MÖNSTER V2 (obligatoriskt för alla nya moduler)
+Två lager ovanpå grunduppgiften. Ren logik i logic/*.js, testad. (Per-fil-anpassningar för äldre filer: se HISTORIK.md.)
+
+Worked example (löst exempel) — workedSteps():
+- Visas AUTO första gången per nivå (sparas i storage); därefter via "Visa mig"-knapp — aldrig påtvingad igen.
+- BILD FÖRST: exemplet ritar modulens riktiga figur i exempelrutan (rita-funktionen tar svgId + task), sedan symboler/uträkning.
+- Exakt samma uppgiftstyp hon ska göra härnäst, fullständigt löst, ETT steg per rad, samma visuella representation.
+- Genereras av samma genMxTask-logik → exempel och uppgift matchar alltid nivån. Ingen hårdkodad text.
+- Uppgiftsspecifik fråga (med tal) ligger INNE i mXLive så den göms när exemplet visas. Generiska frågor får ligga utanför.
+
+Resonemangslager (C/D) "Varför?" — whyQuestion():
+- Efter RÄTT svar, ibland följdfråga "Varför stämmer det?" med 2–3 flervalsmotiveringar (multiple choice, ALDRIG textinput).
+- Frekvens: endast toppnivå (abstrakt) och inte varje gång (~var tredje). Aldrig lägsta nivåerna — där bär den konkreta förståelsen.
+- Motiveringar: en korrekt resonemangsrad + 1–2 rimligt-felaktiga enligt distraktor-doktrinen.
+- STOPPAR ALDRIG progression: fel på "varför" sänker inte streaken och blockerar inte nästa uppgift. Sträcklager ovanpå E-golvet.
+
 ## ARBETSFLÖDE
 - Claude Code CLI: kör `claude` i VS Code-terminalen med auto mode (auto-accept edits) — INTE --dangerously-skip-permissions
-- Git: Claude sköter add → commit → push via sina verktyg (Mats behöver inte köra git själv). Pusha bara efter Mats godkännande — pushen publicerar till live-sidan.
-- Auto Save aktiverat i VS Code
-- npx serve . i separat PowerShell-terminal för lokal testning
+- Git: Claude sköter add → commit → push via sina verktyg. Pusha bara efter Mats godkännande (pushen publicerar till live-sidan).
+- Auto Save aktiverat i VS Code. npx serve . i separat PowerShell-terminal för lokal testning.
 
 ## FILSTRUKTUR
-avalin-matematik/
-├── index.html          (startsida, alla modulknappar live)
-├── style.css           (✅ klar — gemensam stilmall)
-├── storage.js          (✅ localStorage: poäng, streak, stjärnor, inställningar)
-├── ui.js               (✅ delade UI-globaler: showMiso(), setStreak() + mönster v2-helpers: renderExampleSteps(), toggleExample(), renderWhyPanel(), hideWhyPanel())
-├── klockan.html        (✅ klar)
-├── brak.html           (✅ klar — Modul 1–10 inkl. procent + tre former)
-├── taluppfattning.html (✅ klar — Modul 1–8 inkl. negativa tal)
-├── decimaltal.html     (✅ klar — Modul 1–5 inkl. enhetsbyten)
-├── multiplikation.html (✅ klar — Modul 1–5 inkl. division med rest, ×/÷ med 10/100/1000, decimaltal)
-├── koordinat.html      (✅ klar — Modul 1–4: läs av, hitta, plotta punkter, fyra kvadranter)
-├── geometri.html       (✅ klar — Modul 1–5: vinklar, former, symmetri, omkrets, area)
-├── algebra.html        (✅ klar — Modul 1–5: uttryck, variabler, förenkla, ekvationer, mönster)
-├── statistik.html      (✅ klar — Modul 1–5: diagram, medelvärde, sannolikhet, kombinatorik, typvärde)
-├── skala.html          (✅ klar — Modul 1–3: förstoring/förminskning, skalfaktor, karta↔verklighet)
-├── proportionalitet.html (✅ klar — Modul 1–3: per styck, enhetspris, samma förhållande)
-├── template.html       (✅ klar — extraherad ur koordinat.html; skelett för nya modulsidor)
-├── logic/              (✅ delad ren logik: shared, decimaltal, brak, taluppfattning, klockan, multiplikation, koordinat, geometri, algebra, statistik, skala, proportionalitet)
-├── tests/              (✅ test.js — beroendefri svit, körs med "node tests/test.js")
-├── CLAUDE.md
-└── README.md
+- index.html — startsida, alla modulknappar live
+- style.css — gemensam stilmall · storage.js — localStorage (poäng, streak, stjärnor, inställningar)
+- ui.js — delade UI-globaler: showMiso(), setStreak() + mönster v2-helpers renderExampleSteps(), toggleExample(), renderWhyPanel(), hideWhyPanel()
+- template.html — skelett för nya modulsidor (extraherad ur koordinat.html; håll som skelett)
+- Modulsidor (alla klara): klockan, brak, taluppfattning, decimaltal, multiplikation, koordinat, geometri, algebra, statistik, skala, proportionalitet (.html)
+- logic/ — delad ren logik (shared + en fil per modulsida ovan)
+- tests/ — test.js (logik) + regression.js (struktur/referensintegritet/täckning), beroendefria; körs med `node tests/test.js` resp. `node tests/regression.js`
+- CLAUDE.md (denna) · HISTORIK.md (avklarat) · README.md
 
-## HANDLINGSPLAN — PRIORITERAD ORDNING
+## STATUS & ÅTERSTÅENDE ARBETE
+Klart: Fas 1–4 (SINGMA 5A/5B + mönster v2 på alla 9 filer + innehållsluckor) och Fas 5 steg 14–16. Detaljer i HISTORIK.md.
+WHY-ordning för det som återstår: bygg nya filer på färdigt mönster → lägg retrieval-/problemlösningslager ovanpå stabilt innehåll → backlog sist → slutpass. Så rörs ingen fil två gånger för samma sak.
 
-### Fas 1 — Skal och infrastruktur (byggs en gång, gäller alla filer)
-1. ✅ CSS-refaktor — gemensam style.css bruten ut
-2. ✅ Designlyft — Miso-maskot (3 poser), varm färgpalett, skogsbakgrund
-3. ✅ Gamification — localStorage-poäng, daglig streak, stjärnor (storage.js)
-   → statsbaren är dold på begäran (style.css), men poäng/stjärnor sparas och Miso firar milstolpar
-
-### Fas 2 — Komplettera åk 5 (befintliga filer + ny multiplikation.html)
-4. ✅ Procent ↔ bråk ↔ decimal — sambandet explicit (brak.html, Modul 10)
-5. ✅ Decimaltal i mätsammanhang — enhetsbyten cm↔m, ml↔l, g↔kg (decimaltal.html, Modul 5)
-6. ✅ multiplikation.html — multiplikation och division med hela tal och decimaltal (SINGMA 5A kap 2)
-   → Modul 1 grupper/array · 2 hela tal · 3 division (rest på nivå 3) · 4 ×/÷ med 10/100/1000 · 5 decimaltal
-   → NÄSTA STEG är steg 7 (koordinat.html, Fas 3)
-
-### Fas 3 — Nya filer åk 5–6 (shell-first: bygg ett, extrahera template, repetera)
-7. ✅ koordinat.html — koordinatsystem, plotta punkter (SINGMA 5A kap 6)
-   → Modul 1 läs av · 2 hitta punkt (A–D) · 3 plotta (klick) · 4 fyra kvadranter (negativa tal)
-   → ✅ template.html extraherad från det som byggts (skelett för kommande modulsidor)
-   → NÄSTA STEG är steg 8 (geometri.html)
-8. ✅ geometri.html — vinklar, former, symmetri, omkrets, area (SINGMA 5B kap 4–5)
-   → Modul 1 vinklar (typ) · 2 former (känna igen) · 3 symmetri (antal linjer + avslöjar dem) · 4 omkrets · 5 area
-   → NÄSTA STEG är steg 9 (algebra.html)
-9. ✅ algebra.html — uttryck, variabler, enkla ekvationer (SINGMA 5B kap 1)
-   → Modul 1 beräkna uttryck · 2 skriv uttryck · 3 förenkla (samla termer) · 4 lös ekvation (våg) · 5 mönster
-   → NÄSTA STEG är steg 10 (statistik.html) — sista i Fas 3
-10. ✅ statistik.html — diagram, medelvärde, sannolikhet, kombinatorik (SINGMA 5B kap 6)
-    → Modul 1 läsa stapeldiagram · 2 medelvärde · 3 sannolikhet (kulor) · 4 kombinatorik (rutnät) · 5 typvärde
-    → 🎉 FAS 3 KLAR — SINGMA 5A/5B-roadmapen i mål. Roadmapen FORTSÄTTER med Fas 4–8 (åk 6-komplettering, golv E / sikte C–D).
-
-### Fas 4–8 — Åk 6-komplettering (golv E, sikte C–D)
-Bakgrund: Fas 1–3 kartlägger SINGMA 5A/5B. Allt nedan står i Lgr22 åk 4–6 och är
-åk-6-provmaterial. INGET är bortprioriterat (kvalitet före tempo) — allt är schemalagt,
-ordnat efter beroende och pedagogisk logik.
-WHY denna ordning: uppgradera mönstret EN gång på alla befintliga filer → bygg nya filer
-på det färdiga mönstret → lägg retrieval-/problemlösningslagret ovanpå färdigt innehåll →
-backlog sist (lägst beroenderisk) → slutpass. Så rörs ingen fil två gånger för samma sak.
-
-### Fas 4 — Mönster v2 + komplettera befintliga filer (rör varje befintlig fil EN gång)
-Mönster v2 läggs FÖRST så att nya filer (Fas 5) föds färdiga och inget retrofittas två gånger.
-11. Mönster v2 i template.html — uppgradera skelettet med tre lager. Specat för Claude Code:
-
-    11a. ✅ Worked example (löst exempel) före nivåstart — KLAR på piloten (koordinat.html). Logik: workedSteps() i logic/koordinat.js (testad). UI: "Visa mig"-knapp + auto-visning första gången per nivå (sparas i storage), rent rutnät med streckad väg.
-        KONVENTION (efter granskning 2026-06-21, alla filer åtgärdade):
-        (1) BILD FÖRST: exemplet ritar modulens RIKTIGA figur (rita-funktionen tar svgId + task så den kan rita i exempel-rutan), inte bara text. Gäller där modulen har en figur under frågan.
-        (2) Uppgiftsspecifik fråga (med tal) ligger INNE i mXLive så den göms när exemplet visas — annars krockar den synligt med exemplets andra tal. Generiska frågor får ligga kvar utanför.
-        - Visas FÖRSTA gången Avalin går in på en nivå (per modul, per nivå). Därefter nåbar via "Visa mig"-knapp — aldrig påtvingad igen.
-        - Innehåll: exakt samma uppgiftstyp hon ska göra härnäst, fullständigt löst, ETT steg per rad, med samma visuella representation som uppgiften.
-        - Konkret → symbolisk: exemplet visar bilden först, sedan symbolerna/uträkningen.
-        - Datakälla: genereras av samma genMxTask-logik, så exempel och uppgift alltid matchar nivån. Ingen hårdkodad text.
-
-    11b. Uppläsning av instruktion — BORTTAGEN (Mats beslut 2026-06-20)
-        - Ursprungligen: Web Speech API, 🔊-knapp + "Läs upp nya uppgifter"-toggle.
-        - Mats vill inte ha någon inläsning någonstans. All uppläsningskod är borttagen ur ui.js, koordinat.html och template.html (speak/svVoice/initSpeak/🔊-knappar). Återinför INTE utan nytt beslut.
-
-    11c. ✅ Resonemangslager (C/D) — "varför?" — KLAR på piloten (koordinat.html). Logik: whyQuestion() i logic/koordinat.js (testad). UI: panel efter rätt svar, BARA nivå 2, ~var tredje; fel påverkar aldrig streak/progression.
-        - Efter RÄTT svar, ibland en följdfråga "Varför stämmer det?" med 2–3 korta flervalsmotiveringar (multiple choice, ALDRIG textinput).
-        - Frekvens: endast nivå 2 (abstrakt) och inte varje gång (~var tredje). Aldrig nivå 0–1 — där bär den konkreta förståelsen.
-        - Motiveringar: en korrekt resonemangsrad + 1–2 rimligt-felaktiga, byggda enligt distraktor-doktrinen.
-        - STOPPAR ALDRIG progression: fel på "varför" sänker inte streaken och blockerar inte nästa uppgift. Sträcklager ovanpå E-golvet.
-        - Ren logik: motiveringar + deras distraktorer genereras i logic/*.js och testas.
-
-12. Pilot FÖRST, sedan utrullning — bryt inte ut mönstret blint till nio filer.
-    - ✅ Piloten koordinat.html KLAR: 11a + 11c byggda och verifierade (logiklager grönt, ockulärt i Brave). template.html har 11b-resterna borttagna men 11a/11c är ÄNNU INTE inlagda i skelettet — gör det som en del av första utrullningen.
-    - ✅ klockan.html KLAR (specialfall, anpassat): klockan saknar nivåer/flerval/genMxTask. Anpassning: 11a = löst klocka via "Visa mig" + auto första besöket (logic/klockan.js: workedSteps); 11c = "Varför?" ~var tredje HELT rätt svar (ingen nivå-2-gate eftersom nivåer saknas), logic/klockan.js: whyQuestion. Båda testade + ockulärt verifierade. Bonus: solved-flagga hindrar dubbelräkning av streak vid om-koll.
-    - ✅ taluppfattning.html KLAR (8 moduler M1–M8): workedSteps + whyQuestion i logic/taluppfattning.js; per modul exempel-panel (egen visual: markerad siffra/talföljd/jämförelse/tallinje) + "Varför?". M1/M2 saknar nivåer → exempel första besöket, "Varför?" var tredje; M3–M8 → exempel per nivå, "Varför?" bara nivå 2. Tester + ockulärt verifierat.
-    - ✅ decimaltal.html KLAR (5 moduler, standardmönster): workedSteps + whyQuestion i logic/decimaltal.js; exempel per nivå + "Varför?" nivå 3 var tredje. Tester + ockulärt verifierat.
-    - ✅ multiplikation.html KLAR (5 moduler): workedSteps + whyQuestion i logic/multiplikation.js; exempel per nivå + "Varför?" nivå 3 var tredje. Tester + ockulärt verifierat.
-    - ✅ geometri.html KLAR (5 moduler): workedSteps + whyQuestion i logic/geometri.js; exempel per nivå + "Varför?" nivå 3 var tredje. Tester + ockulärt verifierat.
-    - ✅ algebra.html KLAR (5 moduler, generisk makeModule-motor): workedSteps + whyQuestion i logic/algebra.js; exempel/Varför inhakat i motorn via p.mod. Tester + ockulärt verifierat.
-    - ✅ statistik.html KLAR (5 moduler, makeModule-motor): workedSteps + whyQuestion i logic/statistik.js. Tester + ockulärt verifierat.
-    - ✅ brak.html KLAR (specialfall): mönster v2 applicerat på de 6 flervalsmodulerna (da1, da2, M7, M8, M9, M10) per Mats beslut 2026-06-21. da1/da2 utan nivåer (exempel första besöket, "Varför?" var tredje); M7–M10 nivå 1–3 ("Varför?" på toppnivå 3). Interaktiva/"kolla svar"-moduler (M1, M2, M3, M5a, M5b, M6) lämnade medvetet (mönstret passar ej). brak-prefixade JS-namn. Tester + ockulärt verifierat.
-    - 🎉 STEG 12 KLAR — mönster v2 (11a + 11c) utrullat på alla 9 filer.
-    - Per fil måste Definition of Done passeras (se nedan).
-13. Innehållsluckor i befintliga filer (görs i samma pass som filen ändå öppnas):
-    - ✅ geometri.html M6: triangelarea (b×h/2) — ny modul med SVG-triangel (bas/höjd), 3 nivåer, mönster v2. logic/geometri.js genM6Task. KLAR 2026-06-21.
-    - ✅ geometri.html M7: cirkelbegrepp (radie/diameter/medelpunkt + d=2·r) — ny modul, SVG-cirkel, 3 nivåer (känna igen → d från r → r från d), mönster v2. KLAR 2026-06-21.
-    - ✅ geometri.html M8: sammansatta figurer (L-form = två rektanglar, area = a·c + b·d) — ny modul, SVG-L med streckad delningslinje + mått, 3 nivåer, mönster v2. KLAR 2026-06-21.
-    🎉 FAS 4 KLAR — mönster v2 (alla 9 filer) + granskningsfix (bild först + fråga i live) + alla innehållsluckor (steg 13).
-    - ✅ taluppfattning.html M9: överslagsräkning (avrunda till tiotal/hundratal, uppskatta summa, 3 nivåer) — genM9Task. KLAR 2026-06-21.
-    - ✅ taluppfattning.html M10: romerska siffror (läsa, I–C, 3 nivåer) — genM10Task + toRoman. KLAR 2026-06-21.
-    - Återstår av steg 13: bara sammansatta figurer (uppskjutet, se ovan). Övriga innehållsluckor klara.
-
-### Fas 5 — Nya innehållsfiler (på mönster v2), KONKRET → ABSTRAKT
-Ordningen följer Avalins lärstil: konkret bild först, abstraktion sedan.
-14. ✅ skala.html KLAR — förminskning/förstoring, elevnära. Modul 1 förstoring/förminskning (känna igen: kattteckning i rutor + skala a:b) · 2 skalfaktor på en längd (förstoring n:1 ×, förminskning 1:n ÷) · 3 karta↔verklighet (1 cm = M m). Mönster v2 (worked example + "Varför?") inbyggt från start. logic/skala.js testad (genM1–3Task, workedSteps, whyQuestion); ockulärt verifierat i Brave. Knyter till katter/rita via 🐱-teckning.
-15. ✅ proportionalitet.html KLAR — proportionella samband (y = k·x), elevnära. Modul 1 lika mycket per styck (total = antal × styckpris, föremål i rad) · 2 hur mycket kostar ett? (styckpris = total ÷ antal, alltid heltal) · 3 samma förhållande (värdetabell a→b, c→?; konstanten k, knyter till bråk/decimal/procent i resonemanget). Mönster v2 (worked example + "Varför?") inbyggt från start. logic/proportionalitet.js testad (genM1–3Task, workedSteps, whyQuestion; art+plural i ITEMS för korrekt svensk grammatik); ockulärt verifierat via preview. Generaliserar skala (steg 14) + procent (brak M10).
-16. grafer för proportionella samband — i koordinat.html (koordinatsystemet finns) eller i proportionalitet-filen.
+### Fas 5 — Nya innehållsfiler (konkret → abstrakt)
 17. 3D-former — tredimensionella objekt och deras egenskaper (utöka geometri.html eller egen fil).
 
-### Fas 6 — Retrieval- och problemlösningslager (ovanpå färdigt innehåll)
-Byggs sent: aggregerar all modul-logik, så det vill ha innehållet stabilt.
-18. Blandat repetitionsläge (interleaving) — drar slumpade uppgifter tvärs alla moduler.
-    Tränar att VÄLJA metod, inte bara utföra. Starkaste C/D-greppet: prov blandar moment.
-19. problemlösning — elevnära textproblem som kräver strategival (Lgr22 problemlösning).
-    Bär tungt mot C/D (välja ändamålsenlig metod + resonemang). Kan kopplas in som blandade problem i repetitionsläget.
+### Fas 6 — Retrieval- och problemlösningslager (byggs sent; vill ha innehållet stabilt)
+18. Blandat repetitionsläge (interleaving) — slumpade uppgifter tvärs alla moduler. Tränar att VÄLJA metod. Starkaste C/D-greppet.
+19. problemlösning — elevnära textproblem som kräver strategival (Lgr22). Bär tungt mot C/D. Kan kopplas in som blandade problem i repetitionsläget.
 
-### Fas 7 — Backlog (på mogen pattern, lägst beroenderisk — byggs men sist)
-20. Programmering i visuell miljö / algoritmer (Lgr22 algebra-strand).
-    ⚠️ Verifiera FÖRST om skolan täcker detta (ofta Scratch/Blockly i skolan). Om vi bygger:
-    hellre ett enkelt algoritm-/instruktionssekvens-pussel än full blockmiljö.
+### Fas 7 — Backlog (mogen pattern, lägst beroenderisk)
+20. Programmering i visuell miljö / algoritmer (Lgr22 algebra-strand). ⚠️ Verifiera FÖRST om skolan täcker detta (ofta Scratch/Blockly). Om vi bygger: hellre enkelt algoritm-/sekvenspussel än full blockmiljö.
 21. Övriga småsaker som dyker upp under bygget — fångas här, inte ad hoc.
 
 ### Fas 8 — Slutpass (kvalitetsgrind före skolstart aug 2026)
@@ -188,7 +106,8 @@ Byggs sent: aggregerar all modul-logik, så det vill ha innehållet stabilt.
 25. Slutlig avstämning mot Lgr22 åk 4–6 (checklista) — bekräfta att inget moment saknas.
 
 ## DISTRAKTOR-DOKTRIN (kärnan i kvaliteten)
-Varje felaktigt svarsalternativ kodar en SPECIFIK, namngiven missuppfattning — aldrig en slumpmässig närmiss. Det gör fel svar diagnostiska och tvingar fram förståelse, inte gissning. Gäller alla moduler OCH "varför"-motiveringarna.
+Varje felaktigt svarsalternativ kodar en SPECIFIK, namngiven missuppfattning — aldrig en slumpmässig närmiss.
+Det gör fel svar diagnostiska och tvingar fram förståelse, inte gissning. Gäller alla moduler OCH "varför"-motiveringarna.
 Missuppfattningar att bygga på:
 - Fel räknesätt (adderar i stället för multiplicerar — t.ex. kombinatorik a+b)
 - Glömt steg (glömmer dela i medelvärde → svarar summan)
@@ -199,30 +118,25 @@ Missuppfattningar att bygga på:
 Regler: 3 distraktorer, alla distinkta, facit aldrig bland dem, inga ogiltiga värden (negativa/noll där det inte är meningsfullt). Allt verifieras med invariant-assertions i tests/test.js.
 
 ## TEKNISKA STANDARDER
-- answered-flagga blockerar dubbelklick
-- clean state vid ny uppgift
-- pulse på Ny uppgift vid rätt svar
-- streak 🐱 X i rad från 2 rätta — nollställs vid fel
-- hadError-flagga: streak ökar bara om uppgiften klarades utan fel
-- digits-only keydown-handler där relevant
-- multiple choice föredras över textinput
-- nivå-badge synlig
-- avancera efter 3 rena rätt i rad (hadError = false)
-- ett steg i taget i UI — aldrig flera krav synliga samtidigt
+- answered-flagga blockerar dubbelklick · clean state vid ny uppgift · pulse på Ny uppgift vid rätt svar
+- streak 🐱 X i rad från 2 rätta — nollställs vid fel · hadError-flagga: streak ökar bara om uppgiften klarades utan fel
+- digits-only keydown-handler där relevant · multiple choice föredras över textinput · nivå-badge synlig
+- avancera efter 3 rena rätt i rad (hadError = false) · ett steg i taget i UI — aldrig flera krav synliga samtidigt
 
 ## TESTNING & VERIFIERING (två lager — BÅDA krävs)
 Logiklagret och det visuella lagret fångar olika fel. Inget ersätter det andra.
 
-LOGIKLAGER — automatiserat (Claude Code i terminalen)
+LOGIKLAGER — automatiserat (Claude Code i terminalen):
 - node tests/test.js körs efter VARJE ändring och måste vara grönt.
-- All ren logik i logic/*.js ska ha assertions i tests/test.js: exakta värden + invarianter per nivå, property-based (generatorn körs många varv).
-- Ny logik = nya tester i SAMMA commit. Gäller även nya lager, t.ex. "varför"-motiveringarnas generator. Inget läggs till otestat.
-- Bakåt: testsviten utökas löpande om en lucka upptäcks i redan byggd logik. STATUS NU: alla nio moduler har egen testblock — ingen känd lucka.
+- node tests/regression.js kompletterar: strukturell koll (testtäckning, trasiga filreferenser, Miso-container per sida) — den terminalbara halvan av det ockulära lagret. Kör tillsammans med test.js. Den andra halvan (skärmdumpssvep) kräver Fable + browserverktyg.
+- All ren logik i logic/*.js ska ha assertions: exakta värden + invarianter per nivå, property-based (generatorn körs många varv).
+- Ny logik = nya tester i SAMMA commit (även "varför"-motiveringarnas generator). Inget läggs till otestat.
+- Alla moduler har egen testblock — ingen känd lucka. Utöka löpande om en lucka upptäcks.
 - Webbläsar-API (t.ex. SVG-rendering) kan INTE testas i Node — verifieras i visuella lagret i stället.
 
-VISUELLT / OCKULÄRT LAGER — kräver browser-verktyg (terminalen ser INTE renderingen)
-- Verifieras i Brave mot npx serve-URL:en via Claude-extensionen (eller skärmdumpar). Claude Code i terminalen kan INTE göra detta själv — det måste ske genom browser-verktyget.
-- Checklista per sida: instruktionen visas en mening i taget · worked example visas första gången på en nivå · rätt/fel signaleras med ikon + text (inte bara färg) · Miso renderas och firar utan att störa · ingen timer/nedräkning · layout matchar övriga sidor · inga konsolfel.
+VISUELLT / OCKULÄRT LAGER — kräver browser-verktyg (terminalen ser INTE renderingen):
+- Verifieras i Brave mot npx serve-URL:en via Claude-extensionen (eller skärmdumpar).
+- Checklista per sida: instruktionen en mening i taget · worked example första gången på en nivå · rätt/fel med ikon + text (inte bara färg) · Miso renderas och firar utan att störa · ingen timer/nedräkning · layout matchar övriga sidor · inga konsolfel.
 - Körs efter VARJE modul, och som helhetspass över alla sidor i Fas 8.
 
 ## DEFINITION OF DONE (varje modul måste passera)
@@ -236,17 +150,18 @@ VISUELLT / OCKULÄRT LAGER — kräver browser-verktyg (terminalen ser INTE rend
 - [ ] Miso-container omedelbart före </script>
 - [ ] Cross-page consistent UX (knappar, feedback, färgbetydelser identiska)
 - [ ] node tests/test.js grönt
-- [ ] Ockulär verifiering i Brave (npx serve via Claude-extensionen) — checklistan i TESTNING & VERIFIERING passerad
+- [ ] node tests/regression.js grönt
+- [ ] Ockulär verifiering i Brave (npx serve via Claude-extensionen) — checklistan ovan passerad
 - [ ] /code-review high utförd
 
 ## RÖDA FLAGGOR
 - Använd INTE --dangerously-skip-permissions. Kör med auto mode (auto-accept edits).
-- npx serve . i egen terminal, inte Claude Code-terminalen
-- Ren logik hör hemma i logic/*.js (testbar) — kör node tests/test.js efter ändring
-- Lägg inte till navigeringsknappar eller extra features utan att Mats bett om det
-- Stoppa design-tangenter innan funktionen är klar
-- Abstrahera inte för tidigt — template.html finns nu, men håll den som ett skelett; bygg klart en riktig modul innan mönster bryts ut på nytt
-- Miso DOM-placering: container måste ligga omedelbart före </script>-taggen
-- Bygg aldrig mer än ett steg åt gången utan Mats godkännande
+- npx serve . i egen terminal, inte Claude Code-terminalen.
+- Ren logik hör hemma i logic/*.js (testbar) — kör node tests/test.js efter ändring.
+- Lägg inte till navigeringsknappar eller extra features utan att Mats bett om det.
+- Stoppa design-tangenter innan funktionen är klar.
+- Abstrahera inte för tidigt — håll template.html som skelett; bygg klart en riktig modul innan mönster bryts ut på nytt.
+- Miso DOM-placering: container måste ligga omedelbart före </script>-taggen.
+- Bygg aldrig mer än ett steg åt gången utan Mats godkännande.
 - Kvalitet före tempo: ingen deadline att forcera mot. Bygg färdigt och rätt.
 - Betyget (C/D) är en FÖLJD av djup förståelse — bygg för förståelse, metodval och resonemang, inte för att bocka av innehåll. E är golvet; sätt aldrig press på Avalin.
