@@ -148,7 +148,8 @@
                         t.ny > t.orig ? 'Den blev fler rutor — alltså större.'
                             : t.ny < t.orig ? 'Den blev färre rutor — alltså mindre.'
                             : 'Lika många rutor — lika stor.',
-                        'Det är en ' + t.correct.toLowerCase() + '.'
+                        t.correct === 'Lika stor' ? 'Bilden är lika stor.'
+                            : 'Det är en ' + t.correct.toLowerCase() + '.'
                     ];
                 }
                 return [
@@ -156,7 +157,8 @@
                     t.a > t.b ? 'Första talet är störst — bilden blir större.'
                         : t.a < t.b ? 'Andra talet är störst — bilden blir mindre.'
                         : 'Talen är lika — lika stor.',
-                    'Det är en ' + t.correct.toLowerCase() + '.'
+                    t.correct === 'Lika stor' ? 'Bilden är lika stor.'
+                        : 'Det är en ' + t.correct.toLowerCase() + '.'
                 ];
             case 2:
                 if (t.type === 'forstoring') {

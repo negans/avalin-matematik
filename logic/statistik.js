@@ -108,10 +108,10 @@
     /* ════════ Modul 3 – Sannolikhet ════════ */
 
     const COLORS = [
-        { name: 'röda', hex: '#C0614A' },
-        { name: 'blå',  hex: '#5B8DB8' },
-        { name: 'gröna', hex: '#6B9E6B' },
-        { name: 'gula', hex: '#E0B341' }
+        { name: 'röda',  sing: 'röd',  hex: '#C0614A' },
+        { name: 'blå',   sing: 'blå',  hex: '#5B8DB8' },
+        { name: 'gröna', sing: 'grön', hex: '#6B9E6B' },
+        { name: 'gula',  sing: 'gul',  hex: '#E0B341' }
     ];
 
     function genM3Task(level) {
@@ -134,7 +134,7 @@
 
         return {
             colors: palette.map((c, j) => ({ name: c.name, hex: c.hex, count: counts[j] })),
-            askName: palette[i].name, k, total, correct,
+            askName: palette[i].name, askSing: palette[i].sing, k, total, correct,
             distractors: pickDistractors(correct, cand, 3)
         };
     }
