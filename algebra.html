@@ -197,7 +197,7 @@
 <p class="section-title">Modul 5 – Mönster</p>
 
 <div class="card">
-    <p class="task-label" id="m5Q">Titta på mönstret. Hur många i nästa figur?
+    <p class="task-label" id="m5Q"><span id="m5QText">Titta på mönstret. Hur många i nästa figur?</span>
         <button type="button" class="we-btn" id="m5Show">Visa mig</button></p>
     <div style="text-align:center"><span class="level-badge" id="m5LevelLabel">Nivå 1</span></div>
 
@@ -492,7 +492,7 @@ makeModule({
     misoOk: 'Rätt mönster! Toppen!', misoTip: 'Hur mycket ökar det varje gång?',
     render: t => {
         drawPattern('m5SVG', t.figures);
-        document.getElementById('m5Q').textContent = 'Mönstret fortsätter likadant. Hur många i Figur ' + t.askIndex + '?';
+        document.getElementById('m5QText').textContent = 'Mönstret fortsätter likadant. Hur många i Figur ' + t.askIndex + '?';
     },
     levelUpMsg: () => 'Precis rätt! 🎉 Superbra – nu provar vi ett snabbare mönster!',
     hint: t => 'Nästan – det ökar med ' + t.step + ' varje gång, så Figur ' + t.askIndex + ' har ' + t.correct + '.'

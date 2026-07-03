@@ -508,6 +508,9 @@ ok(stat.uniqueMode([1,1,2,2]) === null, 'uniqueMode oavgjort → null');
     const sum = t.colors.reduce((a,c)=>a+c.count,0);
     ok(sum === t.total, 'Stat M3 nivå'+lvl+': total = summa av kulor');
     ok(t.correct === t.k + ' av ' + t.total, 'Stat M3 nivå'+lvl+': facit = k av total');
+    ok(['röd','blå','grön','gul'].includes(t.askSing), 'Stat M3 nivå'+lvl+': askSing är singularform');
+    ok(['röda','blå','gröna','gula'].includes(t.askName), 'Stat M3 nivå'+lvl+': askName är pluralform');
+    ok({röda:'röd',blå:'blå',gröna:'grön',gula:'gul'}[t.askName] === t.askSing, 'Stat M3 nivå'+lvl+': askSing matchar askName');
     ok(t.distractors.length === 3, 'Stat M3 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
     ok(distinct([t.correct, ...t.distractors]), 'Stat M3 nivå'+lvl+': 4 distinkta alternativ');
     ok(!t.distractors.includes(t.correct), 'Stat M3 nivå'+lvl+': facit ej bland distraktorer');
@@ -906,6 +909,7 @@ eq(ska.classify(5, 5), 'Lika stor',    'classify 5→5');
         ok(steps.length === 3, 'Skala WE mod'+mod+' nivå'+lvl+': exakt 3 steg');
         ok(steps.every(s => typeof s === 'string' && s.length > 0), 'Skala WE mod'+mod+' nivå'+lvl+': alla steg ifyllda');
         if (mod === 1) ok(steps[2].includes(t.correct.toLowerCase()), 'Skala WE mod1: sista steget bär kategori');
+        if (mod === 1) ok(!steps[2].includes('en lika stor'), 'Skala WE mod1: korrekt svenska vid "Lika stor" (inte "en lika stor")');
         else           ok(steps[2].includes(String(t.correct)),       'Skala WE mod'+mod+': sista steget bär facit');
 
         const q = ska.whyQuestion(mod);
