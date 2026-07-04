@@ -44,7 +44,7 @@
         .why-q { text-align: center; font-weight: bold; color: var(--color-heading); margin-bottom: 10px; }
         .why-choices { display: flex; flex-direction: column; gap: 8px; }
         .why-fb { text-align: center; margin-top: 10px; color: var(--color-text); min-height: 1.2em; }
-        #m1SVG, #m2SVG, #m3SVG, #m4SVG, #m5SVG { display: block; overflow: visible; }
+        #m1SVG, #m2SVG, #m3SVG, #m4SVG, #m5SVG, #m9SVG { display: block; overflow: visible; }
 
         #miso-container {
             position: fixed;
@@ -319,6 +319,36 @@
     </div>
 </div>
 
+<!-- ══════ Modul 9 ══════ -->
+<p class="section-title">Modul 9 – 3D-former</p>
+
+<div class="card">
+    <p class="task-label">Vilken 3D-form är detta?
+        <button type="button" class="we-btn" id="m9Show">Visa mig</button></p>
+    <div style="text-align:center"><span class="level-badge" id="m9LevelLabel">Nivå 1</span></div>
+
+    <div class="worked-example" id="m9Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="m9ExampleVisual"></div>
+        <ol class="we-steps" id="m9ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="m9ExampleClose">Jag förstår – min tur →</button></div>
+    </div>
+
+    <div id="m9Live">
+        <div class="fig-wrap"><svg id="m9SVG" width="100%"></svg></div>
+        <div class="choice-row" id="m9Choices"></div>
+        <div class="btn-row"><button class="btn-secondary" id="m9Next">Ny uppgift →</button></div>
+        <p class="streak" id="m9Streak"></p>
+        <div class="feedback" id="m9Feedback" aria-live="polite"></div>
+
+        <div class="why" id="m9Why" hidden>
+            <p class="why-q" id="m9WhyQ"></p>
+            <div class="why-choices" id="m9WhyChoices"></div>
+            <div class="why-fb" id="m9WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
+</div>
+
 <div id="miso-container">
     <div id="miso-bubble"></div>
     <img id="miso-img" src="images/miso/miso-neutral.webp" alt="Miso" width="100">
@@ -330,9 +360,9 @@ initStatsBar();
 
 /* ════════════════════════════════
    Mönster v2 – löst exempel (11a) + resonemang (11c), delad inkoppling.
-   Alla 5 moduler har 3 nivåer: exempel per nivå, "Varför?" nivå 3 var tredje.
+   Alla moduler har 3 nivåer: exempel per nivå, "Varför?" nivå 3 var tredje.
 ════════════════════════════════ */
-const GENS = { 1: genM1Task, 2: genM2Task, 3: genM3Task, 4: genM4Task, 5: genM5Task, 6: genM6Task, 7: genM7Task, 8: genM8Task };
+const GENS = { 1: genM1Task, 2: genM2Task, 3: genM3Task, 4: genM4Task, 5: genM5Task, 6: genM6Task, 7: genM7Task, 8: genM8Task, 9: genM9Task };
 function niceExample(mod, level) { return GENS[mod](level); }
 
 function renderExampleVisual(mod, containerId, t) {
@@ -356,6 +386,8 @@ function renderExampleVisual(mod, containerId, t) {
         if (t.kind === 'id')       html = ok(t.correct) + ' — ' + M7_PART_DESC[t.part];
         else if (t.kind === 'r2d') html = '2 × ' + t.r + ' = ' + ok(t.correct + ' ' + t.unit);
         else                       html = t.d + ' ÷ 2 = ' + ok(t.correct + ' ' + t.unit);
+    } else if (mod === 9) {
+        html = ok(t.correct);
     } else {
         html = t.r1 + ' + ' + t.r2 + ' = ' + ok(t.correct + ' ' + t.unit);
     }
@@ -369,6 +401,7 @@ function renderExampleVisual(mod, containerId, t) {
     else if (mod === 5) drawM5(figId, t);
     else if (mod === 6) drawM6(figId, t);
     else if (mod === 7) drawM7Circle(figId, t);
+    else if (mod === 9) drawShape3D(figId, t.shape);
     else                drawM8Composite(figId, t);
 }
 
@@ -389,7 +422,7 @@ function wireExample(mod, getLevel) {
     document.getElementById('m' + mod + 'ExampleClose').addEventListener('click', () => closeExample(mod));
 }
 
-const whyCounts = { 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0 };
+const whyCounts = { 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0 };
 function maybeWhy(mod, level, task) {
     if (level !== 2) return;                 // bara nivå 3 (abstrakt)
     whyCounts[mod]++;
@@ -1039,6 +1072,123 @@ document.getElementById('m8Next').addEventListener('click', () => { showMiso('ne
 wireExample(8, () => m8Level);
 buildM8();
 maybeExample(8, m8Level);
+
+/* ════════════════════════════════ Modul 9 – 3D-former ════════════════════════════════ */
+
+let m9Streak = 0, m9Task = null, m9Answered = false, m9HadError = false;
+let m9Level = 0, m9LevelStreak = 0;
+
+/* Ritar en 3D-form i enkel isometrisk projektion. Konturen bär formen;
+   ljusare topp/mörkare sida är bara djupkänsla (aldrig enda signalen). */
+function drawShape3D(svgId, key) {
+    const svg = document.getElementById(svgId);
+    setBox(svg, 200, 175);
+    const cx = 100, TOP = '#F8E9D2', SIDE = '#E6C79C';
+    const poly = (pts, fill, dash) => {
+        const p = svgEl('polygon');
+        p.setAttribute('points', pts.map(q => q[0] + ',' + q[1]).join(' '));
+        p.setAttribute('fill', fill); p.setAttribute('stroke', STROKE);
+        p.setAttribute('stroke-width', 2.5); p.setAttribute('stroke-linejoin', 'round');
+        if (dash) p.setAttribute('stroke-dasharray', dash);
+        svg.appendChild(p);
+    };
+    const ell = (ex, ey, rx, ry, fill) => {
+        const e = svgEl('ellipse');
+        e.setAttribute('cx', ex); e.setAttribute('cy', ey); e.setAttribute('rx', rx); e.setAttribute('ry', ry);
+        e.setAttribute('fill', fill); e.setAttribute('stroke', STROKE); e.setAttribute('stroke-width', 2.5);
+        svg.appendChild(e);
+    };
+    const circ = (r, fill) => {
+        const c = svgEl('circle');
+        c.setAttribute('cx', cx); c.setAttribute('cy', 88); c.setAttribute('r', r);
+        c.setAttribute('fill', fill); c.setAttribute('stroke', STROKE); c.setAttribute('stroke-width', 2.5);
+        svg.appendChild(c);
+    };
+
+    if (key === 'kub' || key === 'ratblock') {
+        const w = key === 'kub' ? 78 : 112, h = 78, dx = 32, dy = 24;
+        const x0 = cx - (w + dx) / 2, y0 = 58;
+        const A = [x0, y0], B = [x0 + w, y0], C = [x0 + w, y0 + h], D = [x0, y0 + h];
+        const off = p => [p[0] + dx, p[1] - dy];
+        poly([A, B, off(B), off(A)], TOP);      // topp
+        poly([B, C, off(C), off(B)], SIDE);     // höger sida
+        poly([A, B, C, D], FILL);               // framsida (sist)
+        return;
+    }
+    if (key === 'klot') {
+        circ(62, FILL);
+        ell(cx, 88, 62, 21, 'none');            // ekvatorlinje → 3D-boll, inte platt cirkel
+        const hl = svgEl('ellipse');
+        hl.setAttribute('cx', cx - 22); hl.setAttribute('cy', 66);
+        hl.setAttribute('rx', 13); hl.setAttribute('ry', 9);
+        hl.setAttribute('fill', 'rgba(255,255,255,0.55)'); hl.setAttribute('stroke', 'none');
+        svg.appendChild(hl);
+        return;
+    }
+    if (key === 'cylinder') {
+        const rx = 46, ry = 16, yTop = 42, yBot = 134;
+        ell(cx, yBot, rx, ry, FILL);            // botten (hela; bakre halva döljs av kroppen)
+        poly([[cx - rx, yTop], [cx + rx, yTop], [cx + rx, yBot], [cx - rx, yBot]], FILL);
+        elLine(svg, cx - rx, yTop, cx - rx, yBot, STROKE, 2.5);
+        elLine(svg, cx + rx, yTop, cx + rx, yBot, STROKE, 2.5);
+        ell(cx, yTop, rx, ry, TOP);             // topp (sist, syns helt)
+        return;
+    }
+    if (key === 'kon') {
+        const rx = 48, yBase = 134, yApex = 40;
+        ell(cx, yBase, rx, 16, FILL);           // botten (hela; baksidan döljs av manteln)
+        poly([[cx, yApex], [cx - rx, yBase], [cx + rx, yBase]], FILL);
+        return;
+    }
+    /* pyramid (kvadratisk botten i perspektiv) */
+    const rx = 56, ry = 24, yBase = 122, yApex = 40;
+    const front = [cx, yBase + ry], right = [cx + rx, yBase], back = [cx, yBase - ry], left = [cx - rx, yBase];
+    const apex = [cx, yApex];
+    poly([front, right, back, left], FILL);                 // bottenplatta
+    poly([left, front, apex], SIDE);                        // vänster framsida
+    poly([front, right, apex], FILL);                       // höger framsida
+}
+
+function buildM9() {
+    m9Task = genM9Task(m9Level); m9Answered = false; m9HadError = false;
+    drawShape3D('m9SVG', m9Task.shape);
+    buildChoices('m9Choices', [m9Task.correct, ...m9Task.distractors], x => x, m9Check);
+    document.getElementById('m9LevelLabel').textContent = 'Nivå ' + (m9Level + 1);
+    document.getElementById('m9Feedback').textContent = '';
+    document.getElementById('m9Next').classList.remove('btn-pulse');
+    hideWhy(9);
+}
+
+function m9Check(val, btn) {
+    if (m9Answered) return;
+    const fb = document.getElementById('m9Feedback');
+    const t = m9Task;
+    if (val === t.correct) {
+        m9Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m9Choices .choice-btn').forEach(b => { b.disabled = true; });
+        if (!m9HadError) { m9Streak++; m9LevelStreak++; recordCorrect(); }
+        else { m9Streak = 0; m9LevelStreak = 0; }
+        setStreak('m9Streak', m9Streak);
+        if (m9LevelStreak >= 3 && m9Level < 2) {
+            m9Level++; m9LevelStreak = 0;
+            document.getElementById('m9LevelLabel').textContent = 'Nivå ' + (m9Level + 1);
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi fler 3D-former!';
+        } else { fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!'; }
+        showMiso('glad', 'Rätt 3D-form! Toppen!');
+        document.getElementById('m9Next').classList.add('btn-pulse');
+        maybeWhy(9, m9Level, m9Task);
+    } else {
+        m9HadError = true; m9LevelStreak = 0;
+        btn.classList.add('err'); btn.disabled = true;
+        fb.textContent = 'Nästan – det är ' + t.art + ' ' + t.correct.toLowerCase() + ': den ' + SHAPE3D_DESC[t.shape] + '.';
+        showMiso('uppmuntrande', 'Titta på formens sidor och ytor!');
+    }
+}
+document.getElementById('m9Next').addEventListener('click', () => { showMiso('neutral', 'Ny form – kör på!'); buildM9(); maybeExample(9, m9Level); });
+wireExample(9, () => m9Level);
+buildM9();
+maybeExample(9, m9Level);
 </script>
 </body>
 </html>
