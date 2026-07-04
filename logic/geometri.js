@@ -250,7 +250,7 @@
     const SHAPE3D_DESC = {
         kub:      'har 6 lika stora kvadratiska sidor',
         ratblock: 'är som en låda – 6 sidor, men inte alla lika stora',
-        klot:     'är helt runt, som en boll',
+        klot:     'är helt rund, som en boll',
         cylinder: 'har två runda platta sidor och är rund runt om, som en burk',
         kon:      'har en rund botten och smalnar av till en spets, som en glasstrut',
         pyramid:  'har en fyrkantig botten och smalnar av till en spets på toppen'
