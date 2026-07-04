@@ -233,6 +233,39 @@
         return { a, b, c, d, r1, r2, unit: 'cm²', correct, distractors: pickDistractors(correct, cand, 3) };
     }
 
+    /* ════════ Modul 9 – 3D-former (känna igen) ════════
+       Lgr22 åk 4–6: grundläggande tredimensionella objekt. Nivå 0 = fyra
+       tydligt olika former; nivå 1–2 = alla sex (kub/rätblock och
+       cylinder/kon blir förväxlingsbara). Kategorival, som M2. */
+
+    const SHAPES_3D = {
+        kub:      { name: 'Kub',      art: 'en' },
+        ratblock: { name: 'Rätblock', art: 'ett' },
+        klot:     { name: 'Klot',     art: 'ett' },
+        cylinder: { name: 'Cylinder', art: 'en' },
+        kon:      { name: 'Kon',      art: 'en' },
+        pyramid:  { name: 'Pyramid',  art: 'en' }
+    };
+
+    const SHAPE3D_DESC = {
+        kub:      'har 6 lika stora kvadratiska sidor',
+        ratblock: 'är som en låda – 6 sidor, men inte alla lika stora',
+        klot:     'är helt runt, som en boll',
+        cylinder: 'har två runda platta sidor och är rund runt om, som en burk',
+        kon:      'har en rund botten och smalnar av till en spets, som en glasstrut',
+        pyramid:  'har en fyrkantig botten och smalnar av till en spets på toppen'
+    };
+
+    function genM9Task(level) {
+        const pool = level === 0
+            ? ['kub', 'klot', 'cylinder', 'kon']
+            : ['kub', 'ratblock', 'klot', 'cylinder', 'kon', 'pyramid'];
+        const key = pool[rnd(0, pool.length - 1)];
+        const correct = SHAPES_3D[key].name;
+        const others = shuffle(pool.filter(k => k !== key).map(k => SHAPES_3D[k].name));
+        return { shape: key, art: SHAPES_3D[key].art, correct, distractors: others.slice(0, 3) };
+    }
+
     /* ════════ Mönster v2, lager 11a + 11c ════════
        workedSteps(mod, task): 3 stegrader (löst exempel).
        whyQuestion(mod, task): "Varför stämmer det?" + 1 korrekt + 2 distraktorer
@@ -306,6 +339,12 @@
                     'Räkna ' + t.d + ' ÷ 2.',
                     'Radien är ' + t.correct + ' ' + t.unit + '.'
                 ];
+            case 9:
+                return [
+                    'Titta på formen.',
+                    'Den ' + SHAPE3D_DESC[t.shape] + '.',
+                    'Det är ' + t.art + ' ' + t.correct.toLowerCase() + '.'
+                ];
             default:
                 return [];
         }
@@ -367,6 +406,13 @@
                 'Man räknar hela rektangeln utan att ta bort urtaget.', // över-räknar
                 'Man räknar bara en av rektanglarna.'                   // delberäkning
             ]
+        },
+        9: {
+            correct: 'Man känner igen en 3D-form på hur många och vilka sidor och ytor den har.',
+            distractors: [
+                'Man känner igen 3D-former på deras färg.',    // irrelevant egenskap
+                'Alla former som är runda någonstans är klot.' // överförenkling (cylinder/kon är också runda)
+            ]
         }
     };
 
@@ -385,6 +431,7 @@
         genM6Task,
         genM7Task, M7_PART_DESC,
         genM8Task,
+        SHAPES_3D, SHAPE3D_DESC, genM9Task,
         workedSteps, whyQuestion
     };
 }));

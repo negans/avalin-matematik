@@ -398,6 +398,30 @@ eq(geo.classifyAngle(180), 'Rak',     'classifyAngle 180');
     ok(q.distractors.length === 2 && distinct([q.correct, ...q.distractors]) && !q.distractors.includes(q.correct), 'Geo M8 WHY: doktrin');
 }));
 
+/* — M9: 3D-former (känna igen) — */
+const SHAPE3D_NAMES = ['Kub','Rätblock','Klot','Cylinder','Kon','Pyramid'];
+const M9_EASY = ['Kub','Klot','Cylinder','Kon'];
+{
+    const seen = new Set();
+    [0,1,2].forEach(lvl => forEachRun(geo.genM9Task, lvl, RUNS, t => {
+        ok(SHAPE3D_NAMES.includes(t.correct), 'Geo M9 nivå'+lvl+': facit är en 3D-form');
+        ok(['en','ett'].includes(t.art), 'Geo M9 nivå'+lvl+': art är en/ett');
+        ok(geo.SHAPES_3D[t.shape].name === t.correct && geo.SHAPES_3D[t.shape].art === t.art, 'Geo M9 nivå'+lvl+': shape/namn/art konsistenta');
+        if (lvl === 0) ok(M9_EASY.includes(t.correct), 'Geo M9 nivå0: bara de fyra tydliga formerna');
+        ok(t.distractors.length === 3, 'Geo M9 nivå'+lvl+': 3 distraktorer (fick '+t.distractors.length+')');
+        ok(t.distractors.every(d => SHAPE3D_NAMES.includes(d)), 'Geo M9 nivå'+lvl+': distraktorer är giltiga formnamn');
+        ok(distinct([t.correct, ...t.distractors]), 'Geo M9 nivå'+lvl+': 4 distinkta alternativ');
+        ok(!t.distractors.includes(t.correct), 'Geo M9 nivå'+lvl+': facit ej bland distraktorer');
+        const steps = geo.workedSteps(9, t);
+        ok(steps.length === 3 && steps.every(s => typeof s === 'string' && s.length > 0), 'Geo M9 WE nivå'+lvl+': 3 steg ifyllda');
+        ok(steps[2].includes(t.correct.toLowerCase()) && steps[2].includes(t.art + ' '), 'Geo M9 WE: sista steget bär "art + formnamn"');
+        const q = geo.whyQuestion(9, t);
+        ok(q.distractors.length === 2 && distinct([q.correct, ...q.distractors]) && !q.distractors.includes(q.correct), 'Geo M9 WHY: doktrin');
+        seen.add(t.correct);
+    }));
+    ok(SHAPE3D_NAMES.every(n => seen.has(n)), 'Geo M9: alla sex 3D-former nåbara (fick '+[...seen].join(',')+')');
+}
+
 /* ═══════════ algebra ═══════════ */
 const alg = require('../logic/algebra.js');
 
