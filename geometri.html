@@ -360,7 +360,7 @@ initStatsBar();
 
 /* ════════════════════════════════
    Mönster v2 – löst exempel (11a) + resonemang (11c), delad inkoppling.
-   Alla 5 moduler har 3 nivåer: exempel per nivå, "Varför?" nivå 3 var tredje.
+   Alla moduler har 3 nivåer: exempel per nivå, "Varför?" nivå 3 var tredje.
 ════════════════════════════════ */
 const GENS = { 1: genM1Task, 2: genM2Task, 3: genM3Task, 4: genM4Task, 5: genM5Task, 6: genM6Task, 7: genM7Task, 8: genM8Task, 9: genM9Task };
 function niceExample(mod, level) { return GENS[mod](level); }
@@ -1145,7 +1145,6 @@ function drawShape3D(svgId, key) {
     const front = [cx, yBase + ry], right = [cx + rx, yBase], back = [cx, yBase - ry], left = [cx - rx, yBase];
     const apex = [cx, yApex];
     poly([front, right, back, left], FILL);                 // bottenplatta
-    elLine(svg, back[0], back[1], apex[0], apex[1], AXIS, 1.5, '4 3'); // bakre kant (streckad = dold)
     poly([left, front, apex], SIDE);                        // vänster framsida
     poly([front, right, apex], FILL);                       // höger framsida
 }
