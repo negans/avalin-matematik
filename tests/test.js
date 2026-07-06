@@ -1076,6 +1076,85 @@ const pro = require('../logic/proportionalitet.js');
     })));
 }
 
+/* ═══════════ problemlösning ═══════════ */
+const pl = require('../logic/problemlosning.js');
+
+/* Gemensam distraktor-kontroll för ett uppgiftsobjekt. */
+function plDistr(t, tag) {
+    ok(Number.isInteger(t.correct) && t.correct > 0, tag + ': facit heltal > 0');
+    ok(t.distractors.length === 3, tag + ': 3 distraktorer');
+    ok(distinct([t.correct, ...t.distractors]), tag + ': 4 distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), tag + ': facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), tag + ': positiva heltal');
+    ok(typeof t.story === 'string' && t.story.length > 0, tag + ': story ifylld');
+}
+
+/* — Ett-stegs (nivå 0): exakta facit-formler per räknesätt — */
+forEachRun(pl.addTask, 0, RUNS, t => { ok(t.correct === t.a + t.b, 'PL add: facit = a + b'); plDistr(t, 'PL add'); });
+forEachRun(pl.subTask, 0, RUNS, t => {
+    ok(t.correct === t.a - t.b, 'PL sub: facit = a − b');
+    ok(t.a > t.b, 'PL sub: a > b (positivt svar)');
+    plDistr(t, 'PL sub');
+});
+forEachRun(pl.mulTask, 0, RUNS, t => { ok(t.correct === t.g * t.e, 'PL mul: facit = g × e'); plDistr(t, 'PL mul'); });
+forEachRun(pl.divTask, 0, RUNS, t => {
+    ok(t.correct === t.q, 'PL div: facit = q');
+    ok(t.t === t.g * t.q, 'PL div: total = g × q (delbar)');
+    ok(t.t % t.g === 0, 'PL div: total delbart med g');
+    plDistr(t, 'PL div');
+});
+
+/* — Två-stegs (nivå 1): × följt av − eller + — */
+forEachRun(pl.mulSubTask, 1, RUNS, t => {
+    ok(t.p === t.g * t.e, 'PL mul_sub: p = g × e');
+    ok(t.correct === t.p - t.r, 'PL mul_sub: facit = p − r');
+    ok(t.p > t.r, 'PL mul_sub: p > r (positivt svar)');
+    plDistr(t, 'PL mul_sub');
+});
+forEachRun(pl.mulAddTask, 1, RUNS, t => {
+    ok(t.p === t.g * t.e, 'PL mul_add: p = g × e');
+    ok(t.correct === t.p + t.r, 'PL mul_add: facit = p + r');
+    plDistr(t, 'PL mul_add');
+});
+
+/* — Flerstegs + överflödig info (nivå 2) — */
+forEachRun(pl.herringTask, 2, RUNS, t => {
+    ok(t.p === t.g * t.e, 'PL herring: p = g × e');
+    ok(t.correct === t.s + t.p, 'PL herring: facit = s + p (h ingår inte)');
+    ok(t.item !== t.other, 'PL herring: överflödigt föremål är en annan kategori');
+    plDistr(t, 'PL herring');
+});
+
+/* — genM1Task: rätt räknesätt per nivå + alla räknesätt nåbara — */
+{
+    const ops0 = new Set(), ops1 = new Set();
+    for (let i = 0; i < 4000; i++) {
+        const t0 = pl.genM1Task(0), t1 = pl.genM1Task(1), t2 = pl.genM1Task(2);
+        ops0.add(t0.op); ops1.add(t1.op);
+        ok(['add', 'sub', 'mul', 'div'].includes(t0.op), 'PL genM1 nivå0: ett-stegs räknesätt');
+        ok(['mul_sub', 'mul_add'].includes(t1.op), 'PL genM1 nivå1: två-stegs räknesätt');
+        ok(t2.op === 'herring', 'PL genM1 nivå2: överflödig info');
+    }
+    ok(['add', 'sub', 'mul', 'div'].every(o => ops0.has(o)), 'PL nivå0: alla fyra räknesätt nåbara');
+    ok(['mul_sub', 'mul_add'].every(o => ops1.has(o)), 'PL nivå1: båda tvåstegstyperna nåbara');
+}
+
+/* — Mönster v2, lager 11a + 11c: workedSteps + whyQuestion — */
+[0, 1, 2].forEach(lvl => forEachRun(pl.genM1Task, lvl, 400, t => {
+    const steps = pl.workedSteps(1, t);
+    ok(steps.length === 3, 'PL WE nivå' + lvl + ': exakt 3 steg');
+    ok(steps.every(s => typeof s === 'string' && s.length > 0), 'PL WE nivå' + lvl + ': alla steg ifyllda');
+    ok(steps[2].includes(String(t.correct)), 'PL WE nivå' + lvl + ': sista steget bär facit');
+}));
+{
+    const q = pl.whyQuestion(1);
+    ok(typeof q.prompt === 'string' && q.prompt.length > 0, 'PL WHY: prompt ifylld');
+    ok(typeof q.correct === 'string' && q.correct.length > 0, 'PL WHY: korrekt rad ifylld');
+    ok(q.distractors.length === 2, 'PL WHY: exakt 2 distraktorer');
+    ok(distinct([q.correct, ...q.distractors]), 'PL WHY: 3 distinkta alternativ');
+    ok(!q.distractors.includes(q.correct), 'PL WHY: facit ej bland distraktorer');
+}
+
 /* ═══════════ Resultat ═══════════ */
 console.log('');
 console.log('  PASS: ' + pass);

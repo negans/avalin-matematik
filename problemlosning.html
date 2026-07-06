@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problemlösning – Avalins Matematikverkstad</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="storage.js"></script>
+    <script src="ui.js"></script>
+    <script src="logic/shared.js"></script>
+    <script src="logic/problemlosning.js"></script>
+    <style>
+        .section-title { color: var(--color-heading); }
+        .level-badge { color: #FFF8F0; }
+        .choice-btn { background: var(--color-surface); border: 1.5px solid var(--color-border); }
+        .fig-wrap { width: 100%; max-width: 340px; margin: 6px auto 14px; }
+
+        /* Berättelsen får lite luft och läsbar radhöjd (ett kort steg i taget) */
+        #m1Question { line-height: 1.5; }
+
+        /* ── Mönster v2, lager 11a: "Visa mig" + löst exempel ── */
+        .we-btn {
+            background: var(--color-surface); color: var(--color-primary);
+            border: 1.5px solid var(--color-primary); border-radius: 12px;
+            cursor: pointer; font-size: 0.8em; padding: 2px 10px;
+            margin-left: 8px; vertical-align: middle;
+        }
+        .we-btn:hover { background: var(--color-surface-alt); }
+        .worked-example {
+            background: var(--color-surface-alt);
+            border: 2px dashed var(--color-badge); border-radius: 16px;
+            padding: 12px 16px 16px; margin: 6px 0 14px;
+        }
+        .we-head { text-align: center; font-weight: bold; color: var(--color-heading); margin-bottom: 6px; }
+        .we-steps { margin: 10px auto 14px; padding-left: 1.4em; max-width: 360px; color: var(--color-text); }
+        .we-steps li { margin: 6px 0; line-height: 1.4; }
+
+        /* ── Mönster v2, lager 11c: resonemang "Varför?" ── */
+        .why { margin-top: 16px; padding: 14px 16px; background: var(--color-surface-alt); border: 1.5px solid var(--color-border); border-radius: 14px; }
+        .why-q { text-align: center; font-weight: bold; color: var(--color-heading); margin-bottom: 10px; }
+        .why-choices { display: flex; flex-direction: column; gap: 8px; }
+        .why-fb { text-align: center; margin-top: 10px; color: var(--color-text); min-height: 1.2em; }
+        #m1SVG { display: block; overflow: visible; }
+
+        #miso-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1000;
+        }
+        #miso-img { width: clamp(100px, 12vw, 140px); display: block; }
+        #miso-bubble {
+            display: none;
+            background: rgba(255,248,240,0.88);
+            border: 2px solid var(--color-border);
+            border-radius: 16px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            font-size: 0.85em;
+            max-width: 160px;
+            text-align: center;
+            color: var(--color-text);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+    </style>
+</head>
+<body>
+
+<nav class="top-nav">
+    <a href="index.html">← Avalins Matematikverkstad</a>
+</nav>
+
+<h1>🧩 Problemlösning</h1>
+
+<!-- ══════ Modul 1 ══════ -->
+<p class="section-title">Modul 1 – Lös problemet</p>
+
+<div class="card">
+    <div style="text-align:center"><span class="level-badge" id="m1LevelLabel">Nivå 1</span></div>
+
+    <div class="worked-example" id="m1Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="m1ExampleVisual"></div>
+        <ol class="we-steps" id="m1ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="m1ExampleClose">Jag förstår – min tur →</button></div>
+    </div>
+
+    <div id="m1Live">
+        <p class="task-label" id="m1Question">Lös problemet.
+            <button type="button" class="we-btn" id="m1Show">Visa mig</button></p>
+        <div class="fig-wrap"><svg id="m1SVG" width="100%"></svg></div>
+        <div class="choice-row" id="m1Choices"></div>
+        <div class="btn-row"><button class="btn-secondary" id="m1Next">Ny uppgift →</button></div>
+        <p class="streak" id="m1Streak"></p>
+        <div class="feedback" id="m1Feedback" aria-live="polite"></div>
+
+        <div class="why" id="m1Why" hidden>
+            <p class="why-q" id="m1WhyQ"></p>
+            <div class="why-choices" id="m1WhyChoices"></div>
+            <div class="why-fb" id="m1WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
+</div>
+
+<div id="miso-container">
+    <div id="miso-bubble"></div>
+    <img id="miso-img" src="images/miso/miso-neutral.webp" alt="Miso" width="100">
+</div>
+
+<script>
+const CAT_NAME = "Miso";
+initStatsBar();
+
+/* ════════════════════════════════
+   Mönster v2 – löst exempel (11a) + resonemang (11c), delad inkoppling.
+   1 modul, 3 nivåer: exempel per nivå, "Varför?" nivå 3 var tredje.
+════════════════════════════════ */
+const GENS = { 1: genM1Task };
+function niceExample(mod, level) { return GENS[mod](level); }
+
+function renderExampleVisual(mod, containerId, t) {
+    const big = 'text-align:center; font-weight:bold; color:var(--color-text);';
+    const ok  = s => '<span style="color:var(--color-correct)">' + s + '</span>';
+    /* Formeln byggs i logiken (t.formula, "… = correct"); färga facit-delen grön. */
+    const idx = t.formula.lastIndexOf('=');
+    const lhs = t.formula.slice(0, idx + 1);
+    const rhs = t.formula.slice(idx + 1).trim();
+    const el = document.getElementById(containerId);
+    const figId = containerId + 'Fig';
+    el.innerHTML = '<div class="fig-wrap" style="margin:0 auto"><svg id="' + figId + '" width="100%"></svg></div>' +
+                   '<p style="' + big + ' font-size:1.35em">' + lhs + ' ' + ok(rhs) + '</p>';
+    drawProblem(figId, t);
+}
+
+function weKey(mod, level) { return 'm' + mod + '.' + level; }
+function weSeen(mod, level) { const s = getSetting('plWeSeen', {}); return !!s[weKey(mod, level)]; }
+function weMark(mod, level) { const s = getSetting('plWeSeen', {}); s[weKey(mod, level)] = true; setSetting('plWeSeen', s); }
+
+function showExample(mod, level) {
+    const t = niceExample(mod, level);
+    renderExampleVisual(mod, 'm' + mod + 'ExampleVisual', t);
+    renderExampleSteps('m' + mod + 'ExampleSteps', workedSteps(mod, t));
+    toggleExample('m' + mod + 'Example', 'm' + mod + 'Live', true);
+}
+function closeExample(mod) { toggleExample('m' + mod + 'Example', 'm' + mod + 'Live', false); }
+function maybeExample(mod, level) { if (!weSeen(mod, level)) { weMark(mod, level); showExample(mod, level); } }
+function wireExample(mod, getLevel) {
+    document.getElementById('m' + mod + 'Show').addEventListener('click', () => showExample(mod, getLevel()));
+    document.getElementById('m' + mod + 'ExampleClose').addEventListener('click', () => closeExample(mod));
+}
+
+const whyCounts = { 1: 0 };
+function maybeWhy(mod, level, task) {
+    if (level !== 2) return;                 // bara nivå 3 (abstrakt, överflödig info)
+    whyCounts[mod]++;
+    if (whyCounts[mod] % 3 !== 0) return;    // ~var tredje
+    showWhy(mod, task);
+}
+function showWhy(mod, task) {
+    renderWhyPanel(whyQuestion(mod), {
+        panel: 'm' + mod + 'Why', q: 'm' + mod + 'WhyQ',
+        choices: 'm' + mod + 'WhyChoices', fb: 'm' + mod + 'WhyFb'
+    }, {
+        onCorrect: () => showMiso('glad', 'Bra resonerat!'),
+        onWrong:   () => showMiso('uppmuntrande', 'Bra att du funderar!')
+    });
+}
+function hideWhy(mod) { hideWhyPanel('m' + mod + 'Why'); }
+
+/* ════════ Delade rit-hjälpare ════════ */
+const STROKE = '#C97B3A', AXIS = '#8A6D4F', LABEL = '#4A3728';
+const TAG = '#9CB98C', CELL = '#FBF3E6', HL = '#F3D9B8';
+
+function svgEl(tag) { return document.createElementNS('http://www.w3.org/2000/svg', tag); }
+function setBox(svg, w, h) {
+    svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.innerHTML = '';
+}
+function elText(svg, x, y, str, size, color, anchor) {
+    const t = svgEl('text');
+    t.setAttribute('x', x); t.setAttribute('y', y);
+    t.setAttribute('text-anchor', anchor || 'middle');
+    t.setAttribute('font-size', size || 13);
+    t.setAttribute('font-family', 'Arial, sans-serif');
+    t.setAttribute('fill', color || LABEL);
+    t.textContent = str;
+    svg.appendChild(t);
+}
+function elRect(svg, x, y, w, h, fill, stroke, sw, rx) {
+    const r = svgEl('rect');
+    r.setAttribute('x', x); r.setAttribute('y', y);
+    r.setAttribute('width', w); r.setAttribute('height', h);
+    r.setAttribute('fill', fill); r.setAttribute('stroke', stroke);
+    r.setAttribute('stroke-width', sw);
+    if (rx) r.setAttribute('rx', rx);
+    svg.appendChild(r);
+    return r;
+}
+function elEmoji(svg, cx, cy, size, ch) {
+    const t = svgEl('text');
+    t.setAttribute('x', cx); t.setAttribute('y', cy);
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('dominant-baseline', 'central');
+    t.setAttribute('font-size', size);
+    t.textContent = ch;
+    svg.appendChild(t);
+    return t;
+}
+
+/* Skapar svarsknappar. raws = råvärden, fmt(raw) -> etikett, onPick(raw, btn). */
+function buildChoices(rowId, raws, fmt, onPick) {
+    const shuffled = raws.slice();
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = rnd(0, i);
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    const row = document.getElementById(rowId);
+    row.innerHTML = '';
+    shuffled.forEach(raw => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = fmt(raw);
+        btn.addEventListener('click', () => onPick(raw, btn));
+        row.appendChild(btn);
+    });
+}
+
+/* ════════ Bild-lager: rita berättelsens föremål (BILD FÖRST) ════════
+   En rad = en liten etikett + föremålen. Behållarrader (× / ÷) ramas in
+   så grupperingen syns. Bilden visar UPPGIFTENS tal, aldrig svaret. */
+const CELLW = 26;
+function drawRow(svg, y, caption, emoji, count, opts) {
+    opts = opts || {};
+    const W = 300, x0 = 16;
+    let top = y;
+    if (caption) { elText(svg, W / 2, top + 12, caption, 12.5, opts.captionColor || AXIS); top += 20; }
+    const cols = Math.min(count, 6);
+    const rowsN = Math.max(1, Math.ceil(count / 6));
+    const gridW = cols * CELLW;
+    if (opts.box) {
+        elRect(svg, W / 2 - gridW / 2 - 8, top - 4, gridW + 16, rowsN * CELLW + 8,
+               opts.grey ? '#EFE6DA' : CELL, opts.grey ? '#B9A98F' : TAG, 1.5, 10);
+    }
+    for (let i = 0; i < count; i++) {
+        const c = i % 6, r = Math.floor(i / 6);
+        const cx = W / 2 - gridW / 2 + c * CELLW + CELLW / 2;
+        const cy = top + r * CELLW + CELLW / 2;
+        const node = elEmoji(svg, cx, cy, 20, emoji);
+        if (opts.faded) node.setAttribute('opacity', '0.4');
+    }
+    return top + rowsN * CELLW + 8;   // ny y-position
+}
+function drawEmptyBoxes(svg, y, caption, g, short) {
+    const W = 300;
+    if (caption) { elText(svg, W / 2, y + 12, caption, 12.5, AXIS); y += 20; }
+    const bw = 46, gap = 12, totW = g * bw + (g - 1) * gap;
+    let x = W / 2 - totW / 2;
+    for (let i = 0; i < g; i++) {
+        elRect(svg, x, y, bw, 40, CELL, TAG, 1.5, 8);
+        elText(svg, x + bw / 2, y + 25, '?', 20, STROKE);
+        x += bw + gap;
+    }
+    return y + 48;
+}
+
+function drawProblem(svgId, t) {
+    const svg = document.getElementById(svgId);
+    setBox(svg, 300, 200);            // höjden justeras efter innehåll nedan
+    let y = 8;
+    if (t.op === 'add') {
+        y = drawRow(svg, y, 'Avalin har', t.emoji, t.a);
+        y = drawRow(svg, y + 4, 'Hon får ' + t.b + ' till', t.emoji, t.b);
+    } else if (t.op === 'sub') {
+        y = drawRow(svg, y, 'Avalin har', t.emoji, t.a);
+        y = drawRow(svg, y + 4, 'Ger bort ' + t.b, t.emoji, t.b, { faded: true });
+    } else if (t.op === 'mul') {
+        y = drawRow(svg, y, t.g + ' ' + t.cont.many + ' med ' + t.e + ' i varje', t.emoji, t.e, { box: true });
+        for (let i = 1; i < t.g; i++) y = drawRow(svg, y + 4, '', t.emoji, t.e, { box: true });
+    } else if (t.op === 'div') {
+        y = drawRow(svg, y, t.t + ' ' + t.itemMany, t.emoji, t.t);
+        y = drawEmptyBoxes(svg, y + 6, 'Dela lika i ' + t.g + ' ' + t.cont.many, t.g, t.cont.short);
+    } else if (t.op === 'mul_sub' || t.op === 'mul_add') {
+        y = drawRow(svg, y, t.g + ' ' + t.cont.many + ' med ' + t.e + ' i varje', t.emoji, t.e, { box: true });
+        for (let i = 1; i < t.g; i++) y = drawRow(svg, y + 4, '', t.emoji, t.e, { box: true });
+        const cap = t.op === 'mul_sub' ? 'Tappar ' + t.r : 'Hittar ' + t.r + ' till';
+        y = drawRow(svg, y + 4, cap, t.emoji, t.r, { faded: t.op === 'mul_sub' });
+    } else { /* herring */
+        y = drawRow(svg, y, 'Avalin har', t.emoji, t.s);
+        y = drawRow(svg, y + 4, t.g + ' ' + t.cont.many + ' med ' + t.e + ' i varje', t.emoji, t.e, { box: true });
+        for (let i = 1; i < t.g; i++) y = drawRow(svg, y + 4, '', t.emoji, t.e, { box: true });
+        y = drawRow(svg, y + 4, t.herringMany + ' – räknas inte', t.herringEmoji, t.h, { box: true, grey: true, faded: true, captionColor: '#B9A98F' });
+    }
+    svg.setAttribute('viewBox', '0 0 300 ' + Math.max(120, y + 8));
+}
+
+/* ════════════════════════════════ Modul 1 – Lös problemet ════════════════════════════════ */
+
+let m1Streak = 0, m1Task = null, m1Answered = false, m1HadError = false;
+let m1Level = 0, m1LevelStreak = 0;
+
+function buildM1() {
+    m1Task = genM1Task(m1Level); m1Answered = false; m1HadError = false;
+    drawProblem('m1SVG', m1Task);
+    document.getElementById('m1Question').childNodes[0].nodeValue = m1Task.story + ' ';
+    buildChoices('m1Choices', [m1Task.correct, ...m1Task.distractors], v => String(v), m1Check);
+    document.getElementById('m1LevelLabel').textContent = 'Nivå ' + (m1Level + 1);
+    document.getElementById('m1Feedback').textContent = '';
+    document.getElementById('m1Next').classList.remove('btn-pulse');
+    hideWhy(1);
+}
+
+function m1Check(val, btn) {
+    if (m1Answered) return;
+    const fb = document.getElementById('m1Feedback');
+    const t = m1Task;
+    if (val === t.correct) {
+        m1Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m1Choices .choice-btn').forEach(b => { b.disabled = true; });
+        if (!m1HadError) { m1Streak++; m1LevelStreak++; recordCorrect(); }
+        else { m1Streak = 0; m1LevelStreak = 0; }
+        setStreak('m1Streak', m1Streak);
+        if (m1LevelStreak >= 3 && m1Level < 2) {
+            m1Level++; m1LevelStreak = 0;
+            document.getElementById('m1LevelLabel').textContent = 'Nivå ' + (m1Level + 1);
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi klurigare problem!';
+        } else { fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!'; }
+        showMiso('glad', 'Rätt uträknat! Toppen!');
+        document.getElementById('m1Next').classList.add('btn-pulse');
+        maybeWhy(1, m1Level, m1Task);
+    } else {
+        m1HadError = true; m1LevelStreak = 0;
+        btn.classList.add('err'); btn.disabled = true;
+        fb.textContent = 'Nästan – ' + t.formula + '.';
+        showMiso('uppmuntrande', 'Läs igen: vad händer i berättelsen?');
+    }
+}
+document.getElementById('m1Next').addEventListener('click', () => { showMiso('neutral', 'Nytt problem – kör på!'); buildM1(); maybeExample(1, m1Level); });
+wireExample(1, () => m1Level);
+buildM1();
+maybeExample(1, m1Level);
+</script>
+</body>
+</html>
