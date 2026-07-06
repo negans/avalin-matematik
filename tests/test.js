@@ -422,6 +422,52 @@ const M9_EASY = ['Kub','Klot','Cylinder','Kon'];
     ok(SHAPE3D_NAMES.every(n => seen.has(n)), 'Geo M9: alla sex 3D-former nåbara (fick '+[...seen].join(',')+')');
 }
 
+/* — M10: volym (räkna kuber · liter→dl · jämför enheter) — */
+/* nivå 0: räkna enhetskuber → cm³ */
+forEachRun(geo.genM10Task, 0, RUNS, t => {
+    ok(t.kind === 'cubes', 'Geo M10 nivå0: kind=cubes');
+    ok(t.correct === t.l * t.b * t.h, 'Geo M10 nivå0: volym = l·b·h');
+    ok(t.l >= 2 && t.b >= 2 && t.h >= 2, 'Geo M10 nivå0: snälla mått ≥2');
+    ok(t.unit === 'cm³', 'Geo M10 nivå0: enhet cm³');
+    ok(t.distractors.length === 3, 'Geo M10 nivå0: 3 distraktorer');
+    ok(distinct([t.correct, ...t.distractors]), 'Geo M10 nivå0: distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Geo M10 nivå0: facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Geo M10 nivå0: positiva heltal');
+});
+/* nivå 1: liter → deciliter (1 l = 10 dl) */
+forEachRun(geo.genM10Task, 1, RUNS, t => {
+    ok(t.kind === 'l2dl', 'Geo M10 nivå1: kind=l2dl');
+    ok(t.correct === t.liter * 10, 'Geo M10 nivå1: dl = liter·10');
+    ok(t.unit === 'dl', 'Geo M10 nivå1: enhet dl');
+    ok(t.distractors.length === 3, 'Geo M10 nivå1: 3 distraktorer');
+    ok(distinct([t.correct, ...t.distractors]), 'Geo M10 nivå1: distinkta alternativ');
+    ok(!t.distractors.includes(t.correct), 'Geo M10 nivå1: facit ej bland distraktorer');
+    ok(t.distractors.every(v => v > 0 && Number.isInteger(v)), 'Geo M10 nivå1: positiva heltal');
+});
+/* nivå 2: jämför volymer i blandade enheter – facit rymmer mest */
+forEachRun(geo.genM10Task, 2, RUNS, t => {
+    ok(t.kind === 'compare', 'Geo M10 nivå2: kind=compare');
+    ok(t.options.length === 4, 'Geo M10 nivå2: fyra behållare');
+    ok(t.correct === t.options[0].text && t.correctMl === t.options[0].ml, 'Geo M10 nivå2: facit = första behållaren');
+    ok(t.options.every(o => o.ml <= t.correctMl), 'Geo M10 nivå2: facit har störst volym');
+    ok(t.options.filter(o => o.ml === t.correctMl).length === 1, 'Geo M10 nivå2: unik största volym');
+    ok(t.options.slice(1).every(o => o.ml <= 0.7 * t.correctMl), 'Geo M10 nivå2: distraktorer ≤ 70 % av facit (visuellt tydligt fullast)');
+    ok(distinct(t.options.map(o => o.ml)), 'Geo M10 nivå2: distinkta volymer');
+    ok(distinct(t.options.map(o => o.text)), 'Geo M10 nivå2: distinkta etiketter');
+    ok(t.distractors.length === 3 && !t.distractors.includes(t.correct), 'Geo M10 nivå2: 3 distraktorer, facit ej bland');
+    const num = s => parseInt(s, 10);
+    ok(t.options.slice(1).some(o => num(o.text) > num(t.correct) && o.ml < t.correctMl), 'Geo M10 nivå2: taljämförelse-fälla finns');
+});
+/* mönster v2 för M10 */
+[0,1,2].forEach(lvl => forEachRun(geo.genM10Task, lvl, RUNS, t => {
+    const steps = geo.workedSteps(10, t);
+    ok(steps.length === 3 && steps.every(s => typeof s === 'string' && s.length > 0), 'Geo M10 WE nivå'+lvl+': 3 steg ifyllda');
+    const facit = t.kind === 'compare' ? t.correct : String(t.correct);
+    ok(steps[2].includes(facit), 'Geo M10 WE nivå'+lvl+': sista steget bär facit');
+    const q = geo.whyQuestion(10, t);
+    ok(q.distractors.length === 2 && distinct([q.correct, ...q.distractors]) && !q.distractors.includes(q.correct), 'Geo M10 WHY: doktrin');
+}));
+
 /* ═══════════ algebra ═══════════ */
 const alg = require('../logic/algebra.js');
 

@@ -266,6 +266,53 @@
         return { shape: key, art: SHAPES_3D[key].art, correct, distractors: others.slice(0, 3) };
     }
 
+    /* ════════ Modul 10 – Volym (mäta och jämföra rymd) ════════
+       Lgr22 åk 4–6: volym med standardenheter. Konkret → abstrakt.
+       Nivå 0 = räkna enhetskuber (1 kub = 1 cm³) · nivå 1 = liter → deciliter
+       (1 l = 10 dl) · nivå 2 = jämför volymer i blandade enheter (liter/dl/cl),
+       vilken rymmer mest. Grundfakta: 1 l = 10 dl = 100 cl = 1000 cm³ = 1 dm³. */
+
+    function genM10Task(level) {
+        if (level === 0) {                              /* räkna enhetskuber → cm³ */
+            const l = rnd(2, 4), b = rnd(2, 3), h = rnd(2, 3);
+            const correct = l * b * h;                  // volym = längd × bredd × höjd
+            const cand = [
+                l + b + h,          // adderar i stället för att multiplicera
+                l * b,              // bara bottenlagret – glömmer höjden
+                l * h,              // bara en sida – glömmer djupet
+                correct + l, correct - b, correct + 1, correct - 1
+            ].filter(v => v > 0 && v !== correct && Number.isInteger(v));
+            return { kind: 'cubes', l, b, h, unit: 'cm³', correct, distractors: pickDistractors(correct, cand, 3) };
+        }
+        if (level === 1) {                              /* liter → deciliter (1 l = 10 dl) */
+            const liter = rnd(2, 9), correct = liter * 10;
+            const cand = [
+                liter,              // glömmer omvandla (behåller talet, faktor 1)
+                liter + 10,         // adderar 10 i stället för att multiplicera
+                liter * 100,        // fel enhetsfaktor (räknar cl i stället för dl)
+                correct + 10, correct - 10, correct + 1
+            ].filter(v => v > 0 && v !== correct && Number.isInteger(v));
+            return { kind: 'l2dl', liter, unit: 'dl', correct, distractors: pickDistractors(correct, cand, 3) };
+        }
+        /* nivå 2 – jämför: vilken behållare rymmer mest? (blandade enheter) */
+        const literBig = rnd(1, 2);                     // facit: hela liter → alltid störst volym
+        const correctMl = literBig * 1000;
+        /* tre distinkta hundratal 2..7 → max 70 % av facit: vätskehöjden
+           måste synligt skilja sig från facit (bilden bär uppgiften) */
+        const hs = [];
+        while (hs.length < 3) { const x = rnd(2, 7); if (!hs.includes(x)) hs.push(x); }
+        const trap = { text: (hs[0] * 10) + ' cl', ml: hs[0] * 100 };   // stort TAL, liten volym (taljämförelse-fälla)
+        const optB = { text: hs[1] + ' dl', ml: hs[1] * 100 };
+        const optC = { text: hs[2] + ' dl', ml: hs[2] * 100 };
+        const correctText = literBig + ' liter';
+        return {
+            kind: 'compare', unit: '',
+            options: [{ text: correctText, ml: correctMl }, trap, optB, optC],
+            correctMl, correct: correctText,
+            distractors: [trap.text, optB.text, optC.text]
+        };
+    }
+
     /* ════════ Mönster v2, lager 11a + 11c ════════
        workedSteps(mod, task): 3 stegrader (löst exempel).
        whyQuestion(mod, task): "Varför stämmer det?" + 1 korrekt + 2 distraktorer
@@ -345,6 +392,26 @@
                     'Den ' + SHAPE3D_DESC[t.shape] + '.',
                     'Det är ' + t.art + ' ' + t.correct.toLowerCase() + '.'
                 ];
+            case 10:
+                if (t.kind === 'cubes') {
+                    return [
+                        'Volym är hur många kuber som får plats.',
+                        'Räkna ' + t.l + ' × ' + t.b + ' × ' + t.h + '.',
+                        'Volymen är ' + t.correct + ' ' + t.unit + '.'
+                    ];
+                }
+                if (t.kind === 'l2dl') {
+                    return [
+                        '1 liter är samma som 10 deciliter.',
+                        'Räkna ' + t.liter + ' × 10.',
+                        t.liter + ' liter är ' + t.correct + ' dl.'
+                    ];
+                }
+                return [
+                    'Gör om alla till samma enhet först.',
+                    '1 liter = 10 dl = 100 cl.',
+                    t.correct + ' rymmer mest.'
+                ];
             default:
                 return [];
         }
@@ -413,6 +480,13 @@
                 'Man känner igen 3D-former på deras färg.',    // irrelevant egenskap
                 'Alla former som är runda någonstans är klot.' // överförenkling (cylinder/kon är också runda)
             ]
+        },
+        10: {
+            correct: 'Man måste göra om till samma enhet innan man jämför.',
+            distractors: [
+                'Den med störst tal rymmer alltid mest, oavsett enhet.', // ytlig taljämförelse
+                'En behållare med cl rymmer alltid mer än en med liter.'  // enhetsförväxling
+            ]
         }
     };
 
@@ -432,6 +506,7 @@
         genM7Task, M7_PART_DESC,
         genM8Task,
         SHAPES_3D, SHAPE3D_DESC, genM9Task,
+        genM10Task,
         workedSteps, whyQuestion
     };
 }));
