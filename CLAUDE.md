@@ -85,14 +85,14 @@ Resonemangslager (C/D) "Varför?" — whyQuestion():
 - CLAUDE.md (denna) · HISTORIK.md (avklarat) · README.md
 
 ## STATUS & ÅTERSTÅENDE ARBETE
-Klart: Fas 1–4 (SINGMA 5A/5B + mönster v2 på alla 9 filer + innehållsluckor), Fas 5 steg 14–17b (skala, proportionalitet, geometri M9 3D-former + M10 volym), statistik M6 median (Lgr22-gap), Fas 6 steg 19 (problemlösning), samt första pass av Fas 8 steg 22+25 (2026-07-03). Detaljer i HISTORIK.md.
+Klart: Fas 1–4 (SINGMA 5A/5B + mönster v2 på alla 9 filer + innehållsluckor), Fas 5 steg 14–17b (skala, proportionalitet, geometri M9 3D-former + M10 volym), statistik M6 median (Lgr22-gap), Fas 6 steg 18–19 (blandat repetitionsläge + problemlösning), samt första pass av Fas 8 steg 22+25 (2026-07-03). Detaljer i HISTORIK.md.
 WHY-ordning för det som återstår: bygg nya filer på färdigt mönster → lägg retrieval-/problemlösningslager ovanpå stabilt innehåll → backlog sist → slutpass. Så rörs ingen fil två gånger för samma sak.
 
 ### Fas 5 — Nya innehållsfiler (konkret → abstrakt)
 KLAR (17 = geometri M9 3D-former, 17b = geometri M10 volym). Detaljer i HISTORIK.md.
 
-### Fas 6 — Retrieval- och problemlösningslager (byggs sent; vill ha innehållet stabilt)
-18. Blandat repetitionsläge (interleaving) — slumpade uppgifter tvärs moduler. Tränar att VÄLJA metod. Starkaste C/D-greppet. NÄSTA. Arkitektur beslutad (Mats 2026-07-06): väg A = text/flerval-mix + problemlösning; rör inga befintliga filer, visuellt tunga moduler tränas kvar på egna sidor.
+### Fas 6 — Retrieval- och problemlösningslager (KLAR, steg 18–19)
+18. ✅ Blandat repetitionsläge (interleaving) — blandat.html + logic/blandat.js (2026-07-06). 19 uppgiftsfamiljer tvärs 6 befintliga moduler. Hela DoD grön inkl. Fable ockulär sign-off. Detaljer i HISTORIK.md.
 19. ✅ problemlösning — problemlosning.html + logic/problemlosning.js (2026-07-06). Elevnära textproblem där METODVAL tränas. Detaljer i HISTORIK.md. Återanvänds av steg 18.
 
 ### Fas 7 — Backlog (mogen pattern, lägst beroenderisk)

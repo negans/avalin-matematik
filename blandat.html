@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blandad träning – Avalins Matematikverkstad</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="storage.js"></script>
+    <script src="ui.js"></script>
+    <!-- logic/blandat.js exporterar bara `sv` och `createEngine` (unika namn) – säker att
+         ladda som vanlig global <script>. De sex källmodulerna nedanför (taluppfattning,
+         decimaltal, statistik, algebra, proportionalitet, problemlösning) exporterar ALLA
+         samma namn (genM1Task, workedSteps, whyQuestion, ...) och kan INTE laddas som
+         globala <script>-taggar tillsammans – de skulle skriva över varandra. De laddas
+         därför isolerat via fetch + eval i inline-scriptet nedan (se loadPureModule). -->
+    <script src="logic/blandat.js"></script>
+    <style>
+        .section-title { color: var(--color-heading); }
+        .level-badge { color: #FFF8F0; }
+        .choice-btn { background: var(--color-surface); border: 1.5px solid var(--color-border); }
+        .fig-wrap { width: 100%; max-width: 340px; margin: 6px auto 14px; }
+
+        /* Källetikett – liten pill ovanför frågan, ger förutsägbar kontext utan att
+           avslöja svaret (samma färgspråk som level-badge). */
+        .source-chip {
+            display: inline-block; background: var(--color-surface-alt); color: var(--color-heading);
+            border: 1.5px solid var(--color-border); border-radius: 12px;
+            font-size: 0.78em; font-weight: bold; padding: 2px 10px; margin-bottom: 8px;
+        }
+
+        #m1Question { line-height: 1.5; }
+
+        .we-btn {
+            background: var(--color-surface); color: var(--color-primary);
+            border: 1.5px solid var(--color-primary); border-radius: 12px;
+            cursor: pointer; font-size: 0.8em; padding: 2px 10px;
+            margin-left: 8px; vertical-align: middle;
+        }
+        .we-btn:hover { background: var(--color-surface-alt); }
+        .worked-example {
+            background: var(--color-surface-alt);
+            border: 2px dashed var(--color-badge); border-radius: 16px;
+            padding: 12px 16px 16px; margin: 6px 0 14px;
+        }
+        .we-head { text-align: center; font-weight: bold; color: var(--color-heading); margin-bottom: 6px; }
+        .we-steps { margin: 10px auto 14px; padding-left: 1.4em; max-width: 360px; color: var(--color-text); }
+        .we-steps li { margin: 6px 0; line-height: 1.4; }
+
+        .why { margin-top: 16px; padding: 14px 16px; background: var(--color-surface-alt); border: 1.5px solid var(--color-border); border-radius: 14px; }
+        .why-q { text-align: center; font-weight: bold; color: var(--color-heading); margin-bottom: 10px; }
+        .why-choices { display: flex; flex-direction: column; gap: 8px; }
+        .why-fb { text-align: center; margin-top: 10px; color: var(--color-text); min-height: 1.2em; }
+
+        #m1Loading { text-align: center; color: var(--color-text); padding: 30px 0; }
+
+        #miso-container {
+            position: fixed; bottom: 20px; right: 20px;
+            display: flex; flex-direction: column; align-items: center; z-index: 1000;
+        }
+        #miso-img { width: clamp(100px, 12vw, 140px); display: block; }
+        #miso-bubble {
+            display: none; background: rgba(255,248,240,0.88);
+            border: 2px solid var(--color-border); border-radius: 16px;
+            padding: 8px 12px; margin-bottom: 8px; font-size: 0.85em; max-width: 160px;
+            text-align: center; color: var(--color-text); box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+    </style>
+</head>
+<body>
+
+<nav class="top-nav">
+    <a href="index.html">← Avalins Matematikverkstad</a>
+</nav>
+
+<h1>🔀 Blandad träning</h1>
+
+<p class="section-title">Modul 1 – Blandade uppgifter</p>
+
+<div class="card">
+    <div style="text-align:center"><span class="level-badge" id="m1LevelLabel">Nivå 1</span></div>
+
+    <div id="m1Loading">Laddar uppgifter …</div>
+
+    <div class="worked-example" id="m1Example" hidden>
+        <p class="we-head">Så här gör du 👇</p>
+        <div id="m1ExampleVisual"></div>
+        <ol class="we-steps" id="m1ExampleSteps"></ol>
+        <div class="btn-row"><button class="btn-primary" id="m1ExampleClose">Jag förstår – min tur →</button></div>
+    </div>
+
+    <div id="m1Live" hidden>
+        <div style="text-align:center"><span class="source-chip" id="m1SourceChip"></span></div>
+        <p class="task-label" id="m1Question">Lös uppgiften.
+            <button type="button" class="we-btn" id="m1Show">Visa mig</button></p>
+        <div class="choice-row" id="m1Choices"></div>
+        <div class="btn-row"><button class="btn-secondary" id="m1Next">Ny uppgift →</button></div>
+        <p class="streak" id="m1Streak"></p>
+        <div class="feedback" id="m1Feedback" aria-live="polite"></div>
+
+        <div class="why" id="m1Why" hidden>
+            <p class="why-q" id="m1WhyQ"></p>
+            <div class="why-choices" id="m1WhyChoices"></div>
+            <div class="why-fb" id="m1WhyFb" aria-live="polite"></div>
+        </div>
+    </div>
+</div>
+
+<div id="miso-container">
+    <div id="miso-bubble"></div>
+    <img id="miso-img" src="images/miso/miso-neutral.webp" alt="Miso" width="100">
+</div>
+
+<script>
+const CAT_NAME = "Miso";
+initStatsBar();
+
+/* ════════ Isolerad modulladdare ════════
+   Källmodulernas UMD-header (se t.ex. logic/proportionalitet.js) exporterar via
+   `module.exports = api` om `module` finns och är sant, annars `Object.assign(root, api)`
+   (global). Genom att köra källtexten i en egen funktions-scope med en FRISK, tom
+   `module`-låtsasvariabel tvingas den alltid ta CommonJS-grenen – ingen global
+   krock, även om flera moduler exporterar samma funktionsnamn. `require` behöver
+   bara kunna lösa './shared.js' (enda beroendet några av modulerna har). */
+async function loadPureModule(url, sharedExports) {
+    const src = await fetch(url).then(r => r.text());
+    const runner = new Function('module', 'require', src);
+    const mod = { exports: {} };
+    runner(mod, () => sharedExports);
+    return mod.exports;
+}
+
+let engine = null;
+
+/* ════════ Delade rit-/UI-hjälpare (samma mönster som övriga sidor) ════════ */
+function weKey(level) { return 'm1.' + level; }
+function weSeen(level) { const s = getSetting('blandatWeSeen', {}); return !!s[weKey(level)]; }
+function weMark(level) { const s = getSetting('blandatWeSeen', {}); s[weKey(level)] = true; setSetting('blandatWeSeen', s); }
+
+function renderExampleVisual(containerId, task) {
+    const big = 'text-align:center; font-weight:bold; color:var(--color-text);';
+    const ok  = s => '<span style="color:var(--color-correct)">' + s + '</span>';
+    const el = document.getElementById(containerId);
+    el.innerHTML =
+        '<p style="text-align:center; margin-bottom:6px"><span class="source-chip">' + task.sourceLabel + '</span></p>' +
+        '<p style="' + big + ' font-size:1.05em">' + task.question + '</p>' +
+        '<p style="' + big + ' font-size:1.3em">' + ok(String(task.correct)) + '</p>';
+}
+
+/* Exemplet följer mönster v2: SAMMA uppgiftstyp (familj) som liveuppgiften hon
+   ska göra härnäst, men en EGEN, fräscht slumpad instans — aldrig samma tal,
+   annars avslöjar "Visa mig" facit rakt av. Fastnar hon på en median-uppgift
+   får hon alltså en median-genomgång med andra tal, inte en godtycklig familj. */
+function showExample(level) {
+    const t = engine.genTaskFor(m1Task.key, level);
+    renderExampleVisual('m1ExampleVisual', t);
+    renderExampleSteps('m1ExampleSteps', engine.workedSteps(t));
+    toggleExample('m1Example', 'm1Live', true);
+}
+function closeExample() { toggleExample('m1Example', 'm1Live', false); }
+function maybeExample(level) { if (!weSeen(level)) { weMark(level); showExample(level); } }
+function wireExample() {
+    document.getElementById('m1Show').addEventListener('click', () => showExample(m1Level));
+    document.getElementById('m1ExampleClose').addEventListener('click', () => closeExample());
+}
+
+const whyCounts = { 1: 0 };
+function maybeWhy(level, task) {
+    if (level !== 2) return;                 // bara nivå 3 (abstrakt)
+    whyCounts[1]++;
+    if (whyCounts[1] % 3 !== 0) return;      // ~var tredje
+    showWhy(task);
+}
+function showWhy(task) {
+    renderWhyPanel(engine.whyQuestion(task), {
+        panel: 'm1Why', q: 'm1WhyQ', choices: 'm1WhyChoices', fb: 'm1WhyFb'
+    }, {
+        onCorrect: () => showMiso('glad', 'Bra resonerat!'),
+        onWrong:   () => showMiso('uppmuntrande', 'Bra att du funderar!')
+    });
+}
+function hideWhy() { hideWhyPanel('m1Why'); }
+
+/* ════════════════════════════════ Modul 1 – Blandade uppgifter ════════════════════════════════ */
+
+let m1Streak = 0, m1Task = null, m1Answered = false, m1HadError = false;
+let m1Level = 0, m1LevelStreak = 0;
+
+function buildM1() {
+    m1Task = engine.genTask(m1Level); m1Answered = false; m1HadError = false;
+
+    document.getElementById('m1SourceChip').textContent = m1Task.sourceLabel;
+    document.getElementById('m1Question').childNodes[0].nodeValue = m1Task.question + ' ';
+    buildChoices('m1Choices', m1Task.choices, m1Task.labels, m1Check);
+    document.getElementById('m1LevelLabel').textContent = 'Nivå ' + (m1Level + 1);
+    document.getElementById('m1Feedback').textContent = '';
+    document.getElementById('m1Next').classList.remove('btn-pulse');
+    hideWhy();
+}
+
+/* Skapar svarsknappar. values/labels är parallella listor (redan blandade av engine).
+   Layouten anpassas till innehållet: korta svar (tal, "12 kr") får radknappar som på
+   sifferfamiljernas källsidor; långa textsvar (talord, decimalbeskrivningar) får
+   kolumnlayout med choice-btn-text — samma växling som taluppfattning M5 och
+   decimaltal M1 gör på sina egna sidor. Annars klipps de längsta talorden. */
+function buildChoices(rowId, values, labels, onPick) {
+    const row = document.getElementById(rowId);
+    const wide = labels.some(l => l.length > 16);
+    row.className = wide ? 'choice-col' : 'choice-row';
+    row.innerHTML = '';
+    values.forEach((val, i) => {
+        const btn = document.createElement('button');
+        btn.className = wide ? 'choice-btn-text' : 'choice-btn';
+        btn.textContent = labels[i];
+        btn.addEventListener('click', () => onPick(val, btn));
+        row.appendChild(btn);
+    });
+}
+
+function m1Check(val, btn) {
+    if (m1Answered) return;
+    const fb = document.getElementById('m1Feedback');
+    const t = m1Task;
+    if (val === t.correct) {
+        m1Answered = true;
+        btn.classList.add('ok');
+        document.querySelectorAll('#m1Choices button').forEach(b => { b.disabled = true; });
+        if (!m1HadError) { m1Streak++; m1LevelStreak++; recordCorrect(); }
+        else { m1Streak = 0; m1LevelStreak = 0; }
+        setStreak('m1Streak', m1Streak);
+        if (m1LevelStreak >= 3 && m1Level < 2) {
+            m1Level++; m1LevelStreak = 0;
+            document.getElementById('m1LevelLabel').textContent = 'Nivå ' + (m1Level + 1);
+            fb.textContent = 'Precis rätt! 🎉 Superbra – nu provar vi klurigare uppgifter!';
+        } else { fb.textContent = 'Precis rätt! 🎉 Jättebra, Avalin!'; }
+        showMiso('glad', 'Rätt metod! Toppen!');
+        document.getElementById('m1Next').classList.add('btn-pulse');
+        maybeWhy(m1Level, t);
+    } else {
+        m1HadError = true; m1LevelStreak = 0;
+        btn.classList.add('err'); btn.disabled = true;
+        fb.textContent = t.hint;
+        showMiso('uppmuntrande', 'Läs frågan igen – vilken metod passar?');
+    }
+}
+document.getElementById('m1Next').addEventListener('click', () => { showMiso('neutral', 'Ny uppgift – kör på!'); buildM1(); maybeExample(m1Level); });
+wireExample();
+
+/* ════════ Start: ladda alla källmoduler isolerat, sedan visa uppgiften ════════ */
+(async function init() {
+    const SHARED = await loadPureModule('logic/shared.js');
+    const [TAL, DEC, STAT, ALG, PROP, PL] = await Promise.all([
+        loadPureModule('logic/taluppfattning.js', SHARED),
+        loadPureModule('logic/decimaltal.js', SHARED),
+        loadPureModule('logic/statistik.js', SHARED),
+        loadPureModule('logic/algebra.js', SHARED),
+        loadPureModule('logic/proportionalitet.js', SHARED),
+        loadPureModule('logic/problemlosning.js', SHARED)
+    ]);
+    engine = createEngine({ tal: TAL, dec: DEC, stat: STAT, alg: ALG, prop: PROP, pl: PL });
+
+    document.getElementById('m1Loading').hidden = true;
+    document.getElementById('m1Live').hidden = false;
+    buildM1();
+    maybeExample(m1Level);
+})();
+</script>
+</body>
+</html>

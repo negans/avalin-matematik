@@ -1155,6 +1155,78 @@ forEachRun(pl.herringTask, 2, RUNS, t => {
     ok(!q.distractors.includes(q.correct), 'PL WHY: facit ej bland distraktorer');
 }
 
+/* ═══════════ blandat (interleaving, Fas 6 steg 18) ═══════════
+   Slumpar uppgifter tvärs BEFINTLIGA moduler. logic/blandat.js är
+   beroendefritt (tar emot källmodulernas exports injicerade), så testfilen
+   skickar in dem via require() precis som webbläsaren gör via fetch+eval. */
+const blandat = require('../logic/blandat.js');
+const engine = blandat.createEngine({ tal, dec, stat, alg, prop: pro, pl });
+
+eq(blandat.sv(1234), '1 234', 'sv: tusental');
+eq(blandat.sv(12), '12', 'sv: under tusen oförändrat');
+eq(blandat.sv(-500), '-500', 'sv: negativt tal');
+eq(blandat.sv(123456), '123 456', 'sv: hundratusental');
+
+ok(engine.FAMILY_KEYS.length === 19, 'Blandat: 19 uppgiftsfamiljer registrerade (fick ' + engine.FAMILY_KEYS.length + ')');
+
+/* Exakt antal svarsalternativ per familj (verifierat mot källmodulernas egna,
+   redan testade distraktor-garantier ovan i denna fil). */
+const EXPECTED_CHOICES = {
+    'tal-pos': () => 4, 'tal-foljd': () => 3, 'tal-jamfor': () => 2,
+    'tal-lasa': () => 4, 'tal-avrunda': () => 4,
+    'tal-negativa': lvl => (lvl === 2 ? 3 : 2),
+    'tal-overslag': () => 4, 'tal-romerska': () => 4,
+    'dec-beskrivning': () => 4, 'dec-jamfor': () => 2, 'dec-add-sub': () => 4, 'dec-enhet': () => 4,
+    'prop-per-styck': () => 4, 'prop-enhetspris': () => 4, 'prop-forhallande': () => 4,
+    'alg-berakna': () => 4,
+    'stat-medel': () => 4, 'stat-median': () => 4,
+    'pl-los': () => 4
+};
+
+engine.FAMILY_KEYS.forEach(key => {
+    [0, 1, 2].forEach(lvl => {
+        for (let r = 0; r < 400; r++) {
+            const task = engine.genTaskFor(key, lvl);
+            const tag = 'Blandat ' + key + ' nivå' + lvl;
+
+            ok(typeof task.question === 'string' && task.question.length > 0, tag + ': fråga ifylld');
+            ok(typeof task.hint === 'string' && task.hint.length > 0, tag + ': hint ifylld');
+            ok(task.sourceLabel.length > 0, tag + ': källetikett ifylld');
+
+            const expectedN = EXPECTED_CHOICES[key](lvl);
+            ok(task.choices.length === expectedN, tag + ': ' + expectedN + ' alternativ (fick ' + task.choices.length + ')');
+            ok(task.labels.length === task.choices.length, tag + ': lika många etiketter som alternativ');
+            ok(task.choices.includes(task.correct), tag + ': facit finns bland alternativen');
+            ok(distinct(task.choices), tag + ': alternativen är distinkta');
+            ok(distinct(task.labels), tag + ': etiketterna är distinkta');
+
+            /* Mönster v2-passthrough: workedSteps + whyQuestion via källmodulens egna funktioner */
+            const steps = engine.workedSteps(task);
+            ok(steps.length === 3, tag + ': workedSteps ger exakt 3 steg');
+            ok(steps.every(s => typeof s === 'string' && s.length > 0), tag + ': alla steg ifyllda');
+
+            const why = engine.whyQuestion(task);
+            ok(typeof why.prompt === 'string' && why.prompt.length > 0, tag + ': why-prompt ifylld');
+            ok(why.distractors.length === 2, tag + ': why 2 distraktorer');
+            ok(distinct([why.correct, ...why.distractors]), tag + ': why 3 distinkta alternativ');
+            ok(!why.distractors.includes(why.correct), tag + ': why-facit ej bland why-distraktorer');
+        }
+    });
+});
+
+/* — genTask (slumpad familj): grundläggande sundhetskoll + alla familjer nåbara — */
+{
+    const seenKeys = new Set();
+    for (let i = 0; i < 2000; i++) {
+        const task = engine.genTask(i % 3);
+        seenKeys.add(task.key);
+        ok(engine.FAMILY_KEYS.includes(task.key), 'Blandat genTask: giltig familjenyckel');
+        ok(task.choices.includes(task.correct), 'Blandat genTask: facit bland alternativen');
+        ok(distinct(task.choices), 'Blandat genTask: distinkta alternativ');
+    }
+    ok(engine.FAMILY_KEYS.every(k => seenKeys.has(k)), 'Blandat genTask: alla 19 familjer nåbara (fick ' + seenKeys.size + '/19)');
+}
+
 /* ═══════════ Resultat ═══════════ */
 console.log('');
 console.log('  PASS: ' + pass);
