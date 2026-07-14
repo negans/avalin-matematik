@@ -86,7 +86,8 @@ Resonemangslager (C/D) "Varför?" — whyQuestion():
 
 ## STATUS & ÅTERSTÅENDE ARBETE
 Klart: Fas 1–4 (SINGMA 5A/5B + mönster v2 på alla 9 filer + innehållsluckor), Fas 5 steg 14–17b (skala, proportionalitet, geometri M9 3D-former + M10 volym), statistik M6 median (Lgr22-gap), Fas 6 steg 18–19 (blandat repetitionsläge + problemlösning), samt första pass av Fas 8 steg 22+25 (2026-07-03). Detaljer i HISTORIK.md.
-WHY-ordning för det som återstår: bygg nya filer på färdigt mönster → lägg retrieval-/problemlösningslager ovanpå stabilt innehåll → backlog sist → slutpass. Så rörs ingen fil två gånger för samma sak.
+WHY-ordning: bygg nya filer på färdigt mönster → lägg retrieval-/problemlösningslager ovanpå stabilt innehåll → backlog → slutpass. Så rörs ingen fil två gånger för samma sak.
+Fas 7 kräver inget bygge (steg 20 struken, se nedan). **Fas 8-slutgrinden HELT GRÖN 2026-07-14** — alla fyra steg (22–25) avklarade. HELA ROADMAPEN (Fas 1–8) ÄR KLAR. Kvar till skolstart aug 2026: löpande underhåll + ev. backlog-idéer (steg 21).
 
 ### Fas 5 — Nya innehållsfiler (konkret → abstrakt)
 KLAR (17 = geometri M9 3D-former, 17b = geometri M10 volym). Detaljer i HISTORIK.md.
@@ -96,14 +97,14 @@ KLAR (17 = geometri M9 3D-former, 17b = geometri M10 volym). Detaljer i HISTORIK
 19. ✅ problemlösning — problemlosning.html + logic/problemlosning.js (2026-07-06). Elevnära textproblem där METODVAL tränas. Detaljer i HISTORIK.md. Återanvänds av steg 18.
 
 ### Fas 7 — Backlog (mogen pattern, lägst beroenderisk)
-20. Programmering i visuell miljö / algoritmer (Lgr22 algebra-strand). ⚠️ Verifiera FÖRST om skolan täcker detta (ofta Scratch/Blockly). Om vi bygger: hellre enkelt algoritm-/sekvenspussel än full blockmiljö.
+20. ❌ STRUKEN (Mats beslut 2026-07-06): Programmering i visuell miljö / algoritmer (Lgr22 algebra-strand). Skolan täcker detta redan i tekniken. Byggs INTE i detta projekt — återinför inte utan nytt beslut.
 21. Övriga småsaker som dyker upp under bygget — fångas här, inte ad hoc.
 
 ### Fas 8 — Slutpass (kvalitetsgrind före skolstart aug 2026)
-22. Cross-page consistency-genomgång (hård regel — alla sidor samma UX). Första pass körd på Fable 2026-07-03 (fynd fixade, se HISTORIK.md); körs om som slutgrind när Fas 5–7 är klara.
-23. node tests/test.js grön + utöka testsviten för ALL ny logik.
-24. /code-review high per ny/ändrad modul.
-25. Slutlig avstämning mot Lgr22 åk 4–6 (checklista) — körd 2026-07-03: gap = median (✅ byggd), volym (✅ 17b), 3D (✅ 17), programmering (20), problemlösning (18–19). Bekräfta igen som slutgrind.
+22. ✅ Cross-page consistency-genomgång KLAR. Första pass 2026-07-03 (fynd fixade). Mekanisk halva omkörd 2026-07-06 (grep-svep alla 14 sidor) — inga nya fynd. Ockulär halva (Fable skärmdumpssvep, alla 14 sidor via Brave-extensionen) körd 2026-07-14 — **inga nya fynd**. Kända dokumenterade avvikelser kvarstår avsiktligt: klockan.html:s specialfall (förbygger mönster v2), geometri.html ger frusna CDP-skärmdumpar (DOM-verifierad frisk; pixlar signerade i 2026-07-03-passet, oförändrad sedan dess). Detaljer i HISTORIK.md.
+23. ✅ node tests/test.js grönt (3,79M assertions) + regression.js grönt — bekräftat 2026-07-06.
+24. ✅ /code-review high per ny/ändrad modul — uppfyllt löpande (problemlösning 0 fynd, blandat 2 fynd fixade).
+25. ✅ Slutlig avstämning mot Lgr22 åk 4–6 — inga kvarvarande gap: median/volym/3D/problemlösning byggda, programmering struken (täcks av tekniken). Bekräftat 2026-07-06, se memory/lgr22_reconciliation_fas8.md.
 
 ## DISTRAKTOR-DOKTRIN (kärnan i kvaliteten)
 Varje felaktigt svarsalternativ kodar en SPECIFIK, namngiven missuppfattning — aldrig en slumpmässig närmiss.
