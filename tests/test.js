@@ -937,6 +937,63 @@ for (let h = 1; h <= 12; h++) {
     ok(q.distractors.every(d => typeof d === 'string' && d.length > 0), 'klock WHY: distraktorer ifyllda');
 }
 
+/* — Modul 2: säga klockan (timeToSv + sayDistractors + genSayTask + nivåer) — */
+eq(klock.timeToSv(3, 0),  'Klockan är tre',       'timeToSv 3:00');
+eq(klock.timeToSv(5, 30), 'Halv sex',             'timeToSv 5:30');
+eq(klock.timeToSv(3, 15), 'Kvart över tre',       'timeToSv 3:15');
+eq(klock.timeToSv(3, 45), 'Kvart i fyra',         'timeToSv 3:45');
+eq(klock.timeToSv(3, 25), 'Fem i halv fyra',      'timeToSv 3:25');
+eq(klock.timeToSv(3, 35), 'Fem över halv fyra',   'timeToSv 3:35');
+eq(klock.timeToSv(3, 5),  'Fem över tre',         'timeToSv 3:05');
+eq(klock.timeToSv(3, 10), 'Tio över tre',         'timeToSv 3:10');
+eq(klock.timeToSv(3, 20), 'Tjugo över tre',       'timeToSv 3:20');
+eq(klock.timeToSv(3, 40), 'Tjugo i fyra',         'timeToSv 3:40');
+eq(klock.timeToSv(3, 50), 'Tio i fyra',           'timeToSv 3:50');
+eq(klock.timeToSv(3, 55), 'Fem i fyra',           'timeToSv 3:55');
+eq(klock.timeToSv(12, 30), 'Halv ett',            'timeToSv 12:30 (wrap 12→1)');
+eq(klock.timeToSv(12, 0),  'Klockan är tolv',     'timeToSv 12:00');
+
+for (let h = 1; h <= 12; h++) {
+    for (let m = 0; m < 60; m += 5) {
+        const phrase = klock.timeToSv(h, m);
+        ok(typeof phrase === 'string' && phrase.length > 0, 'klock timeToSv '+h+':'+m+': icke-tom fras');
+
+        const dist = klock.sayDistractors(h, m);
+        ok(dist.length === 3, 'klock sayDistractors '+h+':'+m+': exakt 3 distraktorer');
+        ok(distinct([phrase, ...dist]), 'klock sayDistractors '+h+':'+m+': 4 distinkta alternativ');
+        ok(!dist.includes(phrase), 'klock sayDistractors '+h+':'+m+': facit ej bland distraktorerna');
+        ok(dist.every(d => typeof d === 'string' && d.length > 0), 'klock sayDistractors '+h+':'+m+': distraktorer ifyllda');
+    }
+}
+
+eq(klock.SAY_LEVELS.length, 3, 'klock SAY_LEVELS: 3 nivåer');
+[0, 1, 2].forEach(lvl => forEachRun(klock.genSayTask, lvl, RUNS, t => {
+    ok(t.h >= 1 && t.h <= 12 && Number.isInteger(t.h), 'klock genSayTask nivå'+lvl+': h inom 1–12');
+    ok(klock.SAY_LEVELS[lvl].minutes.includes(t.m), 'klock genSayTask nivå'+lvl+': m tillåten för nivån');
+    ok(t.correct === klock.timeToSv(t.h, t.m), 'klock genSayTask nivå'+lvl+': correct = timeToSv(h,m)');
+    ok(t.distractors.length === 3, 'klock genSayTask nivå'+lvl+': exakt 3 distraktorer');
+    ok(distinct([t.correct, ...t.distractors]), 'klock genSayTask nivå'+lvl+': 4 distinkta alternativ');
+}));
+
+for (let h = 1; h <= 12; h++) {
+    for (let m = 0; m < 60; m += 5) {
+        const s = klock.sayWorkedSteps(h, m);
+        ok(s.length === 3, 'klock sayWorkedSteps '+h+':'+m+': exakt 3 steg');
+        ok(s.every(x => typeof x === 'string' && x.length > 0), 'klock sayWorkedSteps '+h+':'+m+': alla steg ifyllda');
+        ok(s[2].includes(klock.timeToSv(h, m)), 'klock sayWorkedSteps '+h+':'+m+': sista steget bär frasen');
+    }
+}
+
+{
+    const q = klock.sayWhyQuestion();
+    ok(typeof q.prompt === 'string' && q.prompt.length > 0, 'klock sayWHY: prompt ifylld');
+    ok(typeof q.correct === 'string' && q.correct.length > 0, 'klock sayWHY: korrekt rad ifylld');
+    ok(q.distractors.length === 2, 'klock sayWHY: exakt 2 distraktorer');
+    ok(distinct([q.correct, ...q.distractors]), 'klock sayWHY: 3 distinkta alternativ');
+    ok(!q.distractors.includes(q.correct), 'klock sayWHY: facit ej bland distraktorer');
+    ok(q.distractors.every(d => typeof d === 'string' && d.length > 0), 'klock sayWHY: distraktorer ifyllda');
+}
+
 /* ═══════════ skala ═══════════ */
 const ska = require('../logic/skala.js');
 

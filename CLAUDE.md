@@ -99,6 +99,7 @@ KLAR (17 = geometri M9 3D-former, 17b = geometri M10 volym). Detaljer i HISTORIK
 ### Fas 7 — Backlog (mogen pattern, lägst beroenderisk)
 20. ❌ STRUKEN (Mats beslut 2026-07-06): Programmering i visuell miljö / algoritmer (Lgr22 algebra-strand). Skolan täcker detta redan i tekniken. Byggs INTE i detta projekt — återinför inte utan nytt beslut.
 21. Övriga småsaker som dyker upp under bygget — fångas här, inte ad hoc.
+    ✅ Klockan Modul 2 "Säg klockan" (2026-07-15): uttala tiden i talspråk, egen modul + 3 nivåer i klockan.html. Modul 1:s specialfall orört; Modul 2 följer mönster v2 fullt ut. Detaljer i HISTORIK.md.
 
 ### Fas 8 — Slutpass (kvalitetsgrind före skolstart aug 2026)
 22. ✅ Cross-page consistency-genomgång KLAR. Första pass 2026-07-03 (fynd fixade). Mekanisk halva omkörd 2026-07-06 (grep-svep alla 14 sidor) — inga nya fynd. Ockulär halva (Fable skärmdumpssvep, alla 14 sidor via Brave-extensionen) körd 2026-07-14 — **inga nya fynd**. Kända dokumenterade avvikelser kvarstår avsiktligt: klockan.html:s specialfall (förbygger mönster v2), geometri.html ger frusna CDP-skärmdumpar (DOM-verifierad frisk; pixlar signerade i 2026-07-03-passet, oförändrad sedan dess). Detaljer i HISTORIK.md.

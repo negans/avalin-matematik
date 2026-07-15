@@ -175,6 +175,47 @@
 
     </div><!-- /liveArea -->
 
+    <p class="section-title">Modul 2 – Säg klockan</p>
+
+    <div class="card">
+        <p class="task-label">Hur säger man den här tiden?
+            <button type="button" class="we-btn" id="sayShow">Visa mig</button></p>
+
+        <div style="text-align:center">
+            <span class="level-badge" id="sayLevelLabel">Nivå 1</span>
+        </div>
+
+        <div class="worked-example" id="sayExample" hidden>
+            <p class="we-head">Så här gör du 👇</p>
+            <div class="clock-wrap">
+                <svg id="sayExampleClock" width="180" height="180" viewBox="0 0 300 300" aria-label="Exempelklocka"></svg>
+            </div>
+            <ol class="we-steps" id="sayExampleSteps"></ol>
+            <div class="btn-row"><button class="btn-primary" id="sayExampleClose">Jag förstår – min tur →</button></div>
+        </div>
+
+        <div id="sayLive">
+            <div class="clock-wrap">
+                <svg id="sayClock" width="200" height="200" viewBox="0 0 300 300" aria-label="Analog klocka"></svg>
+            </div>
+
+            <div class="choice-col" id="sayChoices"></div>
+
+            <p class="streak" id="sayStreak"></p>
+            <div class="feedback" id="sayFeedback" aria-live="polite"></div>
+
+            <div class="why" id="sayWhy" hidden>
+                <p class="why-q" id="sayWhyQ"></p>
+                <div class="why-choices" id="sayWhyChoices"></div>
+                <div class="why-fb" id="sayWhyFb" aria-live="polite"></div>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn-secondary" id="sayNext">Ny uppgift →</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let h = 3, m = 20;
         let streak = 0;
@@ -414,7 +455,9 @@
 
         /* ════════ Löst exempel (Mönster v2, lager 11a) ════════
            Bygger en komplett klocka i valfri SVG och visar de tre lässtegen
-           (workedSteps i logic/klockan.js). Visas första besöket + via "Visa mig". */
+           (workedSteps i logic/klockan.js). Visas första besöket + via "Visa mig".
+           OBS: generell hjälpfunktion – återanvänds även av Modul 2 nedan
+           (sayClock + sayExampleClock), inte bara av Modul 1. */
         function buildClock(svg, hh, mm) {
             const NS = 'http://www.w3.org/2000/svg';
             svg.innerHTML = '';
@@ -483,6 +526,123 @@
         }
         function hideWhy() { hideWhyPanel('whyPanel'); }
 
+        /* ════════════════════════════════
+           Modul 2 – Säg klockan (egen, oberoende klocka + egna 3 nivåer)
+           Element-id:n har prefix "say" (inte m2) eftersom Modul 1 ovan
+           föregår mN-konventionen och saknar egen m1-prefix.
+        ════════════════════════════════ */
+
+        let sayStreak = 0, sayTask = null, sayAnswered = false, sayHadError = false;
+        let sayLevel = 0, sayLevelStreak = 0, sayWhyCount = 0;
+
+        function buildSay() {
+            sayTask = genSayTask(sayLevel);
+            sayAnswered = false; sayHadError = false;
+            buildClock(document.getElementById('sayClock'), sayTask.h, sayTask.m);
+
+            const allPhrases = [sayTask.correct, ...sayTask.distractors];
+            for (let i = allPhrases.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [allPhrases[i], allPhrases[j]] = [allPhrases[j], allPhrases[i]];
+            }
+
+            const col = document.getElementById('sayChoices');
+            col.innerHTML = '';
+            allPhrases.forEach(phrase => {
+                const btn = document.createElement('button');
+                btn.className   = 'choice-btn-text';
+                btn.textContent = phrase;
+                btn.addEventListener('click', () => sayCheck(phrase, btn));
+                col.appendChild(btn);
+            });
+
+            document.getElementById('sayLevelLabel').textContent = 'Nivå ' + (sayLevel + 1);
+            document.getElementById('sayFeedback').textContent = '';
+            document.getElementById('sayNext').classList.remove('btn-pulse');
+            hideSayWhy();
+        }
+
+        /* Svarar direkt vid klick. Ett fel svar låser bara den klickade
+           knappen – hon får försöka igen (aldrig dramatik). */
+        function sayCheck(phrase, btn) {
+            if (sayAnswered) return;
+            const fb = document.getElementById('sayFeedback');
+
+            if (phrase === sayTask.correct) {
+                sayAnswered = true;
+                btn.classList.add('ok');
+                document.querySelectorAll('#sayChoices .choice-btn-text').forEach(b => { b.disabled = true; });
+
+                if (!sayHadError) { sayStreak++; sayLevelStreak++; recordCorrect(); }
+                else              { sayStreak = 0; sayLevelStreak = 0; }
+                setStreak('sayStreak', sayStreak);
+
+                if (sayLevelStreak >= 3 && sayLevel < SAY_LEVELS.length - 1) {
+                    sayLevel++; sayLevelStreak = 0;
+                    document.getElementById('sayLevelLabel').textContent = 'Nivå ' + (sayLevel + 1);
+                    fb.textContent = 'Rätt sagt! 🎉 Nu provar vi fler sätt att säga klockan!';
+                } else {
+                    fb.textContent = 'Rätt sagt! 🎉 Jättebra, Avalin!';
+                }
+                document.getElementById('sayNext').classList.add('btn-pulse');
+                setMiso('miso-glad.webp', 'Rätt sagt!');
+                maybeSayWhy();
+            } else {
+                sayHadError = true;
+                sayLevelStreak = 0;
+                btn.classList.add('err');
+                btn.disabled = true;
+                fb.textContent = 'Nästan – det sägs "' + sayTask.correct + '".';
+                setMiso('miso-uppmuntrande.webp', 'Nästan – testa ett annat alternativ!');
+            }
+        }
+
+        /* ── Löst exempel (samma buildClock-ritning som Modul 1 återanvänds) ──
+           Exemplet genereras av samma genSayTask-logik som den riktiga uppgiften,
+           så de alltid matchar nivån. */
+        function showSayExample() {
+            const ex = genSayTask(sayLevel);
+            buildClock(document.getElementById('sayExampleClock'), ex.h, ex.m);
+            renderExampleSteps('sayExampleSteps', sayWorkedSteps(ex.h, ex.m));
+            toggleExample('sayExample', 'sayLive', true);
+        }
+        function closeSayExample() {
+            toggleExample('sayExample', 'sayLive', false);
+        }
+
+        /* Visas AUTO första gången per NIVÅ (sparas i storage), sedan bara via "Visa mig". */
+        function sayWeKey(level) { return 'lvl' + level; }
+        function sayWeSeen(level) { const s = getSetting('sayWeSeen', {}); return !!s[sayWeKey(level)]; }
+        function sayWeMark(level) { const s = getSetting('sayWeSeen', {}); s[sayWeKey(level)] = true; setSetting('sayWeSeen', s); }
+        function maybeSayExample() {
+            if (!sayWeSeen(sayLevel)) { sayWeMark(sayLevel); showSayExample(); }
+        }
+
+        /* ── Resonemang "Varför?" – bara på toppnivån, ~var tredje rätt ── */
+        function maybeSayWhy() {
+            if (sayLevel !== SAY_LEVELS.length - 1) return;
+            sayWhyCount++;
+            if (sayWhyCount % 3 !== 0) return;
+            showSayWhy();
+        }
+        function showSayWhy() {
+            renderWhyPanel(sayWhyQuestion(), {
+                panel: 'sayWhy', q: 'sayWhyQ', choices: 'sayWhyChoices', fb: 'sayWhyFb'
+            }, {
+                onCorrect: () => setMiso('miso-glad.webp', 'Bra resonerat!'),
+                onWrong:   () => setMiso('miso-uppmuntrande.webp', 'Bra att du funderar!')
+            });
+        }
+        function hideSayWhy() { hideWhyPanel('sayWhy'); }
+
+        document.getElementById('sayNext').addEventListener('click', () => {
+            setMiso('miso-neutral.webp', null);
+            buildSay();
+            maybeSayExample();
+        });
+        document.getElementById('sayShow').addEventListener('click', showSayExample);
+        document.getElementById('sayExampleClose').addEventListener('click', closeSayExample);
+
         /* ── Händelser ── */
         document.getElementById('checkBtn').addEventListener('click', check);
         document.getElementById('nextBtn').addEventListener('click', nextTime);
@@ -503,9 +663,19 @@
         });
 
 
-        /* ── Starta med en slumpmässig tid ── */
+        /* ── Starta med en slumpmässig tid ──
+           Ett steg i taget: om Modul 1:s exempel ska visas första besöket,
+           vänta med Modul 2:s tills hon stängt det – annars syns två
+           lösta exempel samtidigt. */
+        const modul1VisarExempel = !getSetting('klockWeSeen', false);
         nextTime();
         maybeFirstExample();
+        buildSay();
+        if (modul1VisarExempel) {
+            document.getElementById('exampleClose').addEventListener('click', maybeSayExample, { once: true });
+        } else {
+            maybeSayExample();
+        }
     </script>
 </body>
 </html>
